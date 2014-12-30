@@ -6,12 +6,21 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd">
     
     <import resource="classpath*:**/officeContext.xml"/>
+    <import resource="classpath*:**/htmlRequestContext.xml"/>
 
     <bean id="plosOneRequest" class="org.shareok.data.plosonedata.PlosOneRequest">
-        <property name="data" ref="plosOneData" />
+        <property name="htmlRequest" ref="htmlRequest" />
     </bean>
 
     <bean id="plosOneData" class="org.shareok.data.plosonedata.PlosOneData">
+        <property name="peerReviewNotes" value="http://www.plosone.org/static/editorial#peer" />
+        <property name="language" value="en_US" />
+        <property name="publisher" value="PLOS ONE" />
+        <property name="peerReview" value="Yes" />
+        <property name="rights" value="Attribution 3.0 United States" />
+        <property name="rightsUri" value="http://creativecommons.org/licenses/by/3.0/us/" />
+        <property name="rightsRequestable" value="false" />
+        <property name="type" value="Research Article" />
     </bean>
     
     <bean id="plosOneDoiData" class="org.shareok.data.plosonedata.PlosOneDoiData">
@@ -21,6 +30,7 @@
             </map>
         </property>
         <property name="excelHandler" ref="excelHandler" />
+        <property name="plosData" ><list><ref bean="plosOneData" /></list></property>
     </bean>
     
 </beans>

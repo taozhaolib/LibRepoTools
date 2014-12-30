@@ -6,8 +6,24 @@
 
 package org.shareok.data.plosonedata;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.springframework.beans.BeansException;
+import org.w3c.dom.Attr;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * note: dc.identifier.uri will be generated after the articles are imported
@@ -15,50 +31,60 @@ import java.util.List;
  */
 public class PlosOneData {
     
-    private static final String peerreviewnotes = "http://www.plosone.org/static/editorial#peer";   
-    private static final String languageIso = "en_US";                                               
-    private static final String publisher = "PLOS ONE";                                              
-    private static final String peerreview = "Yes";                                                  
-    private static final String rights = "Attribution 3.0 United States";                            
-    private static final String rightsUri = "http://creativecommons.org/licenses/by/3.0/us/";        
-    private static final boolean rightsRequestable = false;                                          
+//    private static final String peerreviewnotes = "http://www.plosone.org/static/editorial#peer";   
+//    private static final String language = "en_US";                                               
+//    private static final String publisher = "PLOS ONE";                                              
+//    private static final String peerreview = "Yes";                                                  
+//    private static final String rights = "Attribution 3.0 United States";                            
+//    private static final String rightsUri = "http://creativecommons.org/licenses/by/3.0/us/";        
+//    private static final boolean rightsRequestable = false;        
+    
+    private String peerReviewNotes;   
+    private String language;                                               
+    private String publisher;                                              
+    private String peerReview;                                                  
+    private String rights;                            
+    private String rightsUri;        
+    private boolean rightsRequestable;    
 
     private String doi;                                                                             
     private String uri;                                                                             
     private String type;                                                                            
-    private String title;                                                                           
+    private String title;         
+    private String citation;
+    private String relationUri;
     private String abstractText;                                                                    
-    private String acknowledgements;                                                               
-    private String ispartofseries;                                                                  
+    private String acknowledgements;    
+    private String authorContributions;
+    private String isPartOfSeries;                                                                  
     
     private Date dateAvailable;
     private Date dateIssued;
     
-    private List<String> authors;                                                                  
-    private List<String> subjects;                                                                  
-    private List<String> citations;                                                                 
+    private String[] authors;                                                                  
+    private String[] subjects;                                                                                                                                   
     
     /**
      *
      * @return dc.description.peerreviewnotes
      */
-    public static String getPeerreviewnotes() {
-        return peerreviewnotes;
+    public String getPeerReviewNotes() {
+        return peerReviewNotes;
     }
 
     /**
      *
      * @return dc.language.iso;
      */
-    public static String getLanguageIso() {
-        return languageIso;
+    public String getLanguage() {
+        return language;
     }
 
     /**
      *
      * @return dc.publisher
      */
-    public static String getPublisher() {
+    public String getPublisher() {
         return publisher;
     }
 
@@ -66,15 +92,15 @@ public class PlosOneData {
      *
      * @return dc.description.peerreview
      */
-    public static String getPeerreview() {
-        return peerreview;
+    public String getPeerReview() {
+        return peerReview;
     }
 
     /**
      *
      * @return dc.rights 
      */
-    public static String getRights() {
+    public String getRights() {
         return rights;
     }
 
@@ -82,15 +108,23 @@ public class PlosOneData {
      *
      * @return dc.relation.uri
      */
-    public static String getRightsUri() {
+    public String getRightsUri() {
         return rightsUri;
+    }
+
+    /**
+     * 
+     * @return dc.relation.uri
+     */
+    public String getRelationUri() {
+        return relationUri;
     }
 
     /**
      *
      * @return dc.rights.requestable
      */
-    public static boolean isRightsRequestable() {
+    public boolean isRightsRequestable() {
         return rightsRequestable;
     }
 
@@ -105,6 +139,9 @@ public class PlosOneData {
     /**
      *
      * @return dc.identifier.uri 
+     * http://dx.doi.org/10.1371/journal.pone.0088732
+     * or 
+     * http://hdl.handle.net/1969.1/152287, this should be generated by DSpace
      */
     public String getUri() {
         return uri;
@@ -146,13 +183,15 @@ public class PlosOneData {
      *
      * @return dc.relation.ispartofseries
      */
-    public String getIspartofseries() {
-        return ispartofseries;
+    public String getIsPartOfSeries() {
+        return isPartOfSeries;
     }
 
     /**
      *
      * @return dc.date
+     * 
+     * NOT implemented in the code
      */
     public Date getDateAvailable() {
         return dateAvailable;
@@ -170,7 +209,7 @@ public class PlosOneData {
      *
      * @return dc.contributor.author
      */
-    public List<String> getAuthors() {
+    public String[] getAuthors() {
         return authors;
     }
 
@@ -178,7 +217,7 @@ public class PlosOneData {
      *
      * @return dc.subject
      */
-    public List<String> getSubjects() {
+    public String[] getSubjects() {
         return subjects;
     }
 
@@ -186,8 +225,16 @@ public class PlosOneData {
      *
      * @return dc.identifier.citation
      */
-    public List<String> getCitations() {
-        return citations;
+    public String getCitation() {
+        return citation;
+    }
+
+    /**
+     * 
+     * @return dc.description
+     */
+    public String getAuthorContributions() {
+        return authorContributions;
     }
 
     /**
@@ -204,6 +251,14 @@ public class PlosOneData {
      */
     public void setUri(String uri) {
         this.uri = uri;
+    }
+
+    /**
+     * 
+     * @param relationUri 
+     */
+    public void setRelationUri(String relationUri) {
+        this.relationUri = relationUri;
     }
 
     /**
@@ -242,8 +297,8 @@ public class PlosOneData {
      *
      * @param ispartofseries
      */
-    public void setIspartofseries(String ispartofseries) {
-        this.ispartofseries = ispartofseries;
+    public void setIsPartOfSeries(String isPartOfSeries) {
+        this.isPartOfSeries = isPartOfSeries;
     }
 
     /**
@@ -266,7 +321,7 @@ public class PlosOneData {
      *
      * @param authors
      */
-    public void setAuthors(List<String> authors) {
+    public void setAuthors(String[] authors) {
         this.authors = authors;
     }
 
@@ -274,21 +329,398 @@ public class PlosOneData {
      *
      * @param subjects
      */
-    public void setSubjects(List<String> subjects) {
+    public void setSubjects(String[] subjects) {
         this.subjects = subjects;
     }
 
     /**
      *
-     * @param citations
+     * @param citation
      */
-    public void setCitations(List<String> citations) {
-        this.citations = citations;
+    public void setCitation(String citation) {
+        this.citation = citation;
     }
-    
-        
+
+    public void setPeerReviewNotes(String peerReviewNotes) {
+        this.peerReviewNotes = peerReviewNotes;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public void setPeerReview(String peerReview) {
+        this.peerReview = peerReview;
+    }
+
+    public void setRights(String rights) {
+        this.rights = rights;
+    }
+
+    public void setRightsUri(String rightsUri) {
+        this.rightsUri = rightsUri;
+    }
+
+    public void setRightsRequestable(boolean rightsRequestable) {
+        this.rightsRequestable = rightsRequestable;
+    }
+
+    public void setAuthorContributions(String authorContributions) {
+        this.authorContributions = authorContributions;
+    }
+            
     public void getDataFromExcel(String fileName) {
         
       
+    }
+    
+    public void exportXmlByDoiData(String fileName) {
+                    
+        try{
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+            Document doc = docBuilder.newDocument();
+            Element rootElement = doc.createElement("dublin_core");
+            doc.appendChild(rootElement);
+
+            // Add the type node:
+            Element element = doc.createElement("dcvalue");
+            element.appendChild(doc.createTextNode("Research Article"));
+            rootElement.appendChild(element);
+            
+            Attr attr = doc.createAttribute("element");
+            attr.setValue("type");
+            element.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("language");
+            attr.setValue("en_US");
+            element.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("none");
+            element.setAttributeNode(attr);
+            
+            // Add the abstract node:
+            Element elementAbs = doc.createElement("dcvalue");
+            elementAbs.appendChild(doc.createTextNode(getAbstractText()));
+            rootElement.appendChild(elementAbs);
+            
+            attr = doc.createAttribute("element");
+            attr.setValue("description");
+            elementAbs.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("language");
+            attr.setValue("en_US");
+            elementAbs.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("abstract");
+            elementAbs.setAttributeNode(attr);
+            
+            // Add the language node:
+            Element elementLang = doc.createElement("dcvalue");
+            elementLang.appendChild(doc.createTextNode(getLanguage()));
+            rootElement.appendChild(elementLang);
+            
+            attr = doc.createAttribute("element");
+            attr.setValue("language");
+            elementLang.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("language");
+            attr.setValue("en_US");
+            elementLang.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("iso");
+            elementLang.setAttributeNode(attr);
+            
+            // Add the title node:
+            Element elementTitle = doc.createElement("dcvalue");
+            elementTitle.appendChild(doc.createTextNode(getTitle()));
+            rootElement.appendChild(elementTitle);
+            
+            attr = doc.createAttribute("element");
+            attr.setValue("title");
+            elementTitle.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("language");
+            attr.setValue("en_US");
+            elementTitle.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("none");
+            elementTitle.setAttributeNode(attr);
+            
+            // Add the available date node:
+//            Element elementAvailable = doc.createElement("dcvalue");
+//            elementAvailable.appendChild(doc.createTextNode(getDateAvailable().toString()));
+//            rootElement.appendChild(elementAvailable);
+//            
+//            attr = doc.createAttribute("element");
+//            attr.setValue("date");
+//            elementAvailable.setAttributeNode(attr);
+//            
+//            attr = doc.createAttribute("qualifier");
+//            attr.setValue("available");
+//            elementAvailable.setAttributeNode(attr);
+            
+            // Add the issued date node:
+            SimpleDateFormat format_issuedDate = new SimpleDateFormat ("yyyy-MM-dd"); 
+            Element elementIssued = doc.createElement("dcvalue");
+            elementIssued.appendChild(doc.createTextNode(format_issuedDate.format(getDateIssued())));
+            rootElement.appendChild(elementIssued);
+            
+            attr = doc.createAttribute("element");
+            attr.setValue("date");
+            elementIssued.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("issued");
+            elementIssued.setAttributeNode(attr);
+            
+            // Add the author nodes:
+            String[] authorSet = getAuthors();
+            if(authorSet.length > 0){
+                for(String author : authorSet){
+                    Element elementAuthor = doc.createElement("dcvalue");
+                    elementAuthor.appendChild(doc.createTextNode(author));
+                    rootElement.appendChild(elementAuthor);
+
+                    attr = doc.createAttribute("element");
+                    attr.setValue("contributor");
+                    elementAuthor.setAttributeNode(attr);
+
+                    attr = doc.createAttribute("qualifier");
+                    attr.setValue("author");
+                    elementAuthor.setAttributeNode(attr);
+                }
+            }
+            
+            // Add the acknowledgements node:
+            Element elementAck = doc.createElement("dcvalue");
+            elementAck.appendChild(doc.createTextNode(getAcknowledgements()));
+            rootElement.appendChild(elementAck);
+            
+            attr = doc.createAttribute("element");
+            attr.setValue("description");
+            elementAck.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("language");
+            attr.setValue("en_US");
+            elementAck.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("none");
+            elementAck.setAttributeNode(attr);
+            
+            // Add the author contributions node:
+            Element elementContribution = doc.createElement("dcvalue");
+            elementContribution.appendChild(doc.createTextNode(getAuthorContributions()));
+            rootElement.appendChild(elementContribution);
+            
+            attr = doc.createAttribute("element");
+            attr.setValue("description");
+            elementContribution.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("language");
+            attr.setValue("en_US");
+            elementContribution.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("none");
+            elementContribution.setAttributeNode(attr);
+            
+            // Add the publisher node:
+            Element elementPublisher = doc.createElement("dcvalue");
+            elementPublisher.appendChild(doc.createTextNode(getPublisher()));
+            rootElement.appendChild(elementPublisher);
+            
+            attr = doc.createAttribute("element");
+            attr.setValue("publisher");
+            elementPublisher.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("none");
+            elementPublisher.setAttributeNode(attr);
+            
+            // Add the citation node:
+            Element elementCitation = doc.createElement("dcvalue");
+            elementCitation.appendChild(doc.createTextNode(getCitation()));
+            rootElement.appendChild(elementCitation);
+            
+            attr = doc.createAttribute("element");
+            attr.setValue("identifier");
+            elementCitation.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("language");
+            attr.setValue("en_US");
+            elementCitation.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("citation");
+            elementCitation.setAttributeNode(attr);
+            
+            // Add the rights node:
+            Element elementRights = doc.createElement("dcvalue");
+            elementRights.appendChild(doc.createTextNode(getRights()));
+            rootElement.appendChild(elementRights);
+            
+            attr = doc.createAttribute("element");
+            attr.setValue("rights");
+            elementRights.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("none");
+            elementRights.setAttributeNode(attr);
+            
+            // Add the rights URI node:
+            Element elementRightsUri = doc.createElement("dcvalue");
+            elementRightsUri.appendChild(doc.createTextNode(getRightsUri()));
+            rootElement.appendChild(elementRightsUri);
+            
+            attr = doc.createAttribute("element");
+            attr.setValue("rights");
+            elementRightsUri.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("uri");
+            elementRightsUri.setAttributeNode(attr);
+            
+            // Add the rights requestable node:
+            Element elementRightsRequestable = doc.createElement("dcvalue");
+            elementRightsRequestable.appendChild(doc.createTextNode(Boolean.toString(isRightsRequestable())));
+            rootElement.appendChild(elementRightsRequestable);
+            
+            attr = doc.createAttribute("element");
+            attr.setValue("rights");
+            elementRightsRequestable.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("language");
+            attr.setValue("en_US");
+            elementCitation.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("requestable");
+            elementRightsRequestable.setAttributeNode(attr);
+            
+            // Add the is part of node:
+            Element elementIsPartOf = doc.createElement("dcvalue");
+            elementIsPartOf.appendChild(doc.createTextNode(getIsPartOfSeries()));
+            rootElement.appendChild(elementIsPartOf);
+            
+            attr = doc.createAttribute("element");
+            attr.setValue("relation");
+            elementIsPartOf.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("ispartofseries");
+            elementIsPartOf.setAttributeNode(attr);
+            
+//            // Add the relation uri node:
+            Element elementRelationUri = doc.createElement("dcvalue");
+            elementRelationUri.appendChild(doc.createTextNode(getRelationUri()));
+            rootElement.appendChild(elementRelationUri);
+            
+            attr = doc.createAttribute("element");
+            attr.setValue("relation");
+            elementRelationUri.setAttributeNode(attr);
+            
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("uri");
+            elementRelationUri.setAttributeNode(attr);
+            
+            // Add the subject nodes:
+            String[] subjectSet = getSubjects();
+            if(subjectSet.length > 0){
+                for(String subject : subjectSet){
+                    Element elementSubject = doc.createElement("dcvalue");
+                    elementSubject.appendChild(doc.createTextNode(subject));
+                    rootElement.appendChild(elementSubject);
+
+                    attr = doc.createAttribute("element");
+                    attr.setValue("subject");
+                    elementSubject.setAttributeNode(attr);
+
+                    attr = doc.createAttribute("language");
+                    attr.setValue("en_US");
+                    elementSubject.setAttributeNode(attr);
+
+                    attr = doc.createAttribute("qualifier");
+                    attr.setValue("none");
+                    elementSubject.setAttributeNode(attr);
+                }
+            }
+            
+            // Add the peerReview node:
+            Element elementPeerReview = doc.createElement("dcvalue");
+            elementPeerReview.appendChild(doc.createTextNode(getPeerReview()));
+            rootElement.appendChild(elementPeerReview);
+
+            attr = doc.createAttribute("element");
+            attr.setValue("description");
+            elementPeerReview.setAttributeNode(attr);
+
+            attr = doc.createAttribute("language");
+            attr.setValue("en_US");
+            elementPeerReview.setAttributeNode(attr);
+
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("peerreview");
+            elementPeerReview.setAttributeNode(attr);
+            
+            // Add the peer review notes node:
+            Element elementPeerReviewNotes = doc.createElement("dcvalue");
+            elementPeerReviewNotes.appendChild(doc.createTextNode(getPeerReviewNotes()));
+            rootElement.appendChild(elementPeerReviewNotes);
+
+            attr = doc.createAttribute("element");
+            attr.setValue("description");
+            elementPeerReviewNotes.setAttributeNode(attr);
+
+            attr = doc.createAttribute("language");
+            attr.setValue("en_US");
+            elementPeerReviewNotes.setAttributeNode(attr);
+
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("peerreviewnotes");
+            elementPeerReviewNotes.setAttributeNode(attr);
+            
+            // Add the doi node:
+            Element elementDoi = doc.createElement("dcvalue");
+            elementDoi.appendChild(doc.createTextNode(getDoi()));
+            rootElement.appendChild(elementDoi);
+
+            attr = doc.createAttribute("element");
+            attr.setValue("identifier");
+            elementDoi.setAttributeNode(attr);
+
+            attr = doc.createAttribute("language");
+            attr.setValue("en_US");
+            elementDoi.setAttributeNode(attr);
+
+            attr = doc.createAttribute("qualifier");
+            attr.setValue("doi");
+            elementDoi.setAttributeNode(attr);
+            
+            
+            // Generate the xml file:
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(new File(fileName));
+
+            transformer.transform(source, result);
+        }
+        catch (ParserConfigurationException | TransformerException pce) {
+            pce.printStackTrace();System.exit(0);
+        }
+        catch(DOMException | BeansException e){
+            e.printStackTrace();System.exit(0);
+        }
     }
 }

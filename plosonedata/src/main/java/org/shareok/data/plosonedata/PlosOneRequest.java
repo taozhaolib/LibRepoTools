@@ -7,18 +7,14 @@
 package org.shareok.data.plosonedata;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -27,6 +23,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.shareok.data.htmlrequest.HtmlRequest;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -39,12 +36,12 @@ public class PlosOneRequest {
     
     private final String USER_AGENT = "Mozilla/5.0";
     
-    private PlosOneData data;
+    private HtmlRequest htmlRequest;
     
     /**
      * 
      * @param doiInfo: string contain the article doi information, such as 10.1371/journal.pone.0041479
-     * @return 
+     * @return some of the metadata provided by the plos api
      */
     public String getMetaDataByApi(String doiInfo) {
        
@@ -55,7 +52,38 @@ public class PlosOneRequest {
        String data = null;
        String link = PlosOneUtil.API_SEARCH_PREFIX + doiInfo + "&&api_key=" + PlosOneUtil.API_KEY;
         try {
-            StringBuffer temp = sendPost(link);
+            StringBuffer temp = getHtmlRequest().sendPost(link);
+            data = temp.toString();
+        } catch (Exception ex) {
+            Logger.getLogger(PlosOneRequest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return data;
+    }
+    
+    public String getRelationUriByDoi(String doiInfo) {
+        if(null == doiInfo || "".equals(doiInfo)){
+           return "";
+       }
+       
+       String encodedDoiInfo = doiInfo.replace("/", "%2F");
+       String link = PlosOneUtil.URL_FULLTEXT_PREFIX + encodedDoiInfo;
+       
+       return link;
+    }
+    
+    /**
+     * 
+     * @param doiInfo: string contain the article doi information, such as 10.1371/journal.pone.0041479
+     * @return the full text plus the metadata
+     */
+    public String getFullData(String doiInfo) {
+       
+       String data = "";
+       String link = getRelationUriByDoi(doiInfo);
+       
+       try {
+            StringBuffer temp = getHtmlRequest().sendPost(link);
             data = temp.toString();
         } catch (Exception ex) {
             Logger.getLogger(PlosOneRequest.class.getName()).log(Level.SEVERE, null, ex);
@@ -164,76 +192,64 @@ public class PlosOneRequest {
             System.out.println(response.toString());
 
     }
-
-    // HTTP POST request
-    public StringBuffer sendPost(String url) throws Exception {
-
-            //String url = "http://www.plosbiology.org/article/info:doi/10.1371/journal.pbio.0000012";
-            URL obj = new URL(url);
-            HttpURLConnection con;
+    
+    public String getImportedDataPath(String doi) {
+        
+        String path = "";
+        try{
             
-            try{
-                con = (HttpURLConnection) obj.openConnection();
-            }
-            catch(Exception e){
-                con = (HttpsURLConnection) obj.openConnection();
-            }
-
-            //add reuqest header
-            con.setRequestMethod("POST");
-            con.setRequestProperty("User-Agent", USER_AGENT);
-            con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-
-            String urlParameters = "";
-
-            // Send post request
-            con.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-            wr.writeBytes(urlParameters);
-            wr.flush();
-            wr.close();
-
-            int responseCode = con.getResponseCode();
-            System.out.println("\n\nSending 'POST' request to URL : " + url);
-            System.out.println("Post parameters : " + urlParameters);
-            System.out.println("Response Code : " + responseCode);
-
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-
-            while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-            }
-            in.close();
-            
-            return response;
-
-//            File file = new File("/Users/zhao0677/Projects/plusOne/plosOne.xml");
-//            if(!file.exists()){
-//                file.createNewFile();
-//            }
-//            FileWriter writer = new FileWriter(file.getAbsoluteFile());
-//            BufferedWriter bw = new BufferedWriter(writer);
-//            bw.write(response.toString());
-//            bw.close();
-            //print result
-            //System.out.println(response.toString());
-
+            String resource = PlosOneRequest.class.getName().replace(".", File.separator) + ".class";      
+            URL fileURL = ClassLoader.getSystemClassLoader().getResource(resource);
+            path = new File(fileURL.toURI()).getParent();
+            String folderName = doi.split("/")[1];
+            path = path + File.separator + "importedData" + File.separator + folderName;
+        }
+        catch(URISyntaxException ex){
+            ex.printStackTrace();
+        }
+        return path;
     }
 
+    public void downloadPlosOnePdfByDoi(String doi) {
+        
+        try{
+            boolean directoryExists = false;
+            String path = getImportedDataPath(doi);
+            File newDir = new File(path);
+            if(newDir.exists()){
+                directoryExists = true;
+                System.out.println("The directory: "+newDir+" has already exists!\n");
+            }
+            else{
+                if(!newDir.mkdirs()){
+                    System.out.println("Directory creation failed!");
+                }
+                else{
+                    directoryExists = true;
+                }
+            }
+            if(directoryExists){
+                //The example url to downlaod: http://dx.plos.org/10.1371/journal.pone.0041479.pdf
+                String pdfUrl = PlosOneUtil.API_FULLTEXT_PDF_PREFIX + doi + ".pdf";
+                getHtmlRequest().getPdfByUrl(pdfUrl, newDir+"/"+doi.split("/")[1]+".pdf");
+            }
+            
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+    
     public String getUSER_AGENT() {
         return USER_AGENT;
     }
 
-    public PlosOneData getData() {
-        return data;
+    public HtmlRequest getHtmlRequest() {
+        return htmlRequest;
     }
 
-    public void setData(PlosOneData data) {
-        this.data = data;
+    public void setHtmlRequest(HtmlRequest htmlRequest) {
+        this.htmlRequest = htmlRequest;
     }
-    
     
 }

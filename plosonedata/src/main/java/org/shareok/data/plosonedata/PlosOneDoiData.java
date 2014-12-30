@@ -6,22 +6,20 @@
 
 package org.shareok.data.plosonedata;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.shareok.data.htmlrequest.HtmlParser;
 import org.shareok.data.msofficedata.ExcelHandler;
 import org.shareok.data.msofficedata.FileUtil;
-import org.springframework.context.ApplicationContext;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  *
@@ -32,6 +30,7 @@ public class PlosOneDoiData implements ExcelData {
     private HashMap<String,String[]> data;
     private ExcelHandler excelHandler;
     private ArrayList<String> doiData;
+    private ArrayList<PlosOneData> plosData;
 
     public HashMap<String, String[]> getData() {
         return data;
@@ -55,6 +54,14 @@ public class PlosOneDoiData implements ExcelData {
 
     public ArrayList<String> getDoiData() {
         return doiData;
+    }
+
+    public ArrayList<PlosOneData> getPlosData() {
+        return plosData;
+    }
+
+    public void setPlosData(ArrayList<PlosOneData> plosData) {
+        this.plosData = plosData;
     }
     
     @Override
@@ -98,60 +105,92 @@ public class PlosOneDoiData implements ExcelData {
                 if(index == -1)
                     continue;
                 String doiVal = value.substring(index);
-                Pattern pattern = Pattern.compile("(e)(\\d{5})");
+                Pattern pattern = Pattern.compile("(e)(\\d{3,5})");
                 Matcher matcher = pattern.matcher(doiVal);
                 if (matcher.find())
                 {
                     String[] doiInfo = doiVal.split(":");
                     if(doiInfo.length != 3)
                         continue;
-                    doiVal = doiInfo[2];
+                    String isPartOfSeries = doiInfo[0]+":"+matcher.group(1)+matcher.group(2);
+                    doiVal = isPartOfSeries + "---" + doiInfo[2];
                     doiList.add(doiVal);
-                    //System.out.println(matcher.group(1) + " - " + matcher.group(2));
+                    //System.out.println("Matcher find the string for "+doiInfo[0]+"!!!  \n");//System.out.println(matcher.group(1) + " - " + matcher.group(2));
+                }
+                else{
+                    System.out.println("Matcher cannot find the string for "+doiVal+"!!!  \n");
                 }
             }
-        }
+        }//System.exit(0);
         setDoiData(doiList);
     }
+    
     
     public void getMetaData() throws Exception {
         ArrayList<String> doiList = getDoiData();
         if(!doiList.isEmpty()) {
+            
             PlosOneRequest req = (PlosOneRequest)PlosOneUtil.getPlosOneContext().getBean("plosOneRequest");
+            PlosOneData plosOneData = (PlosOneData)PlosOneUtil.getPlosOneContext().getBean("plosOneData");
+            
             for(String doi : doiList){
-                //PlosOneUtil.downLoadFullPDF(doi, "path");
-                String[] doiArr = doi.split(":");
+                String[] valArray = doi.split("---");
+                String isPartOfSeries = valArray[0];
+                String[] doiArr = valArray[1].split(":");
                 doi = doiArr[0];
-                String doiData = req.getMetaDataByApi(doi);
-                Document doc = FileUtil.loadXMLFromString(doiData);
-                doc.getDocumentElement().normalize();
-
-                NodeList nList = doc.getElementsByTagName("str");
-
-                int length = nList.getLength();
-
-                if(length == 0){
-                    continue;
-                }
-
-                List<String> dataList = new ArrayList<>();
-                for (int temp = 0; temp < length; temp++) {
-
-                        Node nNode = nList.item(temp);
-
-                        if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-
-                                Element eElement = (Element) nNode;
-                                if(eElement.getAttribute("name").equals("title_display"))
-                                    dataList.add(eElement.getTextContent());
-                                //System.out.println("file type : " + eElement.getTextContent() + "\n");
-
+                String doiDataVal = req.getFullData(doi);
+                HashMap<String,ArrayList<String>> metaData = HtmlParser.metaDataParser(doiDataVal);
+                
+                String acknowledgement = PlosOneUtil.getPlosOneAck(doiDataVal);
+                String citation = PlosOneUtil.getPlosOneCitation(doiDataVal);
+                String contributions = PlosOneUtil.getAuthorContributions(doiDataVal);
+                plosOneData.setDoi(doi);
+                plosOneData.setRelationUri(req.getRelationUriByDoi(doi));
+                plosOneData.setUri(PlosOneUtil.DOI_PREFIX + doi);
+                plosOneData.setAcknowledgements(acknowledgement);
+                plosOneData.setAuthorContributions(contributions);
+                plosOneData.setIsPartOfSeries(isPartOfSeries);
+                plosOneData.setCitation(citation);
+                
+                Iterator it = metaData.entrySet().iterator();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd"); 
+                
+                try{
+                    while(it.hasNext()){
+                        Map.Entry pairs = (Map.Entry)it.next();
+                        if(pairs.getKey().equals("citation_title")){
+                            plosOneData.setTitle(pairs.getValue().toString().replaceAll("(\\[|\\])*", ""));
                         }
+                        else if(pairs.getKey().equals("twitter:description")){
+                            plosOneData.setAbstractText(pairs.getValue().toString().replaceAll("(\\[|\\])*", ""));
+                        }
+                        else if(pairs.getKey().equals("citation_date")){
+                            String dateString = pairs.getValue().toString().replaceAll("(\\[|\\])*", "");
+                            Date date = sdf.parse(dateString);
+                            plosOneData.setDateIssued(date);
+                        }
+                        else if(pairs.getKey().equals("citation_author")){
+                            plosOneData.setAuthors(pairs.getValue().toString().replaceAll("(\\[|\\])*", "").split(", "));
+                        }
+                        else if(pairs.getKey().equals("keywords")){
+                            plosOneData.setSubjects(pairs.getValue().toString().replaceAll("(\\[|\\])*", "").split(", "));
+                        }
+                        //System.out.println(pairs.getKey() + " = " + pairs.getValue()+"\n\n");
+                        it.remove(); // avoids a ConcurrentModificationException
+                    }
+                    // download the PDF full text
+                    req.downloadPlosOnePdfByDoi(doi);
+                    PlosOneUtil.createContentFile(req.getImportedDataPath(doi)+"/content", doi.split("/")[1]+".pdf");
+                    plosOneData.exportXmlByDoiData(req.getImportedDataPath(doi)+"/dublin_core.xml");
+                    //System.exit(0);
                 }
-                System.out.println(dataList.toString());System.exit(0);
-                //System.out.print(doiData + "\n\n");
+                catch(Exception ex){
+                    System.out.print("The data processing from doiData to plosOneData is wrong!\n");
+                    ex.printStackTrace();
+                }
+                plosData.add(plosOneData);
             }
-        }System.exit(0);
+        }
     }
     
     @Override
@@ -172,4 +211,5 @@ public class PlosOneDoiData implements ExcelData {
     public void exportXmlData(String filePath){
         
     }
+    
 }

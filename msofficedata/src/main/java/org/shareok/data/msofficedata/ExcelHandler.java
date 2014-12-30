@@ -12,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -164,5 +165,28 @@ public class ExcelHandler implements FileHandler {
         } catch (Exception ex) {
             Logger.getLogger(ExcelHandler.class.getName()).log(Level.SEVERE, null, ex);
         } 
+    }
+    
+    @Override
+    public void exportMapDataToXml(HashMap map, String filePath) {
+        try{
+            Iterator it = map.keySet().iterator();
+            while(it.hasNext()){
+                String key = (String)it.next();
+                Object obj = (Object)map.get(key);
+                if(obj instanceof ArrayList){
+                    
+                }
+                else if(obj instanceof String){
+
+                }
+                else{
+                    System.out.println("Undefined data type");
+                }
+            }
+        }
+        catch (Exception ex) {
+            Logger.getLogger(ExcelHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

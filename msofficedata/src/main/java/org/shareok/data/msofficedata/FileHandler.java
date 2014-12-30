@@ -6,10 +6,13 @@
 
 package org.shareok.data.msofficedata;
 
+import java.util.HashMap;
+
 /**
  *
  * @author Tao Zhao
  */
 public interface FileHandler {
     public void readData();
+    public void exportMapDataToXml(HashMap map, String filePath);
 }

@@ -8,6 +8,7 @@ package org.shareok.data.msofficedata;
 
 import java.io.File;
 import java.io.StringReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;

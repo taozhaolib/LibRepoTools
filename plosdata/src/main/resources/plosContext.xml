@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd">
+    
+    <import resource="classpath*:**/officeContext.xml"/>
+    <import resource="classpath*:**/htmlRequestContext.xml"/>
+
+    <bean id="plosRequest" class="org.shareok.data.plosdata.PlosRequest">
+        <property name="htmlRequest" ref="htmlRequest" />
+    </bean>
+
+    <bean id="plosData" class="org.shareok.data.plosdata.PlosData">
+        <property name="peerReviewNotes" value="http://www.plosone.org/static/editorial#peer" />
+        <property name="language" value="en_US" />
+        <property name="publisher" value="PLOS ONE" />
+        <property name="peerReview" value="Yes" />
+        <property name="rights" value="Attribution 3.0 United States" />
+        <property name="rightsUri" value="http://creativecommons.org/licenses/by/3.0/us/" />
+        <property name="rightsRequestable" value="false" />
+        <property name="type" value="Research Article" />
+    </bean>
+    
+    <bean id="plosDoiData" class="org.shareok.data.plosdata.PlosDoiData">
+        <property name="data">
+            <map>
+               
+            </map>
+        </property>
+        <property name="excelHandler" ref="excelHandler" />
+        <property name="plosDataList" ><list><ref bean="plosData" /></list></property>
+    </bean>
+    
+</beans>

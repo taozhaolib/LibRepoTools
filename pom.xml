@@ -6,7 +6,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>plosonedata</module>
+        <module>plosdata</module>
         <module>msofficedata</module>
         <module>htmlRequest</module>
     </modules>

@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import org.shareok.data.htmlrequest.HtmlParser;
 import org.shareok.data.msofficedata.ExcelHandler;
 import org.shareok.data.msofficedata.FileUtil;
+import org.shareok.data.plosdata.PlosUtil.JournalType;
 
 /**
  *
@@ -101,11 +102,11 @@ public class PlosDoiData implements ExcelData {
             int row = Integer.parseInt(rowCol[0]);
             int col = Integer.parseInt(rowCol[1]);
             if(col == 3 && value.contains("/journal.p")){
-                int index = value.toLowerCase().indexOf("plos one");
+                int index = value.toLowerCase().indexOf("plos ");
                 if(index == -1)
                     continue;
                 String doiVal = value.substring(index);
-                Pattern pattern = Pattern.compile("(e)(\\d{3,5})");
+                Pattern pattern = Pattern.compile("(e)(\\d{1,5})(.)(\\s*)(doi:)");
                 Matcher matcher = pattern.matcher(doiVal);
                 if (matcher.find())
                 {
@@ -130,8 +131,8 @@ public class PlosDoiData implements ExcelData {
         ArrayList<String> doiList = getDoiData();
         if(!doiList.isEmpty()) {
             
-            PlosRequest req = (PlosRequest)PlosUtil.getPlosOneContext().getBean("plosRequest");
-            PlosData plosData = (PlosData)PlosUtil.getPlosOneContext().getBean("plosData");
+            PlosRequest req = (PlosRequest)PlosUtil.getPlosContext().getBean("plosRequest");
+            PlosData plosData = (PlosData)PlosUtil.getPlosContext().getBean("plosData");
             
             for(String doi : doiList){
                 String[] valArray = doi.split("---");
@@ -141,9 +142,12 @@ public class PlosDoiData implements ExcelData {
                 String doiDataVal = req.getFullData(doi);
                 HashMap<String,ArrayList<String>> metaData = HtmlParser.metaDataParser(doiDataVal);
                 
-                String acknowledgement = PlosUtil.getPlosOneAck(doiDataVal);
-                String citation = PlosUtil.getPlosOneCitation(doiDataVal);
+                String acknowledgement = PlosUtil.getPlosAck(doiDataVal);
+                String citation = PlosUtil.getPlosCitation(doiDataVal);
                 String contributions = PlosUtil.getAuthorContributions(doiDataVal);
+                String journalTypeString = doi.split("journal.")[1].split("\\.")[0];
+                
+                plosData.setPlosJournalType(journalTypeString);
                 plosData.setDoi(doi);
                 plosData.setRelationUri(req.getRelationUriByDoi(doi));
                 plosData.setUri(PlosUtil.DOI_PREFIX + doi);
@@ -151,6 +155,41 @@ public class PlosDoiData implements ExcelData {
                 plosData.setAuthorContributions(contributions);
                 plosData.setIsPartOfSeries(isPartOfSeries);
                 plosData.setCitation(citation);
+                JournalType type = plosData.getJournalType();
+            
+                switch(type){
+                    case PLOSONE: 
+                        plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PONE);
+                        plosData.setPublisher("PLos One");
+                        break;
+                    case PLOSBIO: 
+                        plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PBIO);
+                        plosData.setPublisher("PLos Biology");
+                        break;
+                    case PLOSGEN: 
+                        plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PGEN);
+                        plosData.setPublisher("PLos Genetics");
+                        break;
+                    case PLOSMED: 
+                        plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PMED);
+                        plosData.setPublisher("PLOS Medicine");
+                        break;
+                    case PLOSCBI: 
+                        plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PCBI);
+                        plosData.setPublisher("PLOS Computational Biology");
+                        break;
+                    case PLOSPAT: 
+                        plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PPAT);
+                        plosData.setPublisher("PLoS Pathogens");
+                        break;
+                    case PLOSNTD: 
+                        plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PNTD);
+                        plosData.setPublisher("PLoS Neglected Tropical Diseases");
+                        break;
+                    default:
+                        throw new Exception("Journal type is undefined!");
+                        //break;
+                }
                 
                 Iterator it = metaData.entrySet().iterator();
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd"); 
@@ -180,7 +219,7 @@ public class PlosDoiData implements ExcelData {
                     }
                     // download the PDF full text
                     req.downloadPlosOnePdfByDoi(doi);
-                    PlosUtil.createContentFile(req.getImportedDataPath(doi)+"/content", doi.split("/")[1]+".pdf");
+                    PlosUtil.createContentFile(req.getImportedDataPath(doi)+"/contents", doi.split("/")[1]+".pdf");
                     plosData.exportXmlByDoiData(req.getImportedDataPath(doi)+"/dublin_core.xml");
                     //System.exit(0);
                 }

@@ -65,9 +65,25 @@ public class PlosRequest {
         if(null == doiInfo || "".equals(doiInfo)){
            return "";
        }
+        
+       String prefix = "";
+       if(doiInfo.contains("pone"))
+            prefix = PlosUtil.URL_FULLTEXT_PREFIX_PONE;
+       else if(doiInfo.contains("pbio"))
+            prefix = PlosUtil.URL_FULLTEXT_PREFIX_PBIO;
+       else if(doiInfo.contains("pcbi"))
+            prefix = PlosUtil.URL_FULLTEXT_PREFIX_PCBI;
+       else if(doiInfo.contains("pmed"))
+            prefix = PlosUtil.URL_FULLTEXT_PREFIX_PMED;
+       else if(doiInfo.contains("pgen"))
+            prefix = PlosUtil.URL_FULLTEXT_PREFIX_PGEN;
+       else if(doiInfo.contains("pntd"))
+            prefix = PlosUtil.URL_FULLTEXT_PREFIX_PNTD;
+       else if(doiInfo.contains("ppat"))
+            prefix = PlosUtil.URL_FULLTEXT_PREFIX_PPAT;
        
        String encodedDoiInfo = doiInfo.replace("/", "%2F");
-       String link = PlosUtil.URL_FULLTEXT_PREFIX + encodedDoiInfo;
+       String link = prefix + encodedDoiInfo;
        
        return link;
     }

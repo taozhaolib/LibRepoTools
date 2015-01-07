@@ -23,14 +23,34 @@ public class PlosUtil {
     public static final String API_SEARCH_PREFIX = "http://api.plos.org/search?q=";
     public static final String API_FULLTEXT_PDF_PREFIX = "http://dx.plos.org/";
     public static final String URL_PDF_FULLTEXT_PREIFX = "http://dx.plos.org/";
-    public static final String DOI_PREFIX = "http://dx.doi.org/";
-    public static final String URL_FULLTEXT_PREFIX = "http://www.plosone.org/article/info%3Adoi%2F";
+    public static final String DOI_PREFIX = "http://dx.doi.org/";    
     public static final String URL_FULLTEXT_PDF_PREFIX = "http:///dx.plos.org/";
+    
+    public static final String URL_FULLTEXT_PREFIX_PONE = "http://www.plosone.org/article/info%3Adoi%2F";
+    public static final String URL_FULLTEXT_PREFIX_PBIO = "http://www.plosbiology.org/article/info%3Adoi%2F";
+    public static final String URL_FULLTEXT_PREFIX_PGEN = "http://www.plosgenetics.org/article/info%3Adoi%2F";
+    public static final String URL_FULLTEXT_PREFIX_PMED = "http://www.plosmedicine.org/article/info%3Adoi%2F";
+    public static final String URL_FULLTEXT_PREFIX_PCBI = "http://www.ploscompbiol.org/article/info%3Adoi%2F";
+    public static final String URL_FULLTEXT_PREFIX_PPAT = "http://www.plospathogens.org/article/info%3Adoi%2F";
+    public static final String URL_FULLTEXT_PREFIX_PNTD = "http://www.plosntds.org/article/info%3Adoi%2F";
+    
+    public static final String PEERREVIEWNOTES_PONE = "http://www.plosone.org/static/editorial#peer";   
+    public static final String PEERREVIEWNOTES_PBIO = "http://www.plosbiology.org/static/editorial#peer";   
+    public static final String PEERREVIEWNOTES_PGEN = "http://www.plosgenetics.org/static/editorial#peer";   
+    public static final String PEERREVIEWNOTES_PMED = "http://www.plosmedicine.org/static/editorial#peer";   
+    public static final String PEERREVIEWNOTES_PCBI = "http://www.ploscompbiol.org/static/editorial#peer";   
+    public static final String PEERREVIEWNOTES_PPAT = "http://www.plospathogens.org/static/editorial#peer";   
+    public static final String PEERREVIEWNOTES_PNTD = "http://www.plosntds.org/static/editorial#peer";   
+    
+    public enum JournalType {        
+        PLOSONE, PLOSBIO, PLOSGEN, PLOSMED, PLOSCBI, PLOSPAT, PLOSNTD
+    }
+    
     //public static final String PLOSONE_DOWNLOAD_PATH = "/Users/zhao0677/Projects/plosOne/importData";
     //"http://dx.plos.org/10.1371/journal.pone.0041479.pdf";
     //public static final String URL_FULLTEXT_PREFIX = "http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0115508";
     
-    public static ApplicationContext getPlosOneContext() {
+    public static ApplicationContext getPlosContext() {
         ApplicationContext context = new ClassPathXmlApplicationContext("plosContext.xml");
         return context;
     }
@@ -44,7 +64,7 @@ public class PlosUtil {
         String urlPdf = URL_PDF_FULLTEXT_PREIFX + doiInfo + ".pdf";
     }
     
-    public static String getPlosOneAck(String html) {
+    public static String getPlosAck(String html) {
             
         String ack = "";
         Document doc = Jsoup.parse(html.toString());
@@ -66,7 +86,7 @@ public class PlosUtil {
         return ack;
     }
     
-    public static String getPlosOneCitation(String html) {
+    public static String getPlosCitation(String html) {
         
         String citation = "";
         

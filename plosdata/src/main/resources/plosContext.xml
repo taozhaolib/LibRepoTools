@@ -13,9 +13,9 @@
     </bean>
 
     <bean id="plosData" class="org.shareok.data.plosdata.PlosData">
-        <property name="peerReviewNotes" value="http://www.plosone.org/static/editorial#peer" />
+        <property name="peerReviewNotes" value="" />
         <property name="language" value="en_US" />
-        <property name="publisher" value="PLOS ONE" />
+        <property name="publisher" value="" />
         <property name="peerReview" value="Yes" />
         <property name="rights" value="Attribution 3.0 United States" />
         <property name="rightsUri" value="http://creativecommons.org/licenses/by/3.0/us/" />

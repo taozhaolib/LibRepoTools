@@ -19,6 +19,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.shareok.data.plosdata.PlosUtil.JournalType;
 import org.springframework.beans.BeansException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
@@ -31,7 +32,6 @@ import org.w3c.dom.Element;
  */
 public class PlosData {
     
-//    private static final String peerreviewnotes = "http://www.plosone.org/static/editorial#peer";   
 //    private static final String language = "en_US";                                               
 //    private static final String publisher = "PLOS ONE";                                              
 //    private static final String peerreview = "Yes";                                                  
@@ -64,8 +64,14 @@ public class PlosData {
     private String[] authors;                                                                  
     private String[] subjects;   
     
-    public enum JournalType {
-        plosone, plosbio, plosgen, plosmed, ploscbi, plospat, plosntd
+    private JournalType journalType;
+
+    /**
+     * 
+     * @return journal type
+     */
+    public JournalType getJournalType() {
+        return journalType;
     }
     
     /**
@@ -242,6 +248,14 @@ public class PlosData {
     }
 
     /**
+     * 
+     * @param journalType 
+     */
+    public void setJournalType(JournalType journalType) {
+        this.journalType = journalType;
+    }
+
+    /**
      *
      * @param doi
      */
@@ -380,6 +394,30 @@ public class PlosData {
     public void getDataFromExcel(String fileName) {
         
       
+    }
+    
+    /**
+     * 
+     * @param type 
+     *  type is one of the strings: pone, pbio, pgen, pmed, pcbi, ppat, pntd
+     */
+    public void setPlosJournalType(String type) throws Exception{
+        if(type.equals("pone"))
+            journalType = JournalType.PLOSONE;
+        else if(type.equals("pbio"))
+            journalType = JournalType.PLOSBIO;
+        else if(type.equals("pgen"))
+            journalType = JournalType.PLOSGEN;
+        else if(type.equals("pmed"))
+            journalType = JournalType.PLOSMED;
+        else if(type.equals("pcbi"))
+            journalType = JournalType.PLOSCBI;
+        else if(type.equals("ppat"))
+            journalType = JournalType.PLOSPAT;
+        else if(type.equals("pntd"))
+            journalType = JournalType.PLOSNTD;
+        else
+            throw new Exception ("Journal type is not defined!");
     }
     
     public void exportXmlByDoiData(String fileName) {

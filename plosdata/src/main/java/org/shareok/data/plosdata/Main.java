@@ -20,7 +20,7 @@ public class Main {
         //ApplicationContext context = new ClassPathXmlApplicationContext("classpath*:**/officeContext.xml");
         ApplicationContext context = new ClassPathXmlApplicationContext("plosContext.xml");
         PlosDoiData obj = (PlosDoiData) context.getBean("plosDoiData");
-        obj.importData("plos_articles_2.xlsx");
+        obj.importData("plos_articles.xlsx");
         obj.getMetaData();
         //ExcelHandler obj = (ExcelHandler) context.getBean("excelHandler");
         //obj.setFileName("ok");

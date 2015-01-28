@@ -106,7 +106,7 @@ public class PlosDoiData implements ExcelData {
                 if(index == -1)
                     continue;
                 String doiVal = value.substring(index);
-                Pattern pattern = Pattern.compile("(e)(\\d{1,5})(.)(\\s*)(doi:)");
+                Pattern pattern = Pattern.compile("(e)(\\d{1,10})(.)(\\s*)(doi:)");
                 Matcher matcher = pattern.matcher(doiVal);
                 if (matcher.find())
                 {
@@ -122,7 +122,7 @@ public class PlosDoiData implements ExcelData {
                     System.out.println("Matcher cannot find the string for "+doiVal+"!!!  \n");
                 }
             }
-        }//System.exit(0);
+        }
         setDoiData(doiList);
     }
     
@@ -140,7 +140,8 @@ public class PlosDoiData implements ExcelData {
                 String[] doiArr = valArray[1].split(":");
                 doi = doiArr[0];
                 String doiDataVal = req.getFullData(doi);
-                HashMap<String,ArrayList<String>> metaData = HtmlParser.metaDataParser(doiDataVal);
+                String[] tagNames = {"property"};
+                HashMap<String,ArrayList<String>> metaData = HtmlParser.metaDataParserWithTagNames(doiDataVal, tagNames);
                 
                 String acknowledgement = PlosUtil.getPlosAck(doiDataVal);
                 String citation = PlosUtil.getPlosCitation(doiDataVal);
@@ -192,20 +193,30 @@ public class PlosDoiData implements ExcelData {
                 }
                 
                 Iterator it = metaData.entrySet().iterator();
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd"); 
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");  
                 
                 try{
                     while(it.hasNext()){
                         Map.Entry pairs = (Map.Entry)it.next();
-                        if(pairs.getKey().equals("citation_title")){
+                        if(pairs.getKey().equals("citation_title") || pairs.getKey().equals("og:title")){
                             plosData.setTitle(pairs.getValue().toString().replaceAll("(\\[|\\])*", ""));
                         }
-                        else if(pairs.getKey().equals("twitter:description")){
+                        else if(pairs.getKey().equals("twitter:description") || pairs.getKey().equals("og:description")){
                             plosData.setAbstractText(pairs.getValue().toString().replaceAll("(\\[|\\])*", ""));
                         }
                         else if(pairs.getKey().equals("citation_date")){
+                            Date date = null;
                             String dateString = pairs.getValue().toString().replaceAll("(\\[|\\])*", "");
-                            Date date = sdf.parse(dateString);
+                            Pattern pattern = Pattern.compile("(\\d{4}-\\d{2}-\\d{2})|(\\d{4}/\\d{2}/\\d{2})");
+                            Matcher matcher = pattern.matcher(dateString);
+                            if (matcher.find()){
+                                dateString = matcher.group(0);
+                                dateString = dateString.replace("-", "/");
+                                date = sdf.parse(dateString);
+                            }
+                            else {
+                                throw new Exception("Date match not found\n");
+                            }
                             plosData.setDateIssued(date);
                         }
                         else if(pairs.getKey().equals("citation_author")){
@@ -217,11 +228,17 @@ public class PlosDoiData implements ExcelData {
                         //System.out.println(pairs.getKey() + " = " + pairs.getValue()+"\n\n");
                         it.remove(); // avoids a ConcurrentModificationException
                     }
+                    if(null == plosData.getSubjects()){
+                        String[] subjects = PlosUtil.getSubjects(doiDataVal);
+                        plosData.setSubjects(subjects);
+                    }
+                    if(null == plosData.getTitle() || "".equals(plosData.getTitle())){
+                        plosData.setTitle(PlosUtil.getTitleFromHtml(doiDataVal));
+                    }
                     // download the PDF full text
                     req.downloadPlosOnePdfByDoi(doi);
                     PlosUtil.createContentFile(req.getImportedDataPath(doi)+"/contents", doi.split("/")[1]+".pdf");
-                    plosData.exportXmlByDoiData(req.getImportedDataPath(doi)+"/dublin_core.xml");
-                    //System.exit(0);
+                    plosData.exportXmlByDoiData(req.getImportedDataPath(doi)+"/dublin_core.xml");System.exit(0);
                 }
                 catch(Exception ex){
                     System.out.print("The data processing from doiData to plosData is wrong!\n");

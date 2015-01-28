@@ -420,6 +420,10 @@ public class PlosData {
             throw new Exception ("Journal type is not defined!");
     }
     
+    /**
+     * Generate the metadata xml file
+     * @param fileName 
+     */
     public void exportXmlByDoiData(String fileName) {
                     
         try{
@@ -448,55 +452,64 @@ public class PlosData {
             element.setAttributeNode(attr);
             
             // Add the abstract node:
-            Element elementAbs = doc.createElement("dcvalue");
-            elementAbs.appendChild(doc.createTextNode(getAbstractText()));
-            rootElement.appendChild(elementAbs);
-            
-            attr = doc.createAttribute("element");
-            attr.setValue("description");
-            elementAbs.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("language");
-            attr.setValue("en_US");
-            elementAbs.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("abstract");
-            elementAbs.setAttributeNode(attr);
+            String abs = getAbstractText();
+            if(null != abs){
+                Element elementAbs = doc.createElement("dcvalue");
+                elementAbs.appendChild(doc.createTextNode(abs));
+                rootElement.appendChild(elementAbs);
+                
+                attr = doc.createAttribute("element");
+                attr.setValue("description");
+                elementAbs.setAttributeNode(attr);
+
+                attr = doc.createAttribute("language");
+                attr.setValue("en_US");
+                elementAbs.setAttributeNode(attr);
+
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("abstract");
+                elementAbs.setAttributeNode(attr);
+            }
             
             // Add the language node:
-            Element elementLang = doc.createElement("dcvalue");
-            elementLang.appendChild(doc.createTextNode(getLanguage()));
-            rootElement.appendChild(elementLang);
-            
-            attr = doc.createAttribute("element");
-            attr.setValue("language");
-            elementLang.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("language");
-            attr.setValue("en_US");
-            elementLang.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("iso");
-            elementLang.setAttributeNode(attr);
+            String lang = getLanguage();
+            if(null != lang){
+                Element elementLang = doc.createElement("dcvalue");
+                elementLang.appendChild(doc.createTextNode(lang));
+                rootElement.appendChild(elementLang);
+
+                attr = doc.createAttribute("element");
+                attr.setValue("language");
+                elementLang.setAttributeNode(attr);
+
+                attr = doc.createAttribute("language");
+                attr.setValue("en_US");
+                elementLang.setAttributeNode(attr);
+
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("iso");
+                elementLang.setAttributeNode(attr);
+            }
             
             // Add the title node:
-            Element elementTitle = doc.createElement("dcvalue");
-            elementTitle.appendChild(doc.createTextNode(getTitle()));
-            rootElement.appendChild(elementTitle);
-            
-            attr = doc.createAttribute("element");
-            attr.setValue("title");
-            elementTitle.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("language");
-            attr.setValue("en_US");
-            elementTitle.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("none");
-            elementTitle.setAttributeNode(attr);
+            String tit = getTitle();
+            if(null != tit){
+                Element elementTitle = doc.createElement("dcvalue");
+                elementTitle.appendChild(doc.createTextNode(tit));
+                rootElement.appendChild(elementTitle);
+
+                attr = doc.createAttribute("element");
+                attr.setValue("title");
+                elementTitle.setAttributeNode(attr);
+
+                attr = doc.createAttribute("language");
+                attr.setValue("en_US");
+                elementTitle.setAttributeNode(attr);
+
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("none");
+                elementTitle.setAttributeNode(attr);
+            }
             
             // Add the available date node:
 //            Element elementAvailable = doc.createElement("dcvalue");
@@ -512,22 +525,25 @@ public class PlosData {
 //            elementAvailable.setAttributeNode(attr);
             
             // Add the issued date node:
-            SimpleDateFormat format_issuedDate = new SimpleDateFormat ("yyyy-MM-dd"); 
-            Element elementIssued = doc.createElement("dcvalue");
-            elementIssued.appendChild(doc.createTextNode(format_issuedDate.format(getDateIssued())));
-            rootElement.appendChild(elementIssued);
-            
-            attr = doc.createAttribute("element");
-            attr.setValue("date");
-            elementIssued.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("issued");
-            elementIssued.setAttributeNode(attr);
+            Date issueDate = getDateIssued();
+            if(null != issueDate){
+                SimpleDateFormat format_issuedDate = new SimpleDateFormat ("yyyy-MM-dd"); 
+                Element elementIssued = doc.createElement("dcvalue");
+                elementIssued.appendChild(doc.createTextNode(format_issuedDate.format(issueDate)));
+                rootElement.appendChild(elementIssued);
+
+                attr = doc.createAttribute("element");
+                attr.setValue("date");
+                elementIssued.setAttributeNode(attr);
+
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("issued");
+                elementIssued.setAttributeNode(attr);
+            }
             
             // Add the author nodes:
             String[] authorSet = getAuthors();
-            if(authorSet.length > 0){
+            if(null != authorSet && authorSet.length > 0){
                 for(String author : authorSet){
                     Element elementAuthor = doc.createElement("dcvalue");
                     elementAuthor.appendChild(doc.createTextNode(author));
@@ -544,94 +560,112 @@ public class PlosData {
             }
             
             // Add the acknowledgements node:
-            Element elementAck = doc.createElement("dcvalue");
-            elementAck.appendChild(doc.createTextNode(getAcknowledgements()));
-            rootElement.appendChild(elementAck);
-            
-            attr = doc.createAttribute("element");
-            attr.setValue("description");
-            elementAck.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("language");
-            attr.setValue("en_US");
-            elementAck.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("none");
-            elementAck.setAttributeNode(attr);
+            String ack = getAcknowledgements();
+            if(null != ack){
+                Element elementAck = doc.createElement("dcvalue");
+                elementAck.appendChild(doc.createTextNode(ack));
+                rootElement.appendChild(elementAck);
+
+                attr = doc.createAttribute("element");
+                attr.setValue("description");
+                elementAck.setAttributeNode(attr);
+
+                attr = doc.createAttribute("language");
+                attr.setValue("en_US");
+                elementAck.setAttributeNode(attr);
+
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("none");
+                elementAck.setAttributeNode(attr);
+            }
             
             // Add the author contributions node:
-            Element elementContribution = doc.createElement("dcvalue");
-            elementContribution.appendChild(doc.createTextNode(getAuthorContributions()));
-            rootElement.appendChild(elementContribution);
-            
-            attr = doc.createAttribute("element");
-            attr.setValue("description");
-            elementContribution.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("language");
-            attr.setValue("en_US");
-            elementContribution.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("none");
-            elementContribution.setAttributeNode(attr);
+            String contrib = getAuthorContributions();
+            if(null != contrib){
+                Element elementContribution = doc.createElement("dcvalue");
+                elementContribution.appendChild(doc.createTextNode(contrib));
+                rootElement.appendChild(elementContribution);
+
+                attr = doc.createAttribute("element");
+                attr.setValue("description");
+                elementContribution.setAttributeNode(attr);
+
+                attr = doc.createAttribute("language");
+                attr.setValue("en_US");
+                elementContribution.setAttributeNode(attr);
+
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("none");
+                elementContribution.setAttributeNode(attr);
+            }
             
             // Add the publisher node:
-            Element elementPublisher = doc.createElement("dcvalue");
-            elementPublisher.appendChild(doc.createTextNode(getPublisher()));
-            rootElement.appendChild(elementPublisher);
-            
-            attr = doc.createAttribute("element");
-            attr.setValue("publisher");
-            elementPublisher.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("none");
-            elementPublisher.setAttributeNode(attr);
+            String puber = getPublisher();
+            if(null != puber){
+                Element elementPublisher = doc.createElement("dcvalue");
+                elementPublisher.appendChild(doc.createTextNode(puber));
+                rootElement.appendChild(elementPublisher);
+
+                attr = doc.createAttribute("element");
+                attr.setValue("publisher");
+                elementPublisher.setAttributeNode(attr);
+
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("none");
+                elementPublisher.setAttributeNode(attr);
+            }
             
             // Add the citation node:
-            Element elementCitation = doc.createElement("dcvalue");
-            elementCitation.appendChild(doc.createTextNode(getCitation()));
-            rootElement.appendChild(elementCitation);
-            
-            attr = doc.createAttribute("element");
-            attr.setValue("identifier");
-            elementCitation.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("language");
-            attr.setValue("en_US");
-            elementCitation.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("citation");
-            elementCitation.setAttributeNode(attr);
+            String cit = getCitation();
+            if(null != cit){
+                Element elementCitation = doc.createElement("dcvalue");
+                elementCitation.appendChild(doc.createTextNode(cit));
+                rootElement.appendChild(elementCitation);
+
+                attr = doc.createAttribute("element");
+                attr.setValue("identifier");
+                elementCitation.setAttributeNode(attr);
+
+                attr = doc.createAttribute("language");
+                attr.setValue("en_US");
+                elementCitation.setAttributeNode(attr);
+
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("citation");
+                elementCitation.setAttributeNode(attr);
+            }
             
             // Add the rights node:
-            Element elementRights = doc.createElement("dcvalue");
-            elementRights.appendChild(doc.createTextNode(getRights()));
-            rootElement.appendChild(elementRights);
-            
-            attr = doc.createAttribute("element");
-            attr.setValue("rights");
-            elementRights.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("none");
-            elementRights.setAttributeNode(attr);
+            String rit = getRights();
+            if(null != rit){
+                Element elementRights = doc.createElement("dcvalue");
+                elementRights.appendChild(doc.createTextNode(rit));
+                rootElement.appendChild(elementRights);
+
+                attr = doc.createAttribute("element");
+                attr.setValue("rights");
+                elementRights.setAttributeNode(attr);
+
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("none");
+                elementRights.setAttributeNode(attr);
+            }
             
             // Add the rights URI node:
-            Element elementRightsUri = doc.createElement("dcvalue");
-            elementRightsUri.appendChild(doc.createTextNode(getRightsUri()));
-            rootElement.appendChild(elementRightsUri);
-            
-            attr = doc.createAttribute("element");
-            attr.setValue("rights");
-            elementRightsUri.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("uri");
-            elementRightsUri.setAttributeNode(attr);
+            String ritUri = getRightsUri();
+            if(null != ritUri){
+                Element elementRightsUri = doc.createElement("dcvalue");
+                elementRightsUri.appendChild(doc.createTextNode(ritUri));
+                rootElement.appendChild(elementRightsUri);
+
+                attr = doc.createAttribute("element");
+                attr.setValue("rights");
+                elementRightsUri.setAttributeNode(attr);
+
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("uri");
+                elementRightsUri.setAttributeNode(attr);
+            }
             
             // Add the rights requestable node:
             Element elementRightsRequestable = doc.createElement("dcvalue");
@@ -644,41 +678,47 @@ public class PlosData {
             
             attr = doc.createAttribute("language");
             attr.setValue("en_US");
-            elementCitation.setAttributeNode(attr);
+            elementRightsRequestable.setAttributeNode(attr);
             
             attr = doc.createAttribute("qualifier");
             attr.setValue("requestable");
             elementRightsRequestable.setAttributeNode(attr);
             
             // Add the is part of node:
-            Element elementIsPartOf = doc.createElement("dcvalue");
-            elementIsPartOf.appendChild(doc.createTextNode(getIsPartOfSeries()));
-            rootElement.appendChild(elementIsPartOf);
+            String partOf = getIsPartOfSeries();
+            if(null != partOf){
+                Element elementIsPartOf = doc.createElement("dcvalue");
+                elementIsPartOf.appendChild(doc.createTextNode(partOf));
+                rootElement.appendChild(elementIsPartOf);
+
+                attr = doc.createAttribute("element");
+                attr.setValue("relation");
+                elementIsPartOf.setAttributeNode(attr);
+
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("ispartofseries");
+                elementIsPartOf.setAttributeNode(attr);
+            }
             
-            attr = doc.createAttribute("element");
-            attr.setValue("relation");
-            elementIsPartOf.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("ispartofseries");
-            elementIsPartOf.setAttributeNode(attr);
-            
-//            // Add the relation uri node:
-            Element elementRelationUri = doc.createElement("dcvalue");
-            elementRelationUri.appendChild(doc.createTextNode(getRelationUri()));
-            rootElement.appendChild(elementRelationUri);
-            
-            attr = doc.createAttribute("element");
-            attr.setValue("relation");
-            elementRelationUri.setAttributeNode(attr);
-            
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("uri");
-            elementRelationUri.setAttributeNode(attr);
+            // Add the relation uri node:
+            String reUri = getRelationUri();
+            if(null != reUri){
+                Element elementRelationUri = doc.createElement("dcvalue");
+                elementRelationUri.appendChild(doc.createTextNode(reUri));
+                rootElement.appendChild(elementRelationUri);
+
+                attr = doc.createAttribute("element");
+                attr.setValue("relation");
+                elementRelationUri.setAttributeNode(attr);
+
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("uri");
+                elementRelationUri.setAttributeNode(attr);
+            }
             
             // Add the subject nodes:
             String[] subjectSet = getSubjects();
-            if(subjectSet.length > 0){
+            if(null != subjectSet && subjectSet.length > 0){
                 for(String subject : subjectSet){
                     Element elementSubject = doc.createElement("dcvalue");
                     elementSubject.appendChild(doc.createTextNode(subject));
@@ -699,55 +739,64 @@ public class PlosData {
             }
             
             // Add the peerReview node:
-            Element elementPeerReview = doc.createElement("dcvalue");
-            elementPeerReview.appendChild(doc.createTextNode(getPeerReview()));
-            rootElement.appendChild(elementPeerReview);
+            String review = getPeerReview();
+            if(null != review){
+                Element elementPeerReview = doc.createElement("dcvalue");
+                elementPeerReview.appendChild(doc.createTextNode(review));
+                rootElement.appendChild(elementPeerReview);
 
-            attr = doc.createAttribute("element");
-            attr.setValue("description");
-            elementPeerReview.setAttributeNode(attr);
+                attr = doc.createAttribute("element");
+                attr.setValue("description");
+                elementPeerReview.setAttributeNode(attr);
 
-            attr = doc.createAttribute("language");
-            attr.setValue("en_US");
-            elementPeerReview.setAttributeNode(attr);
+                attr = doc.createAttribute("language");
+                attr.setValue("en_US");
+                elementPeerReview.setAttributeNode(attr);
 
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("peerreview");
-            elementPeerReview.setAttributeNode(attr);
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("peerreview");
+                elementPeerReview.setAttributeNode(attr);
+            }
             
             // Add the peer review notes node:
-            Element elementPeerReviewNotes = doc.createElement("dcvalue");
-            elementPeerReviewNotes.appendChild(doc.createTextNode(getPeerReviewNotes()));
-            rootElement.appendChild(elementPeerReviewNotes);
+            String peer = getPeerReviewNotes();
+            if(null != peer){
+                Element elementPeerReviewNotes = doc.createElement("dcvalue");
+                elementPeerReviewNotes.appendChild(doc.createTextNode(peer));
+                rootElement.appendChild(elementPeerReviewNotes);
 
-            attr = doc.createAttribute("element");
-            attr.setValue("description");
-            elementPeerReviewNotes.setAttributeNode(attr);
+                attr = doc.createAttribute("element");
+                attr.setValue("description");
+                elementPeerReviewNotes.setAttributeNode(attr);
 
-            attr = doc.createAttribute("language");
-            attr.setValue("en_US");
-            elementPeerReviewNotes.setAttributeNode(attr);
+                attr = doc.createAttribute("language");
+                attr.setValue("en_US");
+                elementPeerReviewNotes.setAttributeNode(attr);
 
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("peerreviewnotes");
-            elementPeerReviewNotes.setAttributeNode(attr);
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("peerreviewnotes");
+                elementPeerReviewNotes.setAttributeNode(attr);
+            }
             
             // Add the doi node:
-            Element elementDoi = doc.createElement("dcvalue");
-            elementDoi.appendChild(doc.createTextNode(getDoi()));
-            rootElement.appendChild(elementDoi);
+            String doi = getDoi();
+            if(null != doi){
+                Element elementDoi = doc.createElement("dcvalue");
+                elementDoi.appendChild(doc.createTextNode(doi));
+                rootElement.appendChild(elementDoi);
 
-            attr = doc.createAttribute("element");
-            attr.setValue("identifier");
-            elementDoi.setAttributeNode(attr);
+                attr = doc.createAttribute("element");
+                attr.setValue("identifier");
+                elementDoi.setAttributeNode(attr);
 
-            attr = doc.createAttribute("language");
-            attr.setValue("en_US");
-            elementDoi.setAttributeNode(attr);
+                attr = doc.createAttribute("language");
+                attr.setValue("en_US");
+                elementDoi.setAttributeNode(attr);
 
-            attr = doc.createAttribute("qualifier");
-            attr.setValue("doi");
-            elementDoi.setAttributeNode(attr);
+                attr = doc.createAttribute("qualifier");
+                attr.setValue("doi");
+                elementDoi.setAttributeNode(attr);
+            }
             
             
             // Generate the xml file:

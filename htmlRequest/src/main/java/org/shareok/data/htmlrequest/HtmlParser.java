@@ -28,8 +28,8 @@ public class HtmlParser {
             int size = metaElements.size();
             if(size > 0){
                 for(Element element : metaElements) {
-                    if(element.hasAttr("name")) {
-                        String name = element.attr("name");
+                    if(element.hasAttr("content") && element.hasAttr("name")) {
+                        String name = element.attr("name");//System.out.print("content = "+element.attr("content")+"\n");
                         if(!metaData.containsKey(name)){
                             ArrayList<String> list = new ArrayList<>();
                             list.add(element.attr("content"));
@@ -49,4 +49,56 @@ public class HtmlParser {
             return metaData;
         }
         
+        public static HashMap<String,ArrayList<String>> metaDataParserWithTagNames(String html, String[] tagNames) {
+            
+            HashMap<String,ArrayList<String>> metaData = new HashMap<>();
+
+            Document doc = Jsoup.parse(html.toString());
+            //get meta description content
+            Elements metaElements = doc.select("meta");
+            
+            int size = metaElements.size();
+            if(size > 0){
+                for(Element element : metaElements) {
+                    if(element.hasAttr("content")) {
+                        if(element.hasAttr("name")){
+                            String name = element.attr("name");//System.out.print("content = "+element.attr("content")+"\n");
+                            if(!metaData.containsKey(name)){
+                                ArrayList<String> list = new ArrayList<>();
+                                list.add(element.attr("content"));
+                                metaData.put(name, list);
+
+                            }
+                            else{
+                                ArrayList<String> list = metaData.get(name);
+                                String content = element.attr("content");
+                                list.add(content);
+                                metaData.put(name, list);
+                            }
+                        }
+                        else if(tagNames.length > 0){
+                            for(String tag : tagNames){
+                                if(element.hasAttr(tag)){
+                                    String name = element.attr(tag);//System.out.print("content = "+element.attr("content")+"\n");
+                                    if(!metaData.containsKey(name)){
+                                        ArrayList<String> list = new ArrayList<>();
+                                        list.add(element.attr("content"));
+                                        metaData.put(name, list);
+
+                                    }
+                                    else{
+                                        ArrayList<String> list = metaData.get(name);
+                                        String content = element.attr("content");
+                                        list.add(content);
+                                        metaData.put(name, list);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return metaData;
+        }
 }

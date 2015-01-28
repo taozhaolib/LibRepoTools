@@ -7,6 +7,8 @@
 package org.shareok.data.plosdata;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -103,6 +105,11 @@ public class PlosUtil {
         return citation;
     }
     
+    /**
+     * 
+     * @param html : The string of the web page source
+     * @return author contribution statement
+     */
     public static String getAuthorContributions(String html) {
         String contributions = "";
         
@@ -117,6 +124,53 @@ public class PlosUtil {
         }            
 
         return contributions;
+    }
+    
+    /**
+     * 
+     * @param html : The string of the web page source
+     * @return acknowledge statement
+     */
+    public static String[] getSubjects(String html) {
+        List<String> subjectsList = new ArrayList<>();
+        
+        Document doc = Jsoup.parse(html.toString());
+        Elements subjectListDiv = doc.select("div[class=subject-areas-container]");
+        if(null != subjectListDiv && !subjectListDiv.isEmpty()){
+            Element subjectList = subjectListDiv.first().child(1);
+            if(null != subjectList){
+                Elements lis = subjectList.select("li");
+                if(null != lis && lis.size() > 0){
+                    for (Element li : lis){
+                        Element link = li.child(0);
+                        subjectsList.add(link.text());
+                    }
+                }
+            }
+        }
+        if(subjectsList.size() > 0){
+            return subjectsList.toArray(new String[subjectsList.size()]);
+        }
+        else{
+            return null;
+        }
+    }
+    
+    /**
+     * For some correspondences, there are no metadata about article title, <br>
+     * instead, they is a title tag
+     * @param html : The string of the web page source
+     * @return title
+     */
+    public static String getTitleFromHtml(String html) {
+        String title = "";
+        
+        Document doc = Jsoup.parse(html.toString());
+        Elements titleElements = doc.select("title");
+        if(null != titleElements && titleElements.size() > 0){
+            title = titleElements.get(0).text();
+        }
+        return title;
     }
     
     public static void createContentFile(String fileName, String content){

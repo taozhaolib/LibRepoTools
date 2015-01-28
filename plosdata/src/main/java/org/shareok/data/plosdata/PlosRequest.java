@@ -256,6 +256,12 @@ public class PlosRequest {
         }
     }
     
+    public String getPlosTitle(String doi) {
+        String title = "";
+        
+        return title;
+    }
+    
     public String getUSER_AGENT() {
         return USER_AGENT;
     }

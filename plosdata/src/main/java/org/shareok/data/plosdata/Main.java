@@ -7,7 +7,7 @@
 package org.shareok.data.plosdata;
 
 import java.util.HashMap;
-import org.shareok.data.msofficedata.ExcelHandler;
+import org.shareok.data.documentProcessor.ExcelHandler;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 

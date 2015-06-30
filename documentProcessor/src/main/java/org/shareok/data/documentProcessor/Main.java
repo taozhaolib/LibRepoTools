@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package org.shareok.data.msofficedata;
+package org.shareok.data.documentProcessor;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -17,13 +17,13 @@ public class Main {
     
     public static void main(String[] args) throws Exception
     {
-        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+        ApplicationContext context = new ClassPathXmlApplicationContext("documentProcessor.xml");
         FileRouter router = (FileRouter) context.getBean("fileRouter");
-        ExcelHandler excelHandler = (ExcelHandler) context.getBean("excelHandler");
+        WordHandler wordHandler = (WordHandler) context.getBean("wordHandler");
         //PlosOneExcelData plosOneData = (PlosOneExcelData) context.getBean("plosOneExcelData");
-        String path = FileUtil.getFilePathFromResources("plos_articles.xlsx");
-        excelHandler.setFileName(path);
-        excelHandler.readData();
+        String path = FileUtil.getFilePathFromResources("test2.docx");
+        wordHandler.setFileName(path);
+        wordHandler.readData();
         
         //String obj.getFileExtension();
     }

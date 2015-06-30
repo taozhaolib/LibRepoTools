@@ -4,18 +4,14 @@
  * and open the template in the editor.
  */
 
-package org.shareok.data.msofficedata;
+package org.shareok.data.documentProcessor;
 
-import java.io.File;
-import org.w3c.dom.Element;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.shareok.data.documentProcessor.exceptions.DataTypeException;
 
 /**
- *
+ * The file types can ben handled by this software are defined in an xml file<p>
+ * The program has to been able to load appropriate machine based on file types
+ * 
  * @author Tao Zhao
  */
 public class FileRouter {
@@ -32,14 +28,17 @@ public class FileRouter {
     
     /**
      *
-     * @param type
+     * @param type : String; for example "word" or "excel"
+     * 
+     * @return: String[]; for example "doc,docx"
+     * 
      * @throws Exception
      */
     public String[] loadOfficeFileType(String type) throws Exception {
         
         String[] fileTypes = null;
         if(null == type || "".equals(type)) {
-            throw new Exception ("The file type parameter is empty!");
+            throw new DataTypeException ("non-empty file extension", "emypty string/undefined");
         }
         else {
             fileTypes = FileUtil.getDataFromXmlByTagName(FileUtil.getFilePathFromResources("filetypes.xml"), type);

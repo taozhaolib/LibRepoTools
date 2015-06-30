@@ -11,7 +11,7 @@
     <dependencies>
         <dependency>
             <groupId>org.shareok.data</groupId>
-            <artifactId>msofficedata</artifactId>
+            <artifactId>documentProcessor</artifactId>
             <version>1.0-SNAPSHOT</version>
             <type>jar</type>
         </dependency>

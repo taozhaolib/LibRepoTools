@@ -18,8 +18,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.shareok.data.htmlrequest.HtmlParser;
-import org.shareok.data.msofficedata.ExcelHandler;
-import org.shareok.data.msofficedata.FileUtil;
+import org.shareok.data.documentProcessor.ExcelHandler;
+import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.plosdata.PlosUtil.JournalType;
 
 /**

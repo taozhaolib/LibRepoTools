@@ -4,11 +4,21 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="fileRouter" class="org.shareok.data.msofficedata.FileRouter">
+    <bean id="fileRouter" class="org.shareok.data.documentProcessor.FileRouter">
         <property name="fileName" value="" />
     </bean>
     
-    <bean id="excelHandler" class="org.shareok.data.msofficedata.ExcelHandler">
+    <bean id="excelHandler" class="org.shareok.data.documentProcessor.ExcelHandler">
+        <property name="fileName" value="" />
+        <property name="router" ref = "fileRouter" />
+        <property name="data">
+            <map>
+               
+            </map>
+        </property>
+    </bean>
+    
+    <bean id="wordHandler" class="org.shareok.data.documentProcessor.WordHandler">
         <property name="fileName" value="" />
         <property name="router" ref = "fileRouter" />
         <property name="data">

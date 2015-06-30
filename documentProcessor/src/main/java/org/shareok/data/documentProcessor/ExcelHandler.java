@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package org.shareok.data.msofficedata;
+package org.shareok.data.documentProcessor;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,9 +24,10 @@ import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.shareok.data.documentProcessor.exceptions.*;
 
 /**
- *
+ * Handles Excel files
  * @author Tao Zhao
  */
 public class ExcelHandler implements FileHandler {
@@ -59,6 +60,16 @@ public class ExcelHandler implements FileHandler {
         this.data = data;
     }
     
+    /**
+     * Based on the file extension to create corresponding workbook object and
+     * return the Sheet object
+     * 
+     * @param extension : file extension name of the excel file
+     * @param file : FileInputStream
+     * @return Sheet object
+     * @throws IOException : IO exception handler
+     * 
+     */
     private Sheet getWorkbookSheet(String extension, FileInputStream file) throws IOException {
         Sheet sheet = null;
         if("xlsx".equals(extension)){
@@ -72,6 +83,13 @@ public class ExcelHandler implements FileHandler {
         return sheet;
     }
     
+    /**
+     * Check if the cells are date type
+     * 
+     * @param cell
+     * @return : bool
+     * @throws Exception 
+     */
     private boolean isCellDateFormatted(Cell cell) throws Exception {
         try{
             return DateUtil.isCellDateFormatted(cell);
@@ -83,7 +101,9 @@ public class ExcelHandler implements FileHandler {
     }
     
     /**
-     *
+     * Reads out the data in an excel file and stores data in a hashmap<p>
+     * The cell data has the ending of "--type" to label the data type
+     * 
      * @throws Exception
      */
     @Override
@@ -94,7 +114,7 @@ public class ExcelHandler implements FileHandler {
         
         try {
             if(null == name || "".equals(name)) {
-                throw new Exception ("File name is not specified!"); 
+                throw new FileNameException("File name is not specified!"); 
             }
             
             FileInputStream file = new FileInputStream(new File(name));
@@ -104,7 +124,7 @@ public class ExcelHandler implements FileHandler {
             String[] excelTypes = router.loadOfficeFileType("excel");
             
             if(null == excelTypes || excelTypes.length == 0){
-                throw new Exception("The file types are empty!");
+                throw new FileTypeException("The file types are empty!");
             }
 
             HashMap<String,String> typeMap = new HashMap<>();
@@ -167,6 +187,12 @@ public class ExcelHandler implements FileHandler {
         } 
     }
     
+    /**
+     * Export data to an Xml file
+     * 
+     * @param map
+     * @param filePath 
+     */
     @Override
     public void exportMapDataToXml(HashMap map, String filePath) {
         try{

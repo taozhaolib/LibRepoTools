@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package org.shareok.data.msofficedata;
+package org.shareok.data.documentProcessor;
 
 import java.io.File;
 import java.io.StringReader;

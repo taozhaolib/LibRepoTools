@@ -14,25 +14,36 @@ import org.shareok.data.htmlrequest.HtmlRequest;
  * @author Tao Zhao
  */
 public class GwAdminExhibitItem {
-//    CsvHandler csvHandler;
-//
-//    public CsvHandler getCsv() {
-//        return csvHandler;
-//    }
-//
-//    public void setCsv(CsvHandler csvHandler) {
-//        this.csvHandler = csvHandler;
-//    }
-    private HtmlRequest req;
+    CsvHandler csv;
+
+    public CsvHandler getCsv() {
+        return csv;
+    }
+
+    public void setCsv(CsvHandler csvHandler) {
+        this.csv = csvHandler;
+    }
     
-
-    public HtmlRequest getReq() {
-        return req;
+    public static String getMmsidFromLinkToCatalog(String link) {
+        String mmsId = "";
+        
+        String[] linkSplit = link.split("&term=");
+        if(linkSplit instanceof String[] && linkSplit.length > 1){
+            mmsId = linkSplit[linkSplit.length-1];
+        }
+        
+        return mmsId;
     }
-
-    public void setReq(HtmlRequest req) {
-        this.req = req;
-    }
+//    private HtmlRequest req;
+//    
+//
+//    public HtmlRequest getReq() {
+//        return req;
+//    }
+//
+//    public void setReq(HtmlRequest req) {
+//        this.req = req;
+//    }
     
     
     

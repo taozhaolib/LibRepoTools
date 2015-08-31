@@ -9,7 +9,7 @@
         <module>plosdata</module>
         <module>htmlRequest</module>
         <module>documentProcessor</module>
-        <module>crossref</module>
+        <module>googleDocGw</module>
     </modules>
     <properties>
        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

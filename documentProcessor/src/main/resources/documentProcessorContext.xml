@@ -28,4 +28,14 @@
         </property>
     </bean>
     
+    <bean id="csvHandler" class="org.shareok.data.documentProcessor.CsvHandler">
+        <property name="fileName" value="" />
+        <property name="fileHeadMapping" ><null/></property>
+        <property name="data">
+            <map>
+               
+            </map>
+        </property>
+    </bean>
+    
 </beans>

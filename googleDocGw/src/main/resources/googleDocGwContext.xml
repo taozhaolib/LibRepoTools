@@ -9,7 +9,7 @@
     <import resource="classpath*:**/htmlRequestContext.xml"/>
 
     <bean id="gwAdminExhibitItem" class="org.shareok.data.googleDocGw.GwAdminExhibitItem">
-            <property name="req" ref="htmlRequest" />
+            <property name="csv" ref="csvHandler" />
 
     </bean>
     

@@ -29,6 +29,7 @@ public class CsvHandler implements FileHandler {
     private HashMap data;
     private int recordCount;
     private String [] fileHeadMapping;
+    private CSVFormat csvFormat;
 
     public String getFileName() {
         return fileName;
@@ -61,6 +62,15 @@ public class CsvHandler implements FileHandler {
     public void setRecordCount(int recordCount) {
         this.recordCount = recordCount;
     }
+
+    public CSVFormat getCsvFormat() {
+        return csvFormat;
+    }
+
+    public void setCsvFormat(CSVFormat csvFormat) {
+        this.csvFormat = csvFormat;
+    }
+    
     
     /**
      * Reads out the data in an excel file and stores data in a hashmap
@@ -80,7 +90,10 @@ public class CsvHandler implements FileHandler {
             fileReader = new FileReader(fileName);
 
             //initialize CSVParser object
-            csvFileParser = new CSVParser(fileReader, CSVFormat.DEFAULT);
+            if(null == csvFormat){
+                csvFormat = CSVFormat.DEFAULT;
+            }
+            csvFileParser = new CSVParser(fileReader, csvFormat);
             
             //Get a list of CSV file records
             List csvRecords = csvFileParser.getRecords(); 

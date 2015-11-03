@@ -36,6 +36,7 @@
                
             </map>
         </property>
+        <property name="csvFormat"><null/></property>
     </bean>
     
 </beans>

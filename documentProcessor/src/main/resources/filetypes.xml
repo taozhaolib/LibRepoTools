@@ -8,12 +8,12 @@ and open the template in the editor.
 
 <types>
     
-    <excel>xls</excel>
+    <excel bean = "excelHandler">xls</excel>
     
-    <excel>xlsx</excel>
+    <excel bean = "excelHandler">xlsx</excel>
     
-    <word>doc</word>
+    <word bean = "wordHandler">doc</word>
     
-    <word>docx</word>
+    <word bean = "wordHandler">docx</word>
     
 </types>

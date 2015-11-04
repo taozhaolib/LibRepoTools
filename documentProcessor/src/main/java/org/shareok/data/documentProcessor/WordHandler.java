@@ -54,6 +54,7 @@ public class WordHandler implements FileHandler {
      *
      * @return
      */
+    @Override
     public HashMap getData() {
         return data;
     }
@@ -70,6 +71,7 @@ public class WordHandler implements FileHandler {
      *
      * @param fileName
      */
+    @Override
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }

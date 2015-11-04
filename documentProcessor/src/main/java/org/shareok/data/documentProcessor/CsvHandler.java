@@ -35,10 +35,12 @@ public class CsvHandler implements FileHandler {
         return fileName;
     }
 
+    @Override
     public HashMap getData() {
         return data;
     }
 
+    @Override
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }

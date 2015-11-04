@@ -7,8 +7,7 @@
 package org.shareok.data.documentProcessor;
 
 import java.io.File;
-import java.io.StringReader;
-import java.net.URISyntaxException;
+import java.io.FileInputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +24,13 @@ import org.xml.sax.InputSource;
  * @author Tao Zhao
  */
 public class FileUtil {
+
+    /**
+     * Get the path of the file in the resources folder 
+     * 
+     * @param fileName
+     * @return String path
+     */
     public static String getFilePathFromResources(String fileName) {
         String path = null;
         try{
@@ -37,12 +43,23 @@ public class FileUtil {
         return path;
     }
     
+    /**
+     * Get the File object of the file in the resources folder
+     * 
+     * @param fileName
+     * @return File file
+     */
     public static File getFileFromResources(String fileName) {
         String path = getFilePathFromResources(fileName);
         File file = new File(path);
         return file;
     }
     
+    /**
+     *
+     * @param fileName
+     * @return
+     */
     public static String getFileExtension(String fileName) {
 
         if(null != fileName && !"".equals(fileName)) {
@@ -64,6 +81,12 @@ public class FileUtil {
         }
     }
     
+    /**
+     *
+     * @param filePath
+     * @param tagName
+     * @return
+     */
     public static String[] getDataFromXmlByTagName(String filePath, String tagName) {
         String[] data = null;
         try {
@@ -111,10 +134,16 @@ public class FileUtil {
         return data;
     }
     
+    /**
+     *
+     * @param xml: xml file path
+     * @return
+     * @throws Exception
+     */
     public static Document loadXMLFromString(String xml) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
-        InputSource is = new InputSource(new StringReader(xml));
+        InputSource is = new InputSource(new FileInputStream(xml));
         return builder.parse(is);
     }
 }

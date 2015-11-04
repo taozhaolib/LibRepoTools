@@ -40,6 +40,7 @@ public class ExcelHandler implements FileHandler {
         return router;
     }
 
+    @Override
     public HashMap getData() {
         return data;
     }
@@ -48,6 +49,7 @@ public class ExcelHandler implements FileHandler {
         return fileName;
     }
 
+    @Override
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
@@ -165,6 +167,9 @@ public class ExcelHandler implements FileHandler {
                             break;
                         case Cell.CELL_TYPE_STRING:
                             data.put(key, cell.getStringCellValue() + "---str");
+                            break;
+                        case Cell.CELL_TYPE_ERROR:
+                            data.put(key, "ERROR_VALUE");
                             break;
                         default:
                             data.put(key, cell.getRichStringCellValue() + "---def");

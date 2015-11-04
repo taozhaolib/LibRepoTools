@@ -3,19 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.shareok.data.documentProcessor.exceptions;
+package org.shareok.data.sagedata.exceptions;
 
 /**
  *
  * @author Tao Zhao
  */
-public class DataTypeException extends Exception{
+public class EmptyFilePathException extends Exception{
     
     /**
      *
      * @param message
      */
-    public DataTypeException(String message){
+    public EmptyFilePathException(String message){
         super(message);
     }
     
@@ -24,8 +24,8 @@ public class DataTypeException extends Exception{
      * @param expectedType : String
      * @param actualType : String
      */
-    public DataTypeException(String expectedType, String actualType){
-        super("The expected date type is "+expectedType+" but the actual date type is "+actualType);
+    public EmptyFilePathException(){
+        super("The File Path is NOT set!");
         
     }
 

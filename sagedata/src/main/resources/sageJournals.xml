@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<journals>
+    
+    <journal bean = "procInstMechEngProcessor">Proceedings of the Institution of Mechanical Engineers, Part O: Journal of Risk and Reliability</excel>
+    
+    
+</journals>

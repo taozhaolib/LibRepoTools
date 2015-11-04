@@ -10,6 +10,7 @@
         <module>htmlRequest</module>
         <module>documentProcessor</module>
         <module>googleDocGw</module>
+        <module>sagedata</module>
     </modules>
     <properties>
        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

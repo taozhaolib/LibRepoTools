@@ -2,7 +2,7 @@
 
 <journals>
     
-    <journal bean = "procInstMechEngProcessor">Proceedings of the Institution of Mechanical Engineers, Part O: Journal of Risk and Reliability</excel>
+    <journal bean = "procInstMechEngProcessor">Proceedings of the Institution of Mechanical Engineers, Part O: Journal of Risk and Reliability</journal>
     
     
 </journals>

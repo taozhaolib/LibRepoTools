@@ -63,6 +63,30 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler{
         this.itemData = itemData;
     }
 
+    public String getSourceFilePath() {
+        return sourceFilePath;
+    }
+
+    public String getOutputFilePath() {
+        return outputFilePath;
+    }
+
+    public SageJournalDataProcessorFactory getFactory() {
+        return factory;
+    }
+
+    public void setSourceFilePath(String sourceFilePath) {
+        this.sourceFilePath = sourceFilePath;
+    }
+
+    public void setOutputFilePath(String outputFilePath) {
+        this.outputFilePath = outputFilePath;
+    }
+
+    public void setFactory(SageJournalDataProcessorFactory factory) {
+        this.factory = factory;
+    }
+
     /**
      *
      * @param filePath
@@ -74,6 +98,8 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler{
         try{
             String fileExtension = FileUtil.getFileExtension(filePath);
             FileHandler fh = FileHandlerFactory.getFileHandlerByFileExtension(fileExtension);
+            if(null == fh)
+                return;
             fh.setFileName(filePath);
             fh.readData();
             data = fh.getData();
@@ -91,9 +117,9 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler{
     @Override
     public void processSourceData() {
         
-        if(null == data){
+        if(null == data || data.isEmpty()){
             readSourceData();
-            if(null == data)
+            if(null == data || data.isEmpty())
                 return;
         }
         
@@ -122,11 +148,13 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler{
                 if(row != rowPre){
                     rowPre = row;
                     if(null != articleData && !articleData.isEmpty()){
-                        if(null == itemData)
+                        if(null == itemData){
                             itemData = new ArrayList<HashMap>();
-                        itemData.add(articleData);
-                    }
-                    articleData.clear();
+                        }
+                        Object articleDataCopy = articleData.clone();
+                        itemData.add((HashMap)articleDataCopy);
+                        articleData.clear();
+                    }                    
                 }
                 
                 if(0 != row){
@@ -180,17 +208,27 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler{
         
         try{
             if(null == filePath || "".equals(filePath)){
-                throw new EmptyFilePathException();
+                throw new EmptyFilePathException("File path is NOT set!");
             }
-            if(null == itemData){
+            if(null == itemData || itemData.isEmpty()){
                 processSourceData();
-                if(null == itemData)
+                if(null == itemData || itemData.isEmpty())
                     return;
             }
             
             int size = itemData.size();
             for(int i = 0; i < size; i++){
-                
+                Map journalData = itemData.get(i);
+                String journal = (String)journalData.get("journal");
+                Map journalMap = SageDataUtil.getJournalListWithBeans();
+                SageJournalDataProcessor sjdp = SageJournalDataProcessorFactory.getSageJournalDataProcessorByName(journalMap, journal);
+                sjdp.setData(journalData);
+                if(null == sjdp){
+                    continue;
+                }
+                else{
+                    sjdp.getOutput(filePath);
+                }
             }
         }
         catch(Exception e){

@@ -9,14 +9,12 @@ package org.shareok.data.sagedata.exceptions;
  *
  * @author Tao Zhao
  */
-public class EmptyFilePathException extends Exception{
-    
-    /**
+public class EmptyJournalDataException extends Exception {
+     /**
      *
      * @param message
      */
-    public EmptyFilePathException(String message){
+    public EmptyJournalDataException(String message){
         super(message);
     }
-
 }

@@ -16,9 +16,18 @@
         <property name="factory" ref="sageJournalDataProcessorFactory" />
     </bean>
     
-    <bean id="sageJournalDataProcessorFactory" class="org.shareok.data.sagedata.sageJournalDataProcessorFactory">
-
+    <bean id="sageJournalDataProcessorFactory" class="org.shareok.data.sagedata.SageJournalDataProcessorFactory"></bean>
+    
+    <bean id="sageJournalDataProcessorAbstract" class="org.shareok.data.sagedata.SageJournalDataProcessorAbstract" abstract="true">
+        <property name="data">
+            <map></map>
+        </property>
+        <property name="journalName" value="" />
+        <property name="htmlRequest" ref="htmlRequest" />
     </bean>
     
+    <bean id="procInstMechEngProcessor" parent="sageJournalDataProcessorAbstract" class="org.shareok.data.sagedata.journalDataProcessors.ProcInstMechEngProcessor">
+        <constructor-arg type="java.lang.String" value="" /> 
+    </bean>
 </beans>
 

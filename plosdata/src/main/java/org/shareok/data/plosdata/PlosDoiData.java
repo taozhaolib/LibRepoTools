@@ -238,7 +238,7 @@ public class PlosDoiData implements ExcelData {
                     // download the PDF full text
                     req.downloadPlosOnePdfByDoi(doi);
                     PlosUtil.createContentFile(req.getImportedDataPath(doi)+"/contents", doi.split("/")[1]+".pdf");
-                    plosData.exportXmlByDoiData(req.getImportedDataPath(doi)+"/dublin_core.xml");System.exit(0);
+                    plosData.exportXmlByDoiData(req.getImportedDataPath(doi)+"/dublin_core.xml");
                 }
                 catch(Exception ex){
                     System.out.print("The data processing from doiData to plosData is wrong!\n");

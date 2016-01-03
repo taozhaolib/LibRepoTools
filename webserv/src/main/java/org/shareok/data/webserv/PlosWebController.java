@@ -18,16 +18,36 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-@RequestMapping("/plos")
 public class PlosWebController{
  
    //@RequestMapping(method = RequestMethod.GET)
+//     @RequestMapping("/")
+//   public ModelAndView printHome() {
+//       ModelAndView model = new ModelAndView();
+//       System.out.print("\n **** ok the program at least gets here\n");
+//       model.setViewName("plosWeb");
+//      model.addObject("message", "Hello Spring MVC Framework!");
+//
+//      return model;
+//   }
+   
+    @RequestMapping("/plos")
    public ModelAndView printHello() {
        ModelAndView model = new ModelAndView();
+       System.out.print("\n **** ok the program at least gets here\n");
        model.setViewName("plosWeb");
       model.addObject("message", "Hello Spring MVC Framework!");
 
       return model;
    }
 
+   @RequestMapping("/sage")
+   public ModelAndView printSage() {
+       ModelAndView model = new ModelAndView();
+       System.out.print("\n **** ok the program at least gets here\n");
+       model.setViewName("plosWeb");
+      model.addObject("message", "Hello Spring MVC Framework for sage!");
+
+      return model;
+   }
 }

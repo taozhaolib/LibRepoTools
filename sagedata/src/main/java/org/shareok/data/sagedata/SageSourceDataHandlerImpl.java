@@ -5,6 +5,8 @@
  */
 package org.shareok.data.sagedata;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -215,6 +217,12 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler{
                 if(null == itemData || itemData.isEmpty())
                     return;
             }
+            File outputFolder = new File(filePath);
+            if(!outputFolder.exists()){
+                if(outputFolder.mkdir()){
+                    System.out.print("The folder for data loading has been created.\n");
+                }
+            }
             
             int size = itemData.size();
             for(int i = 0; i < size; i++){
@@ -224,10 +232,12 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler{
                 SageJournalDataProcessor sjdp = SageJournalDataProcessorFactory.getSageJournalDataProcessorByName(journalMap, journal);
                 sjdp.setData(journalData);
                 if(null == sjdp){
+                    System.out.print("The No. "+i+" article has no metadata ...");
                     continue;
                 }
                 else{
                     sjdp.getOutput(filePath);
+                    System.out.print("The No. "+i+" article metadata has been prepared...");
                 }
             }
         }

@@ -8,6 +8,7 @@ package org.shareok.data.htmlrequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -54,6 +55,7 @@ public class HtmlParser {
             HashMap<String,ArrayList<String>> metaData = new HashMap<>();
 
             Document doc = Jsoup.parse(html.toString());
+            doc.outputSettings().prettyPrint(false);
             //get meta description content
             Elements metaElements = doc.select("meta");
             
@@ -100,5 +102,43 @@ public class HtmlParser {
             }
 
             return metaData;
+        }
+        
+        public static String[] metaDataParserWithElementProperty(String html, String tagName, String property, String val) {
+            
+            Document doc = Jsoup.parse(html.toString());
+            
+            String result[] = null;
+            List<String> resultList = new ArrayList<String> ();
+            String key = tagName + "["+property+"="+val+"]";
+            
+            try{
+                Elements tagElements = doc.select(key);
+
+                int size = tagElements.size();
+                if(size > 0){
+                    ArrayList<String> list = new ArrayList<>();
+                    for(Element element : tagElements) {
+                        if(element.hasAttr(property)) {
+                                String value = element.text();
+                                if(null != value){
+                                    resultList.add(value);
+                                }
+                                else{
+                                    continue;
+                                }
+                        }
+                    }
+                }
+            }
+            catch(Exception ex){
+                ex.printStackTrace();
+            }
+            
+            if(resultList.size() > 0){
+                result = new String[resultList.size()];
+                result = resultList.toArray(result);
+            }
+            return result;
         }
 }

@@ -4,5 +4,9 @@
     
     <journal bean = "procInstMechEngProcessor">Proceedings of the Institution of Mechanical Engineers, Part O: Journal of Risk and Reliability</journal>
     
+    <journal bean = "procInstMechEngProcessor">Journal for the History of Astronomy</journal>
     
+    <journal bean = "procInstMechEngProcessor">American Politics Research</journal>
+    
+    <journal bean = "procInstMechEngProcessor">Journal of Interpersonal Violence</journal>
 </journals>

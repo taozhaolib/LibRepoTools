@@ -22,12 +22,26 @@
         <property name="data">
             <map></map>
         </property>
+        <property name="id" value="" />
         <property name="journalName" value="" />
         <property name="htmlRequest" ref="htmlRequest" />
+        <property name="journalData" ref="sageJournalData" />
+        <property name="sageJournalDataList" ><list><ref bean="sageJournalData" /></list></property>
     </bean>
     
     <bean id="procInstMechEngProcessor" parent="sageJournalDataProcessorAbstract" class="org.shareok.data.sagedata.journalDataProcessors.ProcInstMechEngProcessor">
         <constructor-arg type="java.lang.String" value="" /> 
+    </bean>
+    
+    <bean id="sageJournalData" class="org.shareok.data.sagedata.SageJournalData">
+        <property name="peerReviewNotes" value="https://us.sagepub.com/en-us/nam/manuscript-submission-guidelines" />
+        <property name="language" value="en_US" />
+        <property name="publisher" value="" />
+        <property name="peerReview" value="Yes" />
+        <property name="rights" value="Attribution 3.0 United States" />
+        <property name="rightsUri" value="http://creativecommons.org/licenses/by/3.0/us/" />
+        <property name="rightsRequestable" value="false" />
+        <property name="type" value="Research Article" />
     </bean>
 </beans>
 

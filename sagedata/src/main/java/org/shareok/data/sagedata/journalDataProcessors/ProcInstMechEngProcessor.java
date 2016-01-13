@@ -5,8 +5,14 @@
  */
 package org.shareok.data.sagedata.journalDataProcessors;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.shareok.data.htmlrequest.HtmlParser;
 import org.shareok.data.sagedata.SageJournalDataProcessorAbstract;
 import org.shareok.data.sagedata.exceptions.EmptyJournalDataException;
 import org.shareok.data.sagedata.exceptions.NoArticleIssueException;
@@ -82,7 +88,52 @@ public class ProcInstMechEngProcessor extends SageJournalDataProcessorAbstract {
     }
     
     @Override
-    public void processArticleResponse(){
+    public void processArticleResponse(String html){
+        String[] tagNames = {"meta"};
+        HashMap<String,ArrayList<String>> metaData = HtmlParser.metaDataParserWithTagNames(html, tagNames);
+        Iterator it = metaData.entrySet().iterator(); 
+        String authors = "";
+                
+        try{
+            while(it.hasNext()){
+                Map.Entry pairs = (Map.Entry)it.next();
+                if(pairs.getKey().equals("DC.Contributor")){
+                    authors += pairs.getValue()+",";
+                }
+            }
+            if(!authors.equals("")){
+                authors = authors.substring(0, authors.length()-1);
+                // Remove the "[" and "]" within the string:
+                authors = authors.replace("[", "");
+                authors = authors.replace("]", "");
+                data.put("authors", authors);
+            }
+        }
+        catch(Exception ex){
+            Logger.getLogger(ProcInstMechEngProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
+        String abstracts = getArticleAbstract(html);
+        if(null != abstracts){
+            data.put("abstract", abstracts);
+        }
+        
+        String[] subjects = getArticleSubjects(html);
+        String subjectsStr = "";
+        StringBuilder sb = new StringBuilder();
+        for(String s : subjects) {
+            sb.append(s+",");
+        }
+        sb.setLength(sb.length()-1);
+        subjectsStr = sb.toString();
+        if(null != subjectsStr){
+            data.put("subjects", subjectsStr);
+        }
+    }
+    
+    @Override
+    public void setProcessorId() {
+        String doi = (String)data.get("doi").toString().replace("/", ".");
+        setId(doi);
     }
 }

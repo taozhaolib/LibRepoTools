@@ -26,6 +26,15 @@ public interface SageJournalDataProcessor {
     
     public void setData(Map data);
     
-    public void processArticleResponse();
+    public void processArticleResponse(String html);
     public void getOutput(String fileName);
+    
+    public String getArticleAbstract(String html);
+    public String[] getArticleSubjects(String html);
+    
+    public void exportXmlByJournalData(String fileName);
+    public void convertDataToJournalData();
+    
+    public void setProcessorId();
+    public String getFullTextLink();
 }

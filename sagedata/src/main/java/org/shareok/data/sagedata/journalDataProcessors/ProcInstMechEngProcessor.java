@@ -120,15 +120,15 @@ public class ProcInstMechEngProcessor extends SageJournalDataProcessorAbstract {
         
         String[] subjects = getArticleSubjects(html);
         String subjectsStr = "";
-        StringBuilder sb = new StringBuilder();
-        for(String s : subjects) {
-            sb.append(s+",");
+        if(null != subjects && subjects.length > 0){            
+            StringBuilder sb = new StringBuilder();
+            for(String s : subjects) {
+                sb.append(s+",");
+            }
+            sb.setLength(sb.length()-1);
+            subjectsStr = sb.toString();
         }
-        sb.setLength(sb.length()-1);
-        subjectsStr = sb.toString();
-        if(null != subjectsStr){
-            data.put("subjects", subjectsStr);
-        }
+        data.put("subjects", subjectsStr);
     }
     
     @Override
@@ -136,4 +136,16 @@ public class ProcInstMechEngProcessor extends SageJournalDataProcessorAbstract {
         String doi = (String)data.get("doi").toString().replace("/", ".");
         setId(doi);
     }
+    
+    @Override
+    public String getArticleAbstract(String html) {
+        String ab = super.getArticleAbstract(html);
+        if(null == ab){
+            String[] abstracts = HtmlParser.metaDataParserWithElementProperty(html, "p", "id", "p-3");
+            if(null != abstracts && abstracts.length > 0){
+                ab = abstracts[0];
+            }
+        }
+        return ab;
+    } 
 }

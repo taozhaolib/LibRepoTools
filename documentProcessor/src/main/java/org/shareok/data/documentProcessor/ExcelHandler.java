@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.udf.IndexedUDFFinder;
 import org.apache.poi.ss.usermodel.Cell;
@@ -75,11 +76,11 @@ public class ExcelHandler implements FileHandler {
     private Sheet getWorkbookSheet(String extension, FileInputStream file) throws IOException {
         Sheet sheet = null;
         if("xlsx".equals(extension)){
-            XSSFWorkbook workbook = new XSSFWorkbook(file);
+            XSSFWorkbook workbook = new XSSFWorkbook(file);workbook.setMissingCellPolicy(HSSFRow.RETURN_NULL_AND_BLANK);
             sheet = workbook.getSheetAt(0);
         }
         if("xls".equals(extension)){
-            HSSFWorkbook workbook = new HSSFWorkbook(file);
+            HSSFWorkbook workbook = new HSSFWorkbook(file);workbook.setMissingCellPolicy(HSSFRow.RETURN_NULL_AND_BLANK);
             sheet = workbook.getSheetAt(0);
         }
         return sheet;
@@ -141,17 +142,23 @@ public class ExcelHandler implements FileHandler {
             }
 
             sheet = getWorkbookSheet(extension, file);
+            int maxNumOfCells = sheet.getRow(0).getLastCellNum();
             Iterator<Row> rowIterator = sheet.iterator();
             DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
             int rowCount = 0;
-            int colCount = 0;
+            //int colCount = 0;
             
             while(rowIterator.hasNext()) {
                 Row row = rowIterator.next();
                 Iterator<Cell> cellIterator = row.cellIterator();
-                while(cellIterator.hasNext()) {
+                //while(cellIterator.hasNext()) {
+                for(int colCount = 0; colCount < maxNumOfCells; colCount++) {
 
-                    Cell cell = cellIterator.next();
+                    //Cell cell = cellIterator.next();
+                    Cell cell = row.getCell(colCount);
+                    if(null == cell){
+                        cell = row.createCell(colCount);
+                    }
                     String key = Integer.toString(rowCount) + "-" + Integer.toString(colCount);
                     switch(cell.getCellType()) {
                         case Cell.CELL_TYPE_BOOLEAN:
@@ -176,10 +183,10 @@ public class ExcelHandler implements FileHandler {
                             break;
                     }
                     
-                    colCount++;
+                //    colCount++;
                 }
                 rowCount++;
-                colCount = 0;
+                //colCount = 0;
             }
             file.close();
         

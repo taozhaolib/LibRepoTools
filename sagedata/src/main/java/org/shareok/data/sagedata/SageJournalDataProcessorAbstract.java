@@ -6,6 +6,7 @@
 package org.shareok.data.sagedata;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -244,7 +245,7 @@ public abstract class SageJournalDataProcessorAbstract implements SageJournalDat
     @Override
     public String getArticleAbstract(String html) {
         String[] abstracts = HtmlParser.metaDataParserWithElementProperty(html, "p", "id", "p-1");
-        if(abstracts.length > 0){
+        if(null != abstracts && abstracts.length > 0){
             return abstracts[0];
         }
         else{
@@ -285,7 +286,7 @@ public abstract class SageJournalDataProcessorAbstract implements SageJournalDat
                         journalData.setDoi(value);
                     }
                     else if(key.equalsIgnoreCase("citation")){
-                        journalData.setDoi(value);
+                        journalData.setCitation(value);
                     }
                     else if(key.equalsIgnoreCase("subjects")){
                         String[] valStr = value.split(",");
@@ -715,19 +716,27 @@ public abstract class SageJournalDataProcessorAbstract implements SageJournalDat
                 }
             }
             
-            String filePath = folderPath + "/" + id + ".xml";
+            String filePath = folderPath + "/dublin_core.xml";
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(new File(filePath));
+            
+            String contentsFilePath = folderPath + "/contents";
+            File file = new File(contentsFilePath);
+            if(!file.exists()){
+                file.createNewFile();
+            }
 
             transformer.transform(source, result);
-        }
+        }       
         catch (ParserConfigurationException | TransformerException pce) {
             pce.printStackTrace();System.exit(0);
         }
         catch(DOMException | BeansException e){
             e.printStackTrace();System.exit(0);
+        } catch (IOException ex) {
+            Logger.getLogger(SageJournalDataProcessorAbstract.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

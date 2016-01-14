@@ -160,8 +160,7 @@ public class HtmlRequest {
     }
 
     public StringBuffer sendPost(String url) throws Exception {
-
-            //String url = "http://www.plosbiology.org/article/info:doi/10.1371/journal.pbio.0000012";
+           
             URL obj = new URL(url);
             HttpURLConnection con;
             

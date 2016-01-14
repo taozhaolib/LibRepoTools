@@ -6,14 +6,11 @@
 package org.shareok.data.sagedata;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.shareok.data.documentProcessor.FileHandler;
 import org.shareok.data.documentProcessor.FileHandlerFactory;
@@ -224,22 +221,55 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler{
                 }
             }
             
+//            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+//            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+//
+//            Document doc = docBuilder.newDocument();
+//            Element rootElement = doc.createElement("journals");
+//            doc.appendChild(rootElement);
+
+            
             int size = itemData.size();
             for(int i = 0; i < size; i++){
                 Map journalData = itemData.get(i);
                 String journal = (String)journalData.get("journal");
                 Map journalMap = SageDataUtil.getJournalListWithBeans();
                 SageJournalDataProcessor sjdp = SageJournalDataProcessorFactory.getSageJournalDataProcessorByName(journalMap, journal);
-                sjdp.setData(journalData);
+                
                 if(null == sjdp){
-                    System.out.print("The No. "+i+" article has no metadata ...");
+                    System.out.print("The No. "+i+" article from journal \" " + journal + " \" has no metadata ...\n");
                     continue;
                 }
                 else{
+                    sjdp.setData(journalData);
                     sjdp.getOutput(filePath);
-                    System.out.print("The No. "+i+" article metadata has been prepared...");
+                    System.out.print("The No. "+i+" article metadata has been prepared...\n");
                 }
+                
+//                Element elementTitle = doc.createElement("journal");
+//                elementTitle.appendChild(doc.createTextNode(journal));
+//                rootElement.appendChild(elementTitle);
+//                
+//                Attr attr = doc.createAttribute("bean");
+//                attr.setValue("procInstMechEngProcessor");
+//                elementTitle.setAttributeNode(attr);
             }
+            
+//            String folderPath = filePath + "/journals";
+//            File folder = new File(folderPath);
+//            if(!folder.exists()){
+//                if(folder.mkdir()){
+//                    System.out.print("The folder for the journals has been created.\n");
+//                }
+//            }
+            
+//            String journalFilePath = folderPath + "/journals-sage.xml";
+//            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+//            Transformer transformer = transformerFactory.newTransformer();
+//            DOMSource source = new DOMSource(doc);
+//            StreamResult result = new StreamResult(new File(journalFilePath));
+//
+//            transformer.transform(source, result);
         }
         catch(Exception e){
             e.printStackTrace();

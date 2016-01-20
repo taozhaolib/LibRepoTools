@@ -18,6 +18,7 @@ import org.shareok.data.sagedata.exceptions.EmptyJournalDataException;
 import org.shareok.data.sagedata.exceptions.NoArticleIssueException;
 import org.shareok.data.sagedata.exceptions.NoArticlePagesException;
 import org.shareok.data.sagedata.exceptions.NoArticleVolumeException;
+import org.shareok.data.sagedata.exceptions.NoProcessorIdException;
 
 /**
  *
@@ -133,8 +134,16 @@ public class ProcInstMechEngProcessor extends SageJournalDataProcessorAbstract {
     
     @Override
     public void setProcessorId() {
-        String doi = (String)data.get("doi").toString().replace("/", ".");
-        setId(doi);
+        try{
+            String doi = (String)data.get("doi").toString().replace("/", ".").trim();
+            if(null == doi || "".equals(doi)){
+                throw new NoProcessorIdException("Cannot build processor ID from DOI!");
+            }
+            setId(doi);
+        }
+        catch(NoProcessorIdException ex){
+            Logger.getLogger(ProcInstMechEngProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     @Override

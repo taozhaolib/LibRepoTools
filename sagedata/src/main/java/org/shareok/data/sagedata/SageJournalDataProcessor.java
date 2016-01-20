@@ -37,4 +37,8 @@ public interface SageJournalDataProcessor {
     
     public void setProcessorId();
     public String getFullTextLink();
+    
+    public String getPdfLink();
+    public String generatePdf(String outputPath);
+    public void createDspaceContentsFile(String outputFolder, String pdfName);
 }

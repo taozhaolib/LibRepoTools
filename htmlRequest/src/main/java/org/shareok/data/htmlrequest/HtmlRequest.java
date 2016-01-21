@@ -222,7 +222,6 @@ public class HtmlRequest {
             try (InputStream in = url.openStream(); 
                  FileOutputStream fos = new FileOutputStream(new File(filePath))) {
 
-                System.out.println("reading file...");
                 int length = -1;
                 byte[] buffer = new byte[1024];// buffer for portion of data from
                 // connection
@@ -231,7 +230,7 @@ public class HtmlRequest {
                 }
                 fos.close();
             }
-            System.out.println("file was downloaded");
+            System.out.println("PDF file was downloaded");
         }
         catch(IOException ex){
             ex.printStackTrace();

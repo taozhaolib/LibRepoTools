@@ -141,4 +141,42 @@ public class HtmlParser {
             }
             return result;
         }
+        
+        public static String[] getPropertyValueWithElementProperty(String html, String tagName, String property, String propertyVal, String queryProperty){
+            String[] vals = null;
+            
+            Document doc = Jsoup.parse(html.toString());
+            String result[] = null;
+            List<String> resultList = new ArrayList<String> ();
+            String key = tagName + "["+property+"="+propertyVal+"]";
+            
+            try{
+                Elements tagElements = doc.select(key);
+
+                int size = tagElements.size();
+                if(size > 0){
+                    ArrayList<String> list = new ArrayList<>();
+                    for(Element element : tagElements) {
+                        if(element.hasAttr(property)) {
+                                String value = element.attr(queryProperty);
+                                if(null != value){
+                                    resultList.add(value);
+                                }
+                                else{
+                                    continue;
+                                }
+                        }
+                    }
+                }
+            }
+            catch(Exception ex){
+                ex.printStackTrace();
+            }
+            
+            if(resultList.size() > 0){
+                vals = new String[resultList.size()];
+                vals = resultList.toArray(vals);
+            }
+            return vals;
+        }
 }

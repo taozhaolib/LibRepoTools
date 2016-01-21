@@ -21,8 +21,8 @@ import org.shareok.data.sagedata.exceptions.EmptyFilePathException;
  *
  * @author Tao Zhao
  */
-public class SageSourceDataHandlerImpl implements SageSourceDataHandler{
-    
+public class SageSourceDataHandlerImpl implements SageSourceDataHandler {
+
     private String sourceFilePath;
     private String outputFilePath;
     private HashMap data;
@@ -92,72 +92,76 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler{
      */
     @Override
     public void readSourceData() {
-        
+
         String filePath = sourceFilePath;
-        try{
+        try {
             String fileExtension = FileUtil.getFileExtension(filePath);
             FileHandler fh = FileHandlerFactory.getFileHandlerByFileExtension(fileExtension);
-            if(null == fh)
+            if (null == fh) {
                 return;
+            }
             fh.setFileName(filePath);
             fh.readData();
             data = fh.getData();
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
     }
-    
+
     /**
-     * Organize the raw data in order to retrieve the necessary information to request the metadata
-     * Note: this method is closely depending on the excel file format
+     * Organize the raw data in order to retrieve the necessary information to
+     * request the metadata Note: this method is closely depending on the excel
+     * file format
      */
     @Override
     public void processSourceData() {
-        
-        if(null == data || data.isEmpty()){
+
+        if (null == data || data.isEmpty()) {
             readSourceData();
-            if(null == data || data.isEmpty())
+            if (null == data || data.isEmpty()) {
                 return;
+            }
         }
-        
-        try{
+
+        try {
             Set keys = data.keySet();
             Iterator it = keys.iterator();
             int rowPre = 0;
 
             HashMap articleData = new HashMap();
-            
-            while(it.hasNext()){
-                String key = (String)it.next();
-                String value = (String)data.get(key);
+
+            while (it.hasNext()) {
+                String key = (String) it.next();
+                String value = (String) data.get(key);
                 // the values is composed of "val--datatype": for example, Tom--Str or 0.50--num
                 String[] values = value.split("--");
-                if(null == values || values.length != 2)
+                if (null == values || values.length != 2) {
                     continue;
+                }
 
                 value = values[0];
                 String[] rowCol = key.split("-");
-                if(null == rowCol || rowCol.length != 2)
+                if (null == rowCol || rowCol.length != 2) {
                     throw new Exception("The row and column are not specifid!");
+                }
                 int row = Integer.parseInt(rowCol[0]);
                 int col = Integer.parseInt(rowCol[1]);
-                
-                if(row != rowPre){
+
+                if (row != rowPre) {
                     rowPre = row;
-                    if(null != articleData && !articleData.isEmpty()){
-                        if(null == itemData){
+                    if (null != articleData && !articleData.isEmpty()) {
+                        if (null == itemData) {
                             itemData = new ArrayList<HashMap>();
                         }
                         Object articleDataCopy = articleData.clone();
-                        itemData.add((HashMap)articleDataCopy);
+                        itemData.add((HashMap) articleDataCopy);
                         articleData.clear();
-                    }                    
+                    }
                 }
-                
-                if(0 != row){
-                    switch(col){
+
+                if (0 != row) {
+                    switch (col) {
                         case 0:
                             articleData.put("journal", value);
                             break;
@@ -192,86 +196,53 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler{
                             break;
                     }
                 }
-                
+
             }
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-    
+
     }
-    
-    public void outputMetaData(){
-        
+
+    public void outputMetaData() {
+
         String filePath = outputFilePath;
-        
-        try{
-            if(null == filePath || "".equals(filePath)){
+
+        try {
+            if (null == filePath || "".equals(filePath)) {
                 throw new EmptyFilePathException("File path is NOT set!");
             }
-            if(null == itemData || itemData.isEmpty()){
+            if (null == itemData || itemData.isEmpty()) {
                 processSourceData();
-                if(null == itemData || itemData.isEmpty())
+                if (null == itemData || itemData.isEmpty()) {
                     return;
+                }
             }
             File outputFolder = new File(filePath);
-            if(!outputFolder.exists()){
-                if(outputFolder.mkdir()){
+            if (!outputFolder.exists()) {
+                if (outputFolder.mkdir()) {
                     System.out.print("The folder for data loading has been created.\n");
                 }
             }
-            
-//            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-//            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-//
-//            Document doc = docBuilder.newDocument();
-//            Element rootElement = doc.createElement("journals");
-//            doc.appendChild(rootElement);
 
-            
             int size = itemData.size();
-            for(int i = 0; i < size; i++){
+            for (int i = 0; i < size; i++) {
                 Map journalData = itemData.get(i);
-                String journal = (String)journalData.get("journal");
+                String journal = (String) journalData.get("journal");
                 Map journalMap = SageDataUtil.getJournalListWithBeans();
                 SageJournalDataProcessor sjdp = SageJournalDataProcessorFactory.getSageJournalDataProcessorByName(journalMap, journal);
-                
-                if(null == sjdp){
-                    System.out.print("The No. "+i+" article from journal \" " + journal + " \" has no metadata ...\n");
+
+                if (null == sjdp) {
+                    System.out.print("The No. " + i + " article from journal \" " + journal + " \" has no metadata ...\n");
                     continue;
-                }
-                else{
+                } else {
                     sjdp.setData(journalData);
                     sjdp.getOutput(filePath);
-                    System.out.print("The No. "+i+" article metadata has been prepared...\n");
+                    System.out.print("The No. " + i + " article metadata has been prepared...\n");
                 }
-                
-//                Element elementTitle = doc.createElement("journal");
-//                elementTitle.appendChild(doc.createTextNode(journal));
-//                rootElement.appendChild(elementTitle);
-//                
-//                Attr attr = doc.createAttribute("bean");
-//                attr.setValue("procInstMechEngProcessor");
-//                elementTitle.setAttributeNode(attr);
             }
-            
-//            String folderPath = filePath + "/journals";
-//            File folder = new File(folderPath);
-//            if(!folder.exists()){
-//                if(folder.mkdir()){
-//                    System.out.print("The folder for the journals has been created.\n");
-//                }
-//            }
-            
-//            String journalFilePath = folderPath + "/journals-sage.xml";
-//            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-//            Transformer transformer = transformerFactory.newTransformer();
-//            DOMSource source = new DOMSource(doc);
-//            StreamResult result = new StreamResult(new File(journalFilePath));
-//
-//            transformer.transform(source, result);
-        }
-        catch(Exception e){
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -7,10 +7,10 @@ package org.shareok.data.sagedata;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +28,7 @@ import org.shareok.data.htmlrequest.HtmlParser;
 import org.shareok.data.htmlrequest.HtmlRequest;
 import org.shareok.data.sagedata.exceptions.EmptyFilePathException;
 import org.shareok.data.sagedata.exceptions.EmptyJournalDataException;
+import org.shareok.data.sagedata.exceptions.EmptyProcessorDataException;
 import org.springframework.beans.BeansException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
@@ -112,6 +113,9 @@ public abstract class SageJournalDataProcessorAbstract implements SageJournalDat
             }
             convertDataToJournalData();
             exportXmlByJournalData(fileName);
+            String pdfName = generatePdf(fileName);
+            createDspaceContentsFile(fileName, pdfName);
+            
         }
         catch(Exception ex){
             Logger.getLogger(SageJournalDataProcessorAbstract.class.getName()).log(Level.SEVERE, null, ex);
@@ -323,9 +327,10 @@ public abstract class SageJournalDataProcessorAbstract implements SageJournalDat
     }
     
     @Override
-    /**
-     * Generate the metadata xml file
-     * @param fileName 
+    /** 
+     * Convert the article data to dublin core xml metadata and save the the file
+     * 
+     * @param String fileName : the root folder contains all the uploading article data
      */
     public void exportXmlByJournalData(String fileName) {
                     
@@ -701,42 +706,21 @@ public abstract class SageJournalDataProcessorAbstract implements SageJournalDat
                 elementDoi.setAttributeNode(attr);
             }
             
-            
-            // Generate the xml file:
-            String id = getId();
-            if(null == id || "".equals(id)){
-                setProcessorId();
-                id = getId();
-            }
-            String folderPath = fileName + "/" + id;
-            File folder = new File(folderPath);
-            if(!folder.exists()){
-                if(folder.mkdir()){
-                    System.out.print("The folder for loading article" + id + " has been created.\n");
-                }
-            }
-            
+            String folderPath = setOutputPath(fileName);
             String filePath = folderPath + "/dublin_core.xml";
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(new File(filePath));
-            
-            String contentsFilePath = folderPath + "/contents";
-            File file = new File(contentsFilePath);
-            if(!file.exists()){
-                file.createNewFile();
-            }
 
             transformer.transform(source, result);
+
         }       
         catch (ParserConfigurationException | TransformerException pce) {
-            pce.printStackTrace();System.exit(0);
+            pce.printStackTrace();
         }
         catch(DOMException | BeansException e){
-            e.printStackTrace();System.exit(0);
-        } catch (IOException ex) {
-            Logger.getLogger(SageJournalDataProcessorAbstract.class.getName()).log(Level.SEVERE, null, ex);
+            e.printStackTrace();
         }
     }
     
@@ -744,5 +728,81 @@ public abstract class SageJournalDataProcessorAbstract implements SageJournalDat
     public String getFullTextLink() {
         String link = "";
         return link;
+    }
+    
+    @Override
+    public String getPdfLink(){
+        String link = "";
+        try{
+            Map dataTemp = getData();
+            if(null == dataTemp || !dataTemp.containsKey("url")) {
+                throw new EmptyProcessorDataException(" The data of the processor is empty or it does NOT has the correct information ! ");
+            }
+            String url = dataTemp.get("url").toString();
+            link = (url.contains(".short")) ? (url.replace(".short", ".full.pdf")) : (url.contains(".abstract") ? url.replace(".abstract", ".full.pdf") : "");
+        }
+        catch(Exception ex){
+            Logger.getLogger(SageJournalDataProcessorAbstract.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return link;
+    }
+    
+    @Override
+    public String generatePdf(String outputPath){
+        try{
+            String link = getPdfLink();
+            String pdfPath = setOutputPath(outputPath) + "/" + getId() + ".pdf";
+            getHtmlRequest().getPdfByUrl(link, pdfPath);
+            return getId() + ".pdf";
+        }
+        catch(Exception ex){
+            Logger.getLogger(SageJournalDataProcessorAbstract.class.getName()).log(Level.SEVERE, null, ex);
+            return "";
+        }
+    }
+    
+    @Override
+    public void createDspaceContentsFile(String outputFolder, String pdfName){
+        if(null == pdfName){
+            pdfName = "";
+        }
+        
+        try{
+            String folderPath = setOutputPath(outputFolder);
+            String contentsFilePath = folderPath + "/contents";
+            File file = new File(contentsFilePath);
+            if(!file.exists()){
+                file.createNewFile();
+            }
+            try (PrintWriter writer = new PrintWriter(file, "UTF-8")) {
+                writer.println(pdfName);
+            }
+        }
+        catch(IOException ex){
+            Logger.getLogger(SageJournalDataProcessorAbstract.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    /**
+     * Sets up the output path that contains the XML metadata file, the PDF file, and the contents file
+     * @param String outputFolder
+     * @return String folderPath
+     */
+    private String setOutputPath(String outputFolder){
+        
+        String articleId = getId();
+        if(null == articleId || "".equals(articleId)){
+            setProcessorId();
+            articleId = getId();
+        }
+        String folderPath = outputFolder + "/" + articleId;
+        File folder = new File(folderPath);
+        if(!folder.exists()){
+            if(folder.mkdir()){
+                System.out.print("The folder for loading article" + articleId + " has been created.\n");
+            }
+        }
+        
+        return folderPath;
     }
 }

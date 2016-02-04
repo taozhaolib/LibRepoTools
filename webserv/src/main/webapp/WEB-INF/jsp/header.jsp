@@ -2,8 +2,7 @@
 <%@ page pageEncoding="UTF-8" %>
 
     <spring:url value="/resources/js/jquery.1.12.min.js" var="jqueryJs" />
-    <spring:url value="/resources/js/test.js" var="mainJs" />
-
+    
     <script src="${jqueryJs}"></script>
     <script src="${mainJs}"></script>
     
@@ -20,17 +19,3 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    
-    <div class="container">
-      <div class="page-header">
-        <h1>ShareOK Data Processing Center</h1>      
-      </div>     
-        <ul class="nav nav-tabs">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#">PLOS Publications</a></li>
-            <li><a href="#">SAGE Publications</a></li>
-            <li><a href="#">DSpace Data Service</a></li>
-            <li><a href="#">Islandora Data Service</a></li>
-            <li><a href="#">Fedora Data Service</a></li>
-          </ul>
-    </div>

@@ -6,6 +6,7 @@
     
     <import resource="classpath*:**/documentProcessorContext.xml"/>
     <import resource="classpath*:**/htmlRequestContext.xml"/>
+    <import resource="classpath*:**/configContext.xml"/>
     
     <bean id="sageSourceDataHandlerImpl" class="org.shareok.data.sagedata.SageSourceDataHandlerImpl">
         <property name="data">

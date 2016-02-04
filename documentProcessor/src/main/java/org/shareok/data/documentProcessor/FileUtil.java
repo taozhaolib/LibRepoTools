@@ -8,9 +8,13 @@ package org.shareok.data.documentProcessor;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
@@ -83,6 +87,22 @@ public class FileUtil {
     
     /**
      *
+     * @param fileName
+     * @return
+     */
+    public static String getFileNameWithoutExtension(String fileName) {
+
+        if(null != fileName && !"".equals(fileName)) {
+            String[] nameFragments = fileName.split("\\.(?=[^\\.]+$)");
+            return nameFragments[0];
+        }
+        else {
+            return "";
+        }
+    }
+    
+    /**
+     *
      * @param filePath
      * @param tagName
      * @return
@@ -145,5 +165,100 @@ public class FileUtil {
         DocumentBuilder builder = factory.newDocumentBuilder();
         InputSource is = new InputSource(new FileInputStream(xml));
         return builder.parse(is);
+    }
+    
+    /**
+     * Return the folder path of a file
+     * Note: suppose the file path is separated by the File.separator
+     * 
+     * @param filePath
+     * @return String : folder path
+     */
+    public static String getFileContainerPath(String filePath){
+        String fileContainerPath = null;
+        try{
+            String[] filePathInfo = filePath.split("/");
+            if(filePathInfo.length == 1){
+                return File.separator;
+            }
+            else{
+                filePathInfo[filePathInfo.length-1] = "";
+                fileContainerPath = String.join(File.separator, filePathInfo);
+            }
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+        return fileContainerPath;
+    }
+    
+    
+    /**
+     *
+     * @param filePath : String
+     */
+    public static void deleteDirectory(String filePath){
+        
+        File directory = new File(filePath);
+ 
+    	//make sure directory exists
+    	if(!directory.exists()){
+ 
+           System.out.println("Directory does not exist.");
+           System.exit(0);
+ 
+        }else{
+ 
+           try{
+        	   
+               delete(directory);
+        	
+           }catch(IOException e){
+               e.printStackTrace();
+               System.exit(0);
+           }
+        }
+ 
+    	System.out.println("Done");
+    }
+ 
+    public static void delete(File file)
+    	throws IOException{
+ 
+    	if(file.isDirectory()){
+ 
+    		//directory is empty, then delete it
+    		if(file.list().length==0){
+    			
+    		   file.delete();
+    		   System.out.println("Directory is deleted : " 
+                                                 + file.getAbsolutePath());
+    			
+    		}else{
+    			
+    		   //list all the directory contents
+        	   String files[] = file.list();
+     
+        	   for (String temp : files) {
+        	      //construct the file structure
+        	      File fileDelete = new File(file, temp);
+        		 
+        	      //recursive delete
+        	     delete(fileDelete);
+        	   }
+        		
+        	   //check the directory again, if empty then delete it
+        	   if(file.list().length==0){
+           	     file.delete();
+        	     System.out.println("Directory is deleted : " 
+                                                  + file.getAbsolutePath());
+        	   }
+    		}
+    		
+    	}else{
+    		//if file, then delete it
+    		file.delete();
+    		System.out.println("File is deleted : " + file.getAbsolutePath());
+    	}
     }
 }

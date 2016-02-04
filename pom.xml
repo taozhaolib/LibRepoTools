@@ -12,6 +12,8 @@
         <module>googleDocGw</module>
         <module>sagedata</module>
         <module>webserv</module>
+        <module>kernel-api</module>
+        <module>config</module>
     </modules>
     <properties>
        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

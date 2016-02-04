@@ -6,16 +6,28 @@
 package org.shareok.data.sagedata;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.shareok.data.documentProcessor.FileHandler;
 import org.shareok.data.documentProcessor.FileHandlerFactory;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.sagedata.exceptions.EmptyFilePathException;
+import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.documentProcessor.FileZipper;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -198,6 +210,17 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler {
                 }
 
             }
+            
+            // Put the last article into itemData:
+            if (null != articleData && !articleData.isEmpty()) {
+                if (null == itemData) {
+                    itemData = new ArrayList<HashMap>();
+                }
+                Object articleDataCopy = articleData.clone();
+                itemData.add((HashMap) articleDataCopy);
+                articleData.clear();
+            }
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -245,5 +268,79 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    @Override
+    public String getDspaceLoadingData(String filePath){
+        setSourceFilePath(filePath);
+        setOutputFilePath(filePath);
+        readSourceData();
+        processSourceData();
+        outputMetaData();
+        return filePath;
+    }
+    
+    @Override
+    public String saveUploadedData(MultipartFile file){
+        String uploadedFilePath = null;
+        try{
+            String oldFileName = file.getOriginalFilename();
+            String extension = FileUtil.getFileExtension(oldFileName);
+            oldFileName = FileUtil.getFileNameWithoutExtension(oldFileName);
+            //In the future the new file name will also has the user name
+            String time = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+            String newFileName = oldFileName + "--" + time + "." + extension;
+            String uploadPath = ShareokdataManager.getSageUploadPath();
+            if(null != uploadPath){
+                File uploadFolder = new File(uploadPath);
+                if(!uploadFolder.exists()){
+                    uploadFolder.mkdir();
+                }
+                File uploadTimeFolder = new File(uploadPath + File.separator + time);
+                if(!uploadTimeFolder.exists()){
+                    uploadTimeFolder.mkdir();
+                }
+            }
+            uploadedFilePath = uploadPath + File.separator + time + File.separator + newFileName;
+            File uploadedFile = new File(uploadedFilePath);
+            file.transferTo(uploadedFile);
+        }
+        catch(Exception ex){
+            Logger.getLogger(SageSourceDataHandlerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return uploadedFilePath;
+    }
+    
+    @Override
+    public String getDspaceLoadingData(MultipartFile file){
+        String filePath = null;
+        try {
+            filePath = saveUploadedData(file);
+            if(null != filePath){
+                setSourceFilePath(filePath);
+                setOutputFilePath(FileUtil.getFileContainerPath(filePath) + "output");
+                readSourceData();
+                processSourceData();
+                outputMetaData();
+                packLoadingData();
+            }            
+        } catch (Exception ex) {
+            Logger.getLogger(SageSourceDataHandlerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }        
+        return filePath;
+    }
+    
+    private String packLoadingData(){
+        String zipPath = null;
+        String outputFolder = getOutputFilePath();
+        
+        try{
+            zipPath = FileUtil.getFileContainerPath(outputFolder) + File.separator + "output.zip";
+            FileZipper.zipFolder(outputFolder, zipPath);
+        }
+        catch(Exception ex){
+            Logger.getLogger(SageSourceDataHandlerImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return zipPath;
     }
 }

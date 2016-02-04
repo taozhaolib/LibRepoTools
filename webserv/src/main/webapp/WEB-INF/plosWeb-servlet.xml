@@ -10,6 +10,8 @@
     http://www.springframework.org/schema/mvc/spring-mvc.xsd
     http://www.springframework.org/schema/context 
     http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+    
+    <import resource="classpath*:**/kernelApiContext.xml"/>
 
    <context:component-scan base-package="org.shareok.data.webserv" />
 
@@ -21,5 +23,15 @@
    
     <mvc:annotation-driven />
     <mvc:resources mapping="/resources/**" location="/resources/" />
+    
+
+    
+    <bean id="multipartResolver"
+        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+ 
+         <!-- setting maximum upload size -->
+        <property name="maxUploadSize" value="100000" />
+
+    </bean>
 
 </beans>

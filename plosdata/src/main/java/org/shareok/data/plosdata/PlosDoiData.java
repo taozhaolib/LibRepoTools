@@ -5,10 +5,14 @@
  */
 package org.shareok.data.plosdata;
 
+import org.springframework.web.multipart.MultipartFile;
+
 /**
  *
  * @author Tao Zhao
  */
 public interface PlosDoiData {
     public void getDspaceLoadingData(String fileName) throws Exception;
+    public String getDspaceLoadingData(MultipartFile file);
+//    public String saveUploadedData(MultipartFile file);
 }

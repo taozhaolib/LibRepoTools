@@ -10,7 +10,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Uploading the file for PLOS publications</title>
+<title>Uploading the file for online journal publications</title>
 
 </head>
 <body>

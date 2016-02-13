@@ -7,19 +7,17 @@ package org.shareok.data.sagedata;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.poi.util.IOUtils;
 
 import org.shareok.data.documentProcessor.FileHandler;
 import org.shareok.data.documentProcessor.FileHandlerFactory;
@@ -27,6 +25,8 @@ import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.sagedata.exceptions.EmptyFilePathException;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.documentProcessor.FileZipper;
+import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -272,14 +272,23 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler {
     
     @Override
     public String getDspaceLoadingData(String filePath){
-        setSourceFilePath(filePath);
-        setOutputFilePath(filePath);
-        readSourceData();
-        processSourceData();
-        outputMetaData();
-        return filePath;
+        MultipartFile multipartFile = null;
+        try{
+            File file = new File(filePath);
+            FileInputStream input = new FileInputStream(file);
+            multipartFile = new MockMultipartFile("file", file.getName(), "text/plain", IOUtils.toByteArray(input));
+        }
+        catch(IOException ioex){
+            Logger.getLogger(SageSourceDataHandlerImpl.class.getName()).log(Level.SEVERE, null, ioex);
+        }
+        return getDspaceLoadingData(multipartFile);
     }
     
+    /**
+     * 
+     * @param file : the uploaded file
+     * @return : the path to the saved uploaded file
+     */
     @Override
     public String saveUploadedData(MultipartFile file){
         String uploadedFilePath = null;
@@ -311,11 +320,16 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler {
         return uploadedFilePath;
     }
     
+    /**
+     * 
+     * @param file : uploaded file
+     * @return filePath : the path to the folder where the uploading data are saved
+     */
     @Override
     public String getDspaceLoadingData(MultipartFile file){
         String filePath = null;
         try {
-            filePath = saveUploadedData(file);
+            filePath = DspaceJournalDataUtil.saveUploadedData(file, "sage");
             if(null != filePath){
                 setSourceFilePath(filePath);
                 setOutputFilePath(FileUtil.getFileContainerPath(filePath) + "output");

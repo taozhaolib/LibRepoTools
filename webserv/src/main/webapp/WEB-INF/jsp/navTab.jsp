@@ -13,8 +13,8 @@
             <li><a class="dropdown-toggle" data-toggle="dropdown" href="#">DSpace Data Service
                 <span class="caret"></span></a>
                 <ul class="dropdown-menu">
-                    <li class="mainMenuDrop" id="plosDs"><a href="/webserv/plos">PLOS Publications</a></li>
-                    <li class="mainMenuDrop" id="sageDs"><a href="/webserv/sage">SAGE Publications</a></li>
+                    <li class="mainMenuDrop" id="plosDs"><a href="/webserv/dspace/journal/plos">PLOS Publications</a></li>
+                    <li class="mainMenuDrop" id="sageDs"><a href="/webserv/dspace/journal/sage">SAGE Publications</a></li>
                     <li class="mainMenuDrop" id="dataDs"><a href="#">DSpace Data Manipulation</a></li>
                 </ul>
              </li>

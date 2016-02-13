@@ -5,15 +5,13 @@
  */
 package org.shareok.data.kernel.api.services.dspace;
 
-import java.io.File;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
  * @author Tao Zhao
  */
-public interface DspaceSageService {
-    String getSageDsapceLoadingFilesByExcel(String filePath);
-    String getSageMetadataFilesByExcel(String filePath);
-    String getSageDsapceLoadingFiles(MultipartFile file);
+public interface DspaceJournalDataService {
+    public String getDsapceJournalLoadingFiles(MultipartFile file);
+    public String getDsapceJournalLoadingFiles(String userFilePath);
 }

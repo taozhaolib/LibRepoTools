@@ -64,6 +64,13 @@ public class ShareokdataManager {
         if(null == prop){
             loadProperties();
         }
-        return prop.getProperty("plosUploadPath."+publisher);
+        return prop.getProperty("uploadPathFunction."+publisher);
+    }
+    
+    public static String getJournalDataServiceBean(String publisher){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("journalDataBean."+publisher);
     }
 }

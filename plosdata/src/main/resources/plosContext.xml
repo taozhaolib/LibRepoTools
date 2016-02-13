@@ -7,6 +7,7 @@
     
     <import resource="classpath*:**/documentProcessorContext.xml"/>
     <import resource="classpath*:**/htmlRequestContext.xml"/>
+    <import resource="classpath*:**/dspaceManagerContext.xml"/>
 
     <bean id="plosRequest" class="org.shareok.data.plosdata.PlosRequest">
         <property name="htmlRequest" ref="htmlRequest" />

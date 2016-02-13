@@ -209,32 +209,31 @@ public class PlosRequest {
 
     }
     
-    public String getImportedDataPath(String doi) {
-        
-        String path = "";
-        try{
-            
-            String resource = PlosRequest.class.getName().replace(".", File.separator) + ".class";      
-            URL fileURL = ClassLoader.getSystemClassLoader().getResource(resource);
-            path = new File(fileURL.toURI()).getParent();
-            String folderName = doi.split("/")[1];
-            path = path + File.separator + "importedData" + File.separator + folderName;
-        }
-        catch(URISyntaxException ex){
-            ex.printStackTrace();
-        }
-        return path;
-    }
+//    public String getImportedDataPath(String doi) {
+//        
+//        String path = "";
+//        try{
+//            
+//            String resource = PlosRequest.class.getName().replace(".", File.separator) + ".class";      
+//            URL fileURL = ClassLoader.getSystemClassLoader().getResource(resource);
+//            path = new File(fileURL.toURI()).getParent();
+//            String folderName = doi.split("/")[1];
+//            path = path + File.separator + "importedData" + File.separator + folderName;
+//        }
+//        catch(URISyntaxException ex){
+//            ex.printStackTrace();
+//        }
+//        return path;
+//    }
 
-    public void downloadPlosOnePdfByDoi(String doi) {
+    public void downloadPlosOnePdfByDoi(String doi, String outputFolderPath) {
         
         try{
             boolean directoryExists = false;
-            String path = getImportedDataPath(doi);
-            File newDir = new File(path);
+            File newDir = new File(outputFolderPath);
             if(newDir.exists()){
                 directoryExists = true;
-                System.out.println("The directory: "+newDir+" has already exists!\n");
+                System.out.println("The directory: " + newDir + " has already exists!\n");
             }
             else{
                 if(!newDir.mkdirs()){
@@ -247,7 +246,7 @@ public class PlosRequest {
             if(directoryExists){
                 //The example url to downlaod: http://dx.plos.org/10.1371/journal.pone.0041479.pdf
                 String pdfUrl = PlosUtil.API_FULLTEXT_PDF_PREFIX + doi + ".pdf";
-                getHtmlRequest().getPdfByUrl(pdfUrl, newDir+"/"+doi.split("/")[1]+".pdf");
+                getHtmlRequest().getPdfByUrl(pdfUrl, newDir + File.separator + doi.split("/")[1] + ".pdf");
             }
             
         }

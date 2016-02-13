@@ -6,25 +6,13 @@
         <artifactId>shareokdata</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>sagedata</artifactId>
+    <artifactId>dspaceManager</artifactId>
     <packaging>jar</packaging>
-    <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-    </properties>
-    
     <dependencies>
         <dependency>
-            <groupId>org.shareok.data</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>documentProcessor</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.shareok.data</groupId>
-            <artifactId>htmlRequest</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <type>jar</type>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -33,15 +21,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>dspaceManager</artifactId>
+            <artifactId>kernel-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-mock</artifactId>
-            <version>2.0.8</version>
-            <type>jar</type>
-        </dependency>
     </dependencies>
-    
+    <properties>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
+    </properties>
 </project>

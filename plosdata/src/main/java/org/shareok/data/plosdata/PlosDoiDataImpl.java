@@ -6,6 +6,7 @@
 
 package org.shareok.data.plosdata;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,7 +21,9 @@ import java.util.regex.Pattern;
 import org.shareok.data.htmlrequest.HtmlParser;
 import org.shareok.data.documentProcessor.ExcelHandler;
 import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.shareok.data.plosdata.PlosUtil.JournalType;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -32,6 +35,7 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
     private ExcelHandler excelHandler;
     private ArrayList<String> doiData;
     private ArrayList<PlosData> plosDataList;
+    private String outputPath;
 
     public HashMap<String, String[]> getData() {
         return data;
@@ -63,6 +67,14 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
 
     public void setPlosDataList(ArrayList<PlosData> plosDataList) {
         this.plosDataList = plosDataList;
+    }
+
+    public String getOutputPath() {
+        return outputPath;
+    }
+
+    public void setOutputPath(String outputPath) {
+        this.outputPath = outputPath;
     }
     
     @Override
@@ -237,9 +249,10 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
                         plosData.setTitle(PlosUtil.getTitleFromHtml(doiDataVal));
                     }
                     // download the PDF full text
-                    req.downloadPlosOnePdfByDoi(doi);
-                    PlosUtil.createContentFile(req.getImportedDataPath(doi)+"/contents", doi.split("/")[1]+".pdf");
-                    plosData.exportXmlByDoiData(req.getImportedDataPath(doi)+"/dublin_core.xml");
+                    String articleOutputFolderPath = getArticleOutputFolderPath(doi);
+                    req.downloadPlosOnePdfByDoi(doi, articleOutputFolderPath);
+                    PlosUtil.createContentFile(articleOutputFolderPath+File.separator+"contents", doi.split("/")[1]+".pdf");
+                    plosData.exportXmlByDoiData(articleOutputFolderPath+File.separator+"dublin_core.xml");
                 }
                 catch(Exception ex){
                     System.out.print("The data processing from doiData to plosData is wrong!\n");
@@ -250,11 +263,15 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
         }
     }
     
+    /**
+     * 
+     * @param fileName : file path
+     */
     @Override
     public void importData(String fileName) {
 
-        String path = FileUtil.getFilePathFromResources(fileName);
-        excelHandler.setFileName(path);
+        //String path = FileUtil.getFilePathFromResources(fileName);
+        excelHandler.setFileName(fileName);
         try {
             excelHandler.readData();
             HashMap mapData = excelHandler.getData();
@@ -267,6 +284,23 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
     @Override
     public void exportXmlData(String filePath){
         
+    }
+    
+    @Override
+    public String getDspaceLoadingData(MultipartFile file){
+        String filePath = null;
+        filePath = DspaceJournalDataUtil.saveUploadedData(file, "plos");
+        setOutputPath(FileUtil.getFileContainerPath(filePath)+File.separator+"output");
+        try {
+            getDspaceLoadingData(filePath);
+        } catch (Exception ex) {
+            Logger.getLogger(PlosDoiDataImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return filePath;
+    }
+
+    private String getArticleOutputFolderPath(String doi){
+        return outputPath + File.separator + doi.split("/")[1];
     }
     
 }

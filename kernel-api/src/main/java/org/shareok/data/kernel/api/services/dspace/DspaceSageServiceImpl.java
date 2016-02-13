@@ -5,61 +5,61 @@
  */
 package org.shareok.data.kernel.api.services.dspace;
 
-import java.io.File;
 import org.shareok.data.sagedata.SageSourceDataHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
  * @author Tao Zhao
  */
-public class DspaceSageServiceImpl implements DspaceSageService{
+
+@Service
+@Configurable
+public class DspaceSageServiceImpl implements DspaceJournalDataService {
+    
+    private SageSourceDataHandler ssd;
     
     @Autowired
-    private SageSourceDataHandler ssd;
-
-//    /**
-//     *  get SageSourceDataHandler
-//     * @return SageSourceDataHandler ssd
-//     */
-//    public SageSourceDataHandler getSsd() {
-//        return ssd;
-//    }
-//
-//    /**
-//     * set SageSourceDataHandler
-//     * @param SageSourceDataHandler ssd
-//     */
-//    public void setSsd(SageSourceDataHandler ssd) {
-//        this.ssd = ssd;
-//    }
+    public void setSageSourceDataHandler(SageSourceDataHandler ssd){
+        this.ssd = ssd;
+    }
     
     /**
      *
      * @param filePath
      * @return String filePath: the path to the folder containing files to loaded into DSpace
      */
-    @Override
-    public String getSageDsapceLoadingFilesByExcel(String filePath){
-        ssd.getDspaceLoadingData(filePath);
-        return filePath;
-    }
+//    @Override
+//    public String getSageDsapceLoadingFilesByExcel(String filePath){
+//        ssd.getDspaceLoadingData(filePath);
+//        return filePath;
+//    }
     
     /**
      *
+     * @param file
      * @param filePath
      * @return String filePath: the path to the folder containing the metadata files
      */
+//    @Override
+//    public String getSageMetadataFilesByExcel(String filePath){
+//        return filePath;
+//    }
+    
     @Override
-    public String getSageMetadataFilesByExcel(String filePath){
+    public String getDsapceJournalLoadingFiles(MultipartFile file){
+        String filePath = null;
+        filePath = ssd.getDspaceLoadingData(file);
         return filePath;
     }
     
     @Override
-    public String getSageDsapceLoadingFiles(MultipartFile file){
-        String filePath = null;
-        filePath = ssd.getDspaceLoadingData(file);
+    public String getDsapceJournalLoadingFiles(String userFilePath){
+        String filePath = ssd.getDspaceLoadingData(userFilePath);
         return filePath;
     }
 }

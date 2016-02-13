@@ -7,23 +7,27 @@ package org.shareok.data.kernel.api.services.dspace;
 
 import org.shareok.data.plosdata.PlosDoiData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
  * @author Tao Zhao
  */
-public class DspacePlosServiceImpl implements DspacePlosService{
+public class DspacePlosServiceImpl implements DspaceJournalDataService{
     
     @Autowired
     private PlosDoiData pdd;
     
     @Override
-    public String getPlosDsapceLoadingFilesByExcel(String filePath){
+    public String getDsapceJournalLoadingFiles(MultipartFile file){
+        String filePath = null;
+        filePath = pdd.getDspaceLoadingData(file);
         return filePath;
     }
     
     @Override
-    public String getPlosMetadataFilesByExcel(String filePath){
-        return filePath;
+    public String getDsapceJournalLoadingFiles(String userFilePath){
+        return null;
     }
+
 }

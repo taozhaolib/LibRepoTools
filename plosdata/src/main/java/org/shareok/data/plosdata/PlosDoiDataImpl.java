@@ -206,7 +206,6 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
                 }
                 
                 Iterator it = metaData.entrySet().iterator();
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");  
                 
                 try{
                     while(it.hasNext()){
@@ -220,17 +219,7 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
                         else if(pairs.getKey().equals("citation_date")){
                             Date date = null;
                             String dateString = pairs.getValue().toString().replaceAll("(\\[|\\])*", "");
-                            Pattern pattern = Pattern.compile("(\\d{4}-\\d{2}-\\d{2})|(\\d{4}/\\d{2}/\\d{2})");
-                            Matcher matcher = pattern.matcher(dateString);
-                            if (matcher.find()){
-                                dateString = matcher.group(0);
-                                dateString = dateString.replace("-", "/");
-                                date = sdf.parse(dateString);
-                            }
-                            else {
-                                throw new Exception("Date match not found\n");
-                            }
-                            plosData.setDateIssued(date);
+                            matchCitationDate(dateString, plosData);
                         }
                         else if(pairs.getKey().equals("citation_author")){
                             plosData.setAuthors(pairs.getValue().toString().replaceAll("(\\[|\\])*", "").split(", "));
@@ -303,4 +292,29 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
         return outputPath + File.separator + doi.split("/")[1];
     }
     
+    private void matchCitationDate(String dateString, PlosData plosData) throws Exception{
+
+        Date date;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+        Pattern pattern = Pattern.compile("(\\d{4}-\\d{2}-\\d{2})|(\\d{4}/\\d{2}/\\d{2})");
+        Matcher matcher = pattern.matcher(dateString);
+        if (matcher.find()){
+            dateString = matcher.group(0);
+            dateString = dateString.replace("-", "/");
+            date = sdf.parse(dateString);
+        }
+        // the date can be in a form of 'MMM dd, yyyy'
+        else if(!dateString.equals("")){
+            SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy"); // 3-letter month name & 2-char day of month
+            SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy--MM--dd");
+            Date date2 = formatter.parse(dateString);
+            String s3 = formatter2.format(date2);
+            //System.out.println("s = " + s + " and s3 = "+s3);
+            date = formatter2.parse(s3);
+        }
+        else {
+            throw new Exception("Date match not found\n");
+        }
+        plosData.setDateIssued(date);
+    }
 }

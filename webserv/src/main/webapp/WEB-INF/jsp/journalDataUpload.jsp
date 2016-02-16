@@ -43,6 +43,12 @@
                         <a href="${loadingFile}" class="btn btn-info btn-sm" role="button">Loading Files</a>
                         <BR><BR>
                     </div>
+                    <BR>
+                    <div class="download-link-div">
+                         <h4>Sample dublin_core metadata file can be downloaded here:</h4>
+                         <a href="${sampleDublinCore}" class="btn btn-info btn-sm" role="button">Sample Dublin Core File</a>
+                    </div>
+                    <BR>
                 </div>
             </div>
             

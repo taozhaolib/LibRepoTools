@@ -336,25 +336,11 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler {
                 readSourceData();
                 processSourceData();
                 outputMetaData();
-                packLoadingData();
+                DspaceJournalDataUtil.packLoadingData(getOutputFilePath());
             }            
         } catch (Exception ex) {
             Logger.getLogger(SageSourceDataHandlerImpl.class.getName()).log(Level.SEVERE, null, ex);
         }        
         return filePath;
-    }
-    
-    private String packLoadingData(){
-        String zipPath = null;
-        String outputFolder = getOutputFilePath();
-        
-        try{
-            zipPath = FileUtil.getFileContainerPath(outputFolder) + File.separator + "output.zip";
-            FileZipper.zipFolder(outputFolder, zipPath);
-        }
-        catch(Exception ex){
-            Logger.getLogger(SageSourceDataHandlerImpl.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return zipPath;
     }
 }

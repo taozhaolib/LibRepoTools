@@ -73,4 +73,11 @@ public class ShareokdataManager {
         }
         return prop.getProperty("journalDataBean."+publisher);
     }
+    
+    public static String getDspceSampleDublinCoreFileName(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("dspceSampleDublinCoreFileName");
+    }
 }

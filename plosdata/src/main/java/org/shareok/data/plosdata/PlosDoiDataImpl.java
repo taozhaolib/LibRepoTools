@@ -242,6 +242,8 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
                     req.downloadPlosOnePdfByDoi(doi, articleOutputFolderPath);
                     PlosUtil.createContentFile(articleOutputFolderPath+File.separator+"contents", doi.split("/")[1]+".pdf");
                     plosData.exportXmlByDoiData(articleOutputFolderPath+File.separator+"dublin_core.xml");
+                    String outputFolderPath = FileUtil.getFileContainerPath(articleOutputFolderPath);
+                    DspaceJournalDataUtil.packLoadingData(outputFolderPath);
                 }
                 catch(Exception ex){
                     System.out.print("The data processing from doiData to plosData is wrong!\n");
@@ -306,11 +308,9 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
         // the date can be in a form of 'MMM dd, yyyy'
         else if(!dateString.equals("")){
             SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy"); // 3-letter month name & 2-char day of month
-            SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy--MM--dd");
             Date date2 = formatter.parse(dateString);
-            String s3 = formatter2.format(date2);
-            //System.out.println("s = " + s + " and s3 = "+s3);
-            date = formatter2.parse(s3);
+            String s3 = sdf.format(date2);
+            date = sdf.parse(s3);
         }
         else {
             throw new Exception("Date match not found\n");

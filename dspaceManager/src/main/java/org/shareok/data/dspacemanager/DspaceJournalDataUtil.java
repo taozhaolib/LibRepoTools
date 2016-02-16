@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.FileZipper;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -118,5 +119,27 @@ public class DspaceJournalDataUtil {
             Logger.getLogger(DspaceJournalDataUtil.class.getName()).log(Level.SEVERE, null, ex);
         }
         return downloadPath;
+    }
+    
+    
+    public static String packLoadingData(String outputFolder){
+        
+        String zipPath = null;
+        try{
+            zipPath = FileUtil.getFileContainerPath(outputFolder) + File.separator + "output.zip";
+            FileZipper.zipFolder(outputFolder, zipPath);
+        }
+        catch(Exception ex){
+            Logger.getLogger(DspaceJournalDataUtil.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return zipPath;
+    }
+    
+    /**
+     * Sample file path: now it is hard coded but should be configurable in the future.
+     * @return link : the link to download the sample dublin core xml file
+     */
+    public static String getSampleDublinCoreLink(){
+        return File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "journal" + File.separator + "sampleDC.xml";
     }
 }

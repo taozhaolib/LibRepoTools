@@ -13,6 +13,7 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.support.atomic.RedisAtomicLong;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -35,6 +36,16 @@ public class UserRedisImpl implements UserRedis {
     
     @Override
     public void addUser(User user){
+        RedisTemplate<String, Object> redis = new RedisTemplate<>();
+        redis.setConnectionFactory(connectionFactory);
+        RedisAtomicLong userIdIndex = new RedisAtomicLong(Shareok);
+        redis.afterPropertiesSet();
+        redis.setEnableTransactionSupport(true);//奇怪的是一定要再显示开启redistemplate的事务支持
+        redis.multi();  
+        redis.boundValueOps("somevkey").increment(1);  
+        redis.boundZSetOps("somezkey").add("zvalue", 11);  
+        redis.exec(); 
+        redis.setEnableTransactionSupport(false);
         stringRedisTemplate.opsForHash().put(USER_KEY, user., this);
     }
     

@@ -80,4 +80,11 @@ public class ShareokdataManager {
         }
         return prop.getProperty("dspceSampleDublinCoreFileName");
     }
+    
+    public static String getRedisGlobalUidSchema(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("redisGlobalUid"); 
+    }
 }

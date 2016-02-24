@@ -13,5 +13,7 @@ public interface UserRedis {
     public User addUser(User user);
     public User updateUser(User user);
     public User findUserByUserId(long userId);
-    public User deleteUserByUserId(long userId);
+    public User findUserByUserEmail(String userName);
+    public void deleteUserByUserId(long userId);
+    public void deactivateUserByUserId(long userId);
 }

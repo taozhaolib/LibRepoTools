@@ -23,8 +23,34 @@
     <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate" p:connection-factory-ref="jedisConnectionFactory"/>
     <bean id="stringRedisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate" p:connection-factory-ref="jedisConnectionFactory"/>
     
-    <bean id="user" class="org.shareok.data.redis.User"/>
+    <bean id="user" class="org.shareok.data.redis.User">
+        <property name="isActive">
+            <value>true</value>
+        </property>
+        <property name="sessionKey" value="" />
+    </bean>
+    
+    <bean id="userRedisImpl" class="org.shareok.data.redis.UserRedisImpl"/>
+    
 <!--    
+    <bean id="dateEditor" class="org.springframework.beans.propertyeditors.CustomDateEditor">
+            <constructor-arg>
+                    <bean class="java.text.SimpleDateFormat">
+                            <constructor-arg value="yyyy-MM-dd hh-mm-ss" />
+                    </bean>
+            </constructor-arg>
+            <constructor-arg value="true" />
+
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+            <property name="propertyEditorRegistrars">
+                <list>
+                    <bean class="org.shareok.data.redis.CustomDateEditorRegistrar"/>
+                </list>
+            </property>
+    </bean>
+        
     <bean id="cacheManager" class="org.springframework.data.redis.cache.RedisCacheManager" c:template-ref="redisTemplate"/>
 -->    
 </beans>

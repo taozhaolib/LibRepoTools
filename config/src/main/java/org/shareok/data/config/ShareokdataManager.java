@@ -87,4 +87,18 @@ public class ShareokdataManager {
         }
         return prop.getProperty("redisGlobalUid"); 
     }
+    
+    public static String getRedisUserIdQueryPrefix(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("redisUserIdQueryPrefix");
+    }
+    
+    public static String getRedisUserNameIdMatchingTable(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("redisUserNameIdMatchingTable");
+    }
 }

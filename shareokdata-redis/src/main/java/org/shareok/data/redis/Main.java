@@ -5,6 +5,7 @@
  */
 package org.shareok.data.redis;
 
+import java.util.Date;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -15,9 +16,21 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class Main {
     public static void main(String[] args){
         ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
-        UserRedisImpl example = (UserRedisImpl) context.getBean("redisExample");
-//        example.addLink("80", "OK");
-        example.test2();
+        UserRedisImpl impl = (UserRedisImpl) context.getBean("userRedisImpl");
+
+        User user = (User) context.getBean("user");
+        user.setUserName("tao.zhao.test2@ou.edu");
+        user.setEmail("tao.zhao.test2@ou.edu");
+        user.setPassword("12345");
+        user.setSessionKey(RedisUtil.getRandomString());
+        user.setStartTime(new Date());
+        //user.setUserId(9);
+        
+        //impl.addUser(user);
+        user = impl.findUserByUserEmail("tao.zhao.test2@ou.edu");
+        impl.deactivateUserByUserId(user.getUserId());
+        
+
         System.out.println("Redis template is working!");
     }
 }

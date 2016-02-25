@@ -18,7 +18,7 @@ public class Main {
         ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
         UserRedisImpl impl = (UserRedisImpl) context.getBean("userRedisImpl");
 
-        User user = (User) context.getBean("user");
+        RedisUser user = (RedisUser) context.getBean("user");
         user.setUserName("tao.zhao.test2@ou.edu");
         user.setEmail("tao.zhao.test2@ou.edu");
         user.setPassword("12345");

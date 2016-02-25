@@ -52,7 +52,7 @@ public class UserRedisImpl implements UserRedis {
     
     @Override
     @Transactional
-    public User addUser(final User user){
+    public RedisUser addUser(final RedisUser user){
         try{
             redisTemplate.setConnectionFactory(connectionFactory);
             RedisAtomicLong userIdIndex = new RedisAtomicLong(ShareokdataManager.getRedisGlobalUidSchema(), redisTemplate.getConnectionFactory());
@@ -90,7 +90,7 @@ public class UserRedisImpl implements UserRedis {
     }
     
     @Override
-    public User updateUser(final User user){
+    public RedisUser updateUser(final RedisUser user){
         try{
             long uid = user.getUserId();
             redisTemplate.setConnectionFactory(connectionFactory);
@@ -122,10 +122,10 @@ public class UserRedisImpl implements UserRedis {
     }
     
     @Override
-    public User findUserByUserId(long userId){
+    public RedisUser findUserByUserId(long userId){
         BoundHashOperations<String, String, String> userOps = redisTemplate.boundHashOps(RedisUtil.getUserQueryKey(userId));
         ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
-        User user = (User) context.getBean("user");
+        RedisUser user = (RedisUser) context.getBean("user");
         user.setEmail(userOps.get("email"));
         user.setUserName(userOps.get("userName"));
         user.setUserId(Long.parseLong(userOps.get("userId")));
@@ -135,7 +135,7 @@ public class UserRedisImpl implements UserRedis {
     }
     
     @Override
-    public User findUserByUserEmail(String email){
+    public RedisUser findUserByUserEmail(String email){
         BoundHashOperations<String, String, String> userOps = redisTemplate.boundHashOps(ShareokdataManager.getRedisUserNameIdMatchingTable());
         long userId = Long.valueOf(userOps.get(email));
         return findUserByUserId(userId);
@@ -168,6 +168,7 @@ public class UserRedisImpl implements UserRedis {
         }
     }
 
+    @Override
     public void deactivateUserByUserId(long userId){
         try{
             redisTemplate.setConnectionFactory(connectionFactory);

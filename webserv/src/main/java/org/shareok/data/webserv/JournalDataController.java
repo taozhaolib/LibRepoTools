@@ -18,7 +18,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import org.shareok.data.config.ShareokdataManager;
-import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.shareok.data.kernel.api.services.dspace.DspaceJournalServiceManager;
 import org.springframework.stereotype.Controller;

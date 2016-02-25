@@ -23,7 +23,7 @@
     <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate" p:connection-factory-ref="jedisConnectionFactory"/>
     <bean id="stringRedisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate" p:connection-factory-ref="jedisConnectionFactory"/>
     
-    <bean id="user" class="org.shareok.data.redis.User">
+    <bean id="user" class="org.shareok.data.redis.RedisUser">
         <property name="isActive">
             <value>true</value>
         </property>

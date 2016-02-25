@@ -22,7 +22,7 @@
         </dependency>
         
         <dependency>
-            <groupId>org.shareok.data</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>plosdata</artifactId>
             <version>1.0-SNAPSHOT</version>
             <type>jar</type>
@@ -30,6 +30,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>shareokdata-redis</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

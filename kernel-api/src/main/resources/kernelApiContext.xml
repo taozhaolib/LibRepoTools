@@ -11,12 +11,17 @@
     
     <import resource="classpath*:**/sageDataContext.xml"/>
     <import resource="classpath*:**/plosContext.xml"/>
+    <import resource="classpath*:**/redisContext.xml"/>
     
     <bean id="plosDspaceServiceImpl" class="org.shareok.data.kernel.api.services.dspace.DspacePlosServiceImpl">
 
     </bean>
     
     <bean id="sageDspaceServiceImpl" class="org.shareok.data.kernel.api.services.dspace.DspaceSageServiceImpl">
+
+    </bean>
+    
+    <bean id="redisUserServiceImpl" class="org.shareok.data.kernel.api.services.dspace.RedisUserServiceImpl">
 
     </bean>
     

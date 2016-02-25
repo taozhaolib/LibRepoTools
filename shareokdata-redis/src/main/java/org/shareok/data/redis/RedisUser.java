@@ -13,7 +13,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  *
  * @author Tao Zhao
  */
-public class User {
+public class RedisUser {
     private String userName;  // by default to be user's email
     private String email;  // required
     private String password;  // required
@@ -79,9 +79,9 @@ public class User {
     }
     
     @Override
-    public User clone(){
+    public RedisUser clone(){
         ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
-        User newUser = (User) context.getBean("user");
+        RedisUser newUser = (RedisUser) context.getBean("user");
         
         newUser.setEmail(email);
         newUser.setPassword(password);

@@ -11,9 +11,9 @@
     http://www.springframework.org/schema/context 
     http://www.springframework.org/schema/context/spring-context-3.0.xsd">
     
-    <import resource="classpath*:**/kernelApiContext.xml"/>
-
-   <context:component-scan base-package="org.shareok.data.webserv" />
+    <context:annotation-config/>
+    
+    <context:component-scan base-package="org.shareok.data.webserv" />
 
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
@@ -33,5 +33,7 @@
         <property name="maxUploadSize" value="100000" />
 
     </bean>
+    
+    <bean class="org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration"/>
 
 </beans>

@@ -55,6 +55,11 @@ public class UserRedisImpl implements UserRedis {
     public RedisUser addUser(final RedisUser user){
         try{
             redisTemplate.setConnectionFactory(connectionFactory);
+            RedisUser existedUser = findUserByUserEmail(user.getEmail());
+            if(null == existedUser){
+                return null;
+            }
+            
             RedisAtomicLong userIdIndex = new RedisAtomicLong(ShareokdataManager.getRedisGlobalUidSchema(), redisTemplate.getConnectionFactory());
             long uidCount = userIdIndex.incrementAndGet();
             final String uid = String.valueOf(uidCount);
@@ -124,21 +129,31 @@ public class UserRedisImpl implements UserRedis {
     @Override
     public RedisUser findUserByUserId(long userId){
         BoundHashOperations<String, String, String> userOps = redisTemplate.boundHashOps(RedisUtil.getUserQueryKey(userId));
-        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
-        RedisUser user = (RedisUser) context.getBean("user");
-        user.setEmail(userOps.get("email"));
-        user.setUserName(userOps.get("userName"));
-        user.setUserId(Long.parseLong(userOps.get("userId")));
-        user.setPassword(userOps.get("password"));
-        user.setSessionKey(userOps.get("sessionKey"));
-        return user;
+        if(null != userOps){
+            ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
+            RedisUser user = (RedisUser) context.getBean("user");
+            user.setEmail(userOps.get("email"));
+            user.setUserName(userOps.get("userName"));
+            user.setUserId(Long.parseLong(userOps.get("userId")));
+            user.setPassword(userOps.get("password"));
+            user.setSessionKey(userOps.get("sessionKey"));
+            return user;
+        }
+        else{
+            return null;
+        }
     }
     
     @Override
     public RedisUser findUserByUserEmail(String email){
         BoundHashOperations<String, String, String> userOps = redisTemplate.boundHashOps(ShareokdataManager.getRedisUserNameIdMatchingTable());
-        long userId = Long.valueOf(userOps.get(email));
-        return findUserByUserId(userId);
+        if(null != userOps){
+            long userId = Long.valueOf(userOps.get(email));
+            return findUserByUserId(userId);
+        }
+        else{
+            return null;
+        }
     }
     
     @Override

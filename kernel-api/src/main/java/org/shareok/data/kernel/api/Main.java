@@ -3,9 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.shareok.data.redis;
+package org.shareok.data.kernel.api;
 
 import java.util.Date;
+import org.shareok.data.kernel.api.services.user.RedisUserServiceImpl;
+import org.shareok.data.redis.RedisUser;
+import org.shareok.data.redis.RedisUtil;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -15,22 +18,14 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class Main {
     public static void main(String[] args){
-        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
-        UserRedisImpl impl = (UserRedisImpl) context.getBean("userRedisImpl");
-
-        RedisUser user = (RedisUser) context.getBean("redisUser");
+        ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
+        RedisUser user = new RedisUser();
         user.setUserName("tao.zhao.test2@ou.edu");
         user.setEmail("tao.zhao.test2@ou.edu");
         user.setPassword("12345");
         user.setSessionKey(RedisUtil.getRandomString());
         user.setStartTime(new Date());
-        //user.setUserId(9);
-        
-        //impl.addUser(user);
-        user = impl.findUserByUserEmail("tao.zhao.test2@ou.edu");
-        impl.deactivateUserByUserId(user.getUserId());
-        
-
-        System.out.println("Redis template is working!");
+        RedisUserServiceImpl impl = (RedisUserServiceImpl) context.getBean("redisUserServiceImpl");
+        impl.addUser(user);
     }
 }

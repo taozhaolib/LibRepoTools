@@ -16,10 +16,8 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.shareok.data.config.ShareokdataManager;
-import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
-import org.shareok.data.kernel.api.services.dspace.DspaceJournalServiceManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +26,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+
+import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
+import org.shareok.data.kernel.api.services.dspace.DspaceJournalServiceManager;
 
 /**
  *
@@ -38,7 +40,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class JournalDataController {
     
     @RequestMapping("/dspace/journal/{publisher}")
-    public ModelAndView journalHello(@PathVariable("publisher") String publisher) {
+    public ModelAndView journalHello(HttpServletRequest req, @PathVariable("publisher") String publisher) {
         String sampleDublinCoreLink = DspaceJournalDataUtil.getSampleDublinCoreLink();
          ModelAndView model = new ModelAndView();
          model.setViewName("journalDataUpload");

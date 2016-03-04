@@ -1,8 +1,6 @@
 <%-- any content can be specified here e.g.: --%>
 <%@ page pageEncoding="UTF-8" %>
-
-    <spring:url value="/resources/js/jquery.1.12.min.js" var="jqueryJs" />
-    
+ 
     <script src="${jqueryJs}"></script>
     <script src="${mainJs}"></script>
     

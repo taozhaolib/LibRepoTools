@@ -7,6 +7,7 @@ package org.shareok.data.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -100,5 +101,22 @@ public class ShareokdataManager {
             loadProperties();
         }
         return prop.getProperty("redisUserNameIdMatchingTable");
+    }
+    
+    public static boolean requiredUserAuthentication(String urlPattern){
+        boolean userAuthenRequired = true;
+        if(null == prop){
+            loadProperties();
+        }
+        String[] noAuthenPatterns = prop.getProperty("noUserAuthen").split(",");
+        userAuthenRequired = !Arrays.asList(noAuthenPatterns).contains(urlPattern);
+        return userAuthenRequired;
+    }
+    
+    public static String getSessionRedisUserAttributeName(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("sessionUserAttributeName");
     }
 }

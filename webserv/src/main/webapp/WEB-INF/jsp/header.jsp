@@ -1,8 +1,5 @@
 <%-- any content can be specified here e.g.: --%>
 <%@ page pageEncoding="UTF-8" %>
- 
-    <script src="${jqueryJs}"></script>
-    <script src="${mainJs}"></script>
     
     <!-- Bootstrap include -->
     <!-- Latest compiled and minified CSS -->

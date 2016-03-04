@@ -21,7 +21,7 @@
 
     </bean>
     
-    <bean id="redisUserServiceImpl" class="org.shareok.data.kernel.api.services.dspace.RedisUserServiceImpl">
+    <bean id="redisUserServiceImpl" class="org.shareok.data.kernel.api.services.user.RedisUserServiceImpl">
 
     </bean>
     

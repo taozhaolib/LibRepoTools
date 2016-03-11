@@ -4,19 +4,9 @@
     Author     : Tao Zhao
 --%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
-
-<!DOCTYPE html>
-<html>
-<head>
-<title>Online Journal Data Processing Center</title>
-
-</head>
-<body>
-    <%@ include file="mainPageIncludes.jsp" %>     
+    <%@ include file="header.jsp" %>   
+    <%@ include file="navTab.jsp" %>     
+    
     <c:set var="string1" value="${publisher}"/>
     <c:set var="publisherUpCase" value="${fn:toUpperCase(string1)}" />
     

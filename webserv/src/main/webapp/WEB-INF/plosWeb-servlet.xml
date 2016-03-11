@@ -17,13 +17,12 @@
 
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
-       <property name="prefix" value="/WEB-INF/jsp/" />
-       <property name="suffix" value=".jsp" />
+        <property name="prefix" value="/WEB-INF/jsp/" />
+        <property name="suffix" value=".jsp" />
     </bean>
    
+    <mvc:resources mapping="/resources/**" location="/resources/"  cache-period="31556926"/>
     <mvc:annotation-driven />
-    <mvc:resources mapping="/resources/**" location="/resources/" />
-    
 
     
     <bean id="multipartResolver"

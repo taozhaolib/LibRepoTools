@@ -157,6 +157,15 @@ public class UserRedisImpl implements UserRedis {
     }
     
     @Override
+    public RedisUser findAuthenticatedUser(String userName, String sessionKey){
+        RedisUser user = findUserByUserEmail(userName);
+        if(null != user && sessionKey.equals(user.getSessionKey())){
+            return user;
+        }
+        return null;
+    }
+    
+    @Override
     public void deleteUserByUserId(final long userId){
         try{
             redisTemplate.setConnectionFactory(connectionFactory);

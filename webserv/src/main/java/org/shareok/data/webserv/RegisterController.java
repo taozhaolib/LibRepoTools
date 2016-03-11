@@ -24,7 +24,7 @@ public class RegisterController{
     @RequestMapping("/login")
     public ModelAndView register() {
          ModelAndView model = new ModelAndView();
-         model.setViewName("register");
+         model.setViewName("login");
 
          return model;
     }

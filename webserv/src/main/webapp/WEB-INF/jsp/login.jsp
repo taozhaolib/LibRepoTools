@@ -4,56 +4,45 @@
     Author     : Tao Zhao
 --%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Register to use ShareOK Data Services</title>
-    </head>
-    <body>
-        <div class="container-fluid">
-        <div class="panel panel-success">
-            <div class="panel-heading" align="center">
-                <h4><b><font color="black" style="font-family: fantasy;">My First Login Demo</font> </b></h4>
-            </div>
-            <div class="panel-body"align="center">
-                 
-                <div class="container " style="margin-top: 10%; margin-bottom: 10%;">
-   
-                    <div class="panel panel-success" style="max-width: 35%;" align="left">
-                       
-                        <div class="panel-heading form-group">
-                            <b><font color="white">
-                                Login Form</font> </b>
-                        </div>
-                   
-                        <div class="panel-body" >
-
-                        <form action="LoginServlet" method="post" >
-                            <div class="form-group">
-                                <label for="exampleInputEmail1">User Name</label> <input
-                                    type="text" class="form-control" name="txtUserName" id="txtUserName"
-                                    placeholder="Enter User Name" required="required">
-                                   
-                            </div>
-                            <div class="form-group">
-                                <label for="exampleInputPassword1">Password</label> <input
-                                    type="password" class="form-control" name="txtPass" id="txtPass"
-                                    placeholder="Password" required="required">
-                            </div>
-                            <button type="submit" style="width: 100%; font-size:1.1em;" class="btn btn-large btn btn-success btn-lg btn-block" ><b>Login</b></button>
-                                                  
-                        </form>
-
-                        </div>
+    <%@ include file="header.jsp" %>   
+        
+        <div class="container">
+            <div class="jumbotron">
+                <div class="panel panel-primary">
+                    <div class="panel-heading"><h4>Please Login/Register to use ShareOK Data Services:</h4></div>
+                    <div class="panel-body">
+                        <center>
+                            <form role="form" action="/webserv/register" method="post" enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <label class="control-label col-sm-2" for="email">Email:</label>
+                                    <div class="col-sm-10">
+                                      <input type="email" class="form-control" id="email" placeholder="Enter email">
+                                    </div>
+                                </div>
+                                <br/><br/><br/>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-2" for="pwd">Password:</label>
+                                    <div class="col-sm-10">          
+                                        <input type="password" class="form-control" id="password" placeholder="Enter password">
+                                    </div>
+                                </div>
+                                <br/><br/>
+                                <div class="form-group">
+                                    <label class="control-label col-sm-2" for="nickname">Nick name (optional): </label>
+                                    <div class="col-sm-10">
+                                       <input type="text" class="form-control" id="nickname">
+                                    </div>
+                                </div>
+                                <br/><br/><br/>
+                                    <button type="submit" class="btn btn-form">Submit</button>&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <input type="button"  class="btn btn-form" onclick="location.href='/webserv/home'" value="Back to home page">
+                                <br>
+                             </form>
+                        </center>
                     </div>
-                   
-                </div>
-               
+                  </div>
+
             </div>
-            <div class="panel-footer" align="center"><font style="color: #111">Copyright @2014  <a href="http://mysite.com/">mysite.com</a>, All Rights Reserved. </font></div>
         </div>
-    </div>
     </body>
 </html>

@@ -16,7 +16,8 @@ public interface RedisUserService {
     public RedisUser addUser(RedisUser user);
     public RedisUser updateUser(RedisUser user);
     //public RedisUser findUserByUserId(long userId);
-    public RedisUser findUserByUserEmail(String userName);
+    public RedisUser findUserByUserEmail(String email);
+    public RedisUser findAuthenticatedUser(String email, String sessionKey);
     //public void deleteUserByUserId(long userId);
     public void deactivateUserByUserId(long userId);
 }

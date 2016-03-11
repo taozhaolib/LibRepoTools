@@ -108,7 +108,7 @@ public class ShareokdataManager {
         if(null == prop){
             loadProperties();
         }
-        String[] noAuthenPatterns = prop.getProperty("noUserAuthen").split(",");
+        String[] noAuthenPatterns = prop.getProperty("noUserAuthen").replaceAll("\\s*#\\s*","#").split(",");
         userAuthenRequired = !Arrays.asList(noAuthenPatterns).contains(urlPattern);
         return userAuthenRequired;
     }

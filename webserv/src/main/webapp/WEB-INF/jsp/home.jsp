@@ -4,17 +4,8 @@
     Author     : Tao Zhao
 --%>
 
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
-
-<!DOCTYPE html>
-<html>
-<head>
-<title>Uploading the file for online journal publications</title>
-
-</head>
-<body>
-    <%@ include file="mainPageIncludes.jsp" %>   
+    <%@ include file="header.jsp" %>   
+    <%@ include file="navTab.jsp" %>  
     
     <div class="container">
         <div class="jumbotron">
@@ -22,7 +13,7 @@
                 <div class="panel-heading"><h4>About ShareOK Data:</h4></div>
                 <div class="panel-body">
                     <center>
-                    <h4>
+                    <h4 class="ok">
                 
                     ShareOK Data handles </BR><br/>
                     </h4>

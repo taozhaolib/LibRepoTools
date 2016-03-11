@@ -13,6 +13,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.shareok.data.config.ShareokdataManager;
@@ -85,7 +86,8 @@ public class UserSessionFilter implements Filter{
                     
                     session.setAttribute(ShareokdataManager.getSessionRedisUserAttributeName(), user);
                     repo.save(session);
-                    
+                    HttpServletResponse httpReponse = (HttpServletResponse)response;
+                    httpReponse.sendRedirect("/webserv/home");
                 }
                 else{
                     boolean sessionValidated = false;
@@ -95,7 +97,7 @@ public class UserSessionFilter implements Filter{
                         if(null != exSession){
                             RedisUser user = (RedisUser) session.getAttribute(ShareokdataManager.getSessionRedisUserAttributeName());
                             if(null != user){
-                                RedisUser userPersisted = redisUserService.findUserByUserEmail(user.getEmail());
+                                RedisUser userPersisted = redisUserService.findAuthenticatedUser(user.getEmail(), session.getId());
                                 if(null != userPersisted){
                                     sessionValidated = true;
                                 }
@@ -110,11 +112,18 @@ public class UserSessionFilter implements Filter{
                             session.invalidate();
                         }
                         httpRequest.logout();
-//                        request.getRequestDispatcher("/WEB-INF/jsp/logout.jsp").forward(request, response);
+                        //request.getRequestDispatcher("/WEB-INF/jsp/logout.jsp").forward(request, response);
+                        HttpServletResponse httpReponse = (HttpServletResponse)response;
+                        httpReponse.sendRedirect("/webserv/login");
+                    }
+                    else{
+                        chain.doFilter(request, response);
                     }
                 }
             }
-            chain.doFilter(request, response);
+            else{
+                chain.doFilter(request, response);
+            }
         } catch (IOException ex) {
                 request.setAttribute("errorMessage", ex);
                 request.getRequestDispatcher("/WEB-INF/jsp/userError.jsp").forward(request, response);

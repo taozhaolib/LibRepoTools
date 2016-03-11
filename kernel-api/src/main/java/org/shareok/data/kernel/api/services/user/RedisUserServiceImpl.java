@@ -30,8 +30,13 @@ public class RedisUserServiceImpl implements RedisUserService{
     //public RedisUser findUserByUserId(long userId);
     
     @Override
-    public RedisUser findUserByUserEmail(String userName){
-        return userRedis.findUserByUserEmail(userName);
+    public RedisUser findUserByUserEmail(String email){
+        return userRedis.findUserByUserEmail(email);
+    }
+    
+    @Override
+    public RedisUser findAuthenticatedUser(String email, String sessionKey){
+        return userRedis.findAuthenticatedUser(email, sessionKey);
     }
     //public void deleteUserByUserId(long userId);
     

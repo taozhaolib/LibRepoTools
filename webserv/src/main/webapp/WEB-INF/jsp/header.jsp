@@ -12,13 +12,12 @@
     
     <!-- Bootstrap include -->
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-
-    <!-- jQuery library -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <link href="<c:url value="/resources/css/bootstrap.min.css" />" rel="stylesheet">
+    <!-- jQuery library -->    
+    <script src="<c:url value="/resources/js/jquery.min.js" />"></script>
 
     <!-- Latest compiled JavaScript -->
-    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="<c:url value="/resources/js/bootstrap.min.js" />"></script>
     
     <link href="<c:url value="/resources/css/main.css" />" rel="stylesheet">
     
@@ -32,4 +31,6 @@
             <h1>ShareOK Data Processing Center</h1>      
         </div> 
     </div>
+    
+    <%@ include file="userInfo.jsp" %>
     

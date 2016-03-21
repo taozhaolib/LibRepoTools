@@ -3,22 +3,25 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.shareok.data.webserv.filters;
+package org.shareok.data.webserv;
+
+/**
+ *
+ * @author Tao Zhao
+ */
 
 import java.io.IOException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.kernel.api.services.user.RedisUserService;
 import org.shareok.data.redis.RedisUser;
+import org.shareok.data.webserv.exceptions.NUllUserException;
+import org.shareok.data.webserv.exceptions.NullSessionException;
 import org.shareok.data.webserv.exceptions.UserRegisterInfoNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -26,38 +29,31 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.session.ExpiringSession;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
-/**
- *
- * @author Tao Zhao
- */
-public class UserSessionFilter implements Filter{
+ 
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+ 
+public class UserSessionInterceptor implements HandlerInterceptor  {
     
     @Autowired
     private RedisUserService redisUserService;
     
     @Override
-    public void destroy() {
-    }
-
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-    }
-
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+         
+        System.out.println("Pre-handle");
         try {
-            HttpServletRequest httpRequest = (HttpServletRequest) request;
-            String contextPath = httpRequest.getServletPath();
+            String contextPath = request.getServletPath();
             if(contextPath.contains("/")){
                 contextPath = contextPath.split("/")[1];
             }//.getContextPath();
             if(null != contextPath && !"".equals(contextPath) && ShareokdataManager.requiredUserAuthentication(contextPath)){
-                SessionRepository<Session> repo = (SessionRepository<Session>) httpRequest.getAttribute(SessionRepository.class.getName());
+                SessionRepository<Session> repo = (SessionRepository<Session>) request.getAttribute(SessionRepository.class.getName());
                 
                 if(contextPath.equals("register")){                    
-                    String email = (String) httpRequest.getParameter("email");
-                    String password = (String) httpRequest.getParameter("password");
-                    String userName = (String) httpRequest.getParameter("nickname");
+                    String email = (String) request.getParameter("email");
+                    String password = (String) request.getParameter("password");
+                    String userName = (String) request.getParameter("nickname");
                     if(null == email || "".equals(email)){
                         throw new UserRegisterInfoNotFoundException("Valid email register information is required!");
                     }
@@ -67,20 +63,22 @@ public class UserSessionFilter implements Filter{
                     /*****************
                      * Some password validation logic here:
                      */                    
-                    ExpiringSession session = (ExpiringSession) repo.createSession();
-                    session.setMaxInactiveIntervalInSeconds(600);
+                    HttpSession httpSession = (HttpSession)request.getSession();
+                    ExpiringSession session = (ExpiringSession) repo.getSession(httpSession.getId());
+                    if(null == session){
+                        session = (ExpiringSession) repo.createSession();
+                        session.setMaxInactiveIntervalInSeconds(600);
+                    }                    
                     String sessionId = session.getId();
                     RedisUser user = redisUserService.findUserByUserEmail(email);
                     if(null != user && password.equals(user.getPassword())){
-                        session.setAttribute(ShareokdataManager.getSessionRedisUserAttributeName(), user);
+                        session.setMaxInactiveIntervalInSeconds(600);
                         user.setSessionKey(sessionId);
                         user.setUserName(userName);
                         redisUserService.updateUser(user);
                     }
                     else if(null == user){
-                        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
-                        user = (RedisUser) context.getBean("redisUser");
-
+                        user = redisUserService.getNewUser();
                         user.setEmail(email);
                         user.setPassword(password);
                         user.setSessionKey(sessionId);
@@ -90,15 +88,14 @@ public class UserSessionFilter implements Filter{
                         throw new UserRegisterInfoNotFoundException("Your login information does not match our records!`");
                     }
                     
-                    session.setAttribute(ShareokdataManager.getSessionRedisUserAttributeName(), user);
+                    setSessionUserInfo(session, user);
                     repo.save(session);
-                    chain.doFilter(request, response);
 //                    HttpServletResponse httpReponse = (HttpServletResponse)response;
 //                    httpReponse.sendRedirect("/webserv/home");
                 }
                 else{
                     boolean sessionValidated = false;
-                    HttpSession session = (HttpSession) httpRequest.getSession(false);
+                    HttpSession session = (HttpSession) request.getSession(false);
                     if(null != session){
                         ExpiringSession exSession = (ExpiringSession) repo.getSession(session.getId());
                         if(null != exSession){
@@ -118,18 +115,18 @@ public class UserSessionFilter implements Filter{
                             session.setAttribute(ShareokdataManager.getSessionRedisUserAttributeName(), null);
                             session.invalidate();
                         }
-                        httpRequest.logout();
+                        request.logout();
                         //request.getRequestDispatcher("/WEB-INF/jsp/logout.jsp").forward(request, response);
                         HttpServletResponse httpReponse = (HttpServletResponse)response;
                         httpReponse.sendRedirect("/webserv/login");
                     }
                     else{
-                        chain.doFilter(request, response);
+                        ;
                     }
                 }
             }
             else{
-                chain.doFilter(request, response);
+                ;
             }
         } catch (IOException ex) {
                 request.setAttribute("errorMessage", ex);
@@ -141,6 +138,40 @@ public class UserSessionFilter implements Filter{
             request.setAttribute("errorMessage", ex);
             request.getRequestDispatcher("/WEB-INF/jsp/userError.jsp").forward(request, response);
         }
+         
+        return true;
+    }
+     
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("Post-handle");
+    }
+     
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("After completion handle");
+    }
+    
+    private void setSessionUserInfo(ExpiringSession session, RedisUser user){
+        
+        try{
+            if(null == session){
+                throw new NullSessionException("The ExpiringSession Session is NULL!");
+            }
+            if(null == user){
+                throw new NUllUserException("The User Information is NULL!");
+            }
 
+            session.setAttribute("userName", user.getUserName());
+            session.setAttribute("email", user.getEmail());
+            session.setAttribute("userId", user.getUserId());
+            session.setAttribute("isActive", user.isIsActive());
+        }
+        catch (NullSessionException ex){
+            Logger.getLogger(UserSessionInterceptor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (NUllUserException ex){
+            Logger.getLogger(UserSessionInterceptor.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

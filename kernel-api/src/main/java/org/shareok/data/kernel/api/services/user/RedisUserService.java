@@ -13,6 +13,7 @@ import org.shareok.data.redis.RedisUser;
  */
 
 public interface RedisUserService {
+    public RedisUser getNewUser();
     public RedisUser addUser(RedisUser user);
     public RedisUser updateUser(RedisUser user);
     //public RedisUser findUserByUserId(long userId);

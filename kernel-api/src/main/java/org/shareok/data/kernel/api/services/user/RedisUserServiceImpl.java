@@ -44,4 +44,9 @@ public class RedisUserServiceImpl implements RedisUserService{
     public void deactivateUserByUserId(long userId){
         userRedis.deactivateUserByUserId(userId);
     }
+    
+    @Override
+    public RedisUser getNewUser(){
+        return userRedis.getNewUser();
+    }
 }

@@ -33,6 +33,10 @@
 
     </bean>
     
+    <mvc:interceptors>
+      <bean class="org.shareok.data.webserv.UserSessionInterceptor" />
+    </mvc:interceptors> 
+    
     <bean class="org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration"/>
 
 </beans>

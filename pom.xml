@@ -16,7 +16,7 @@
         <module>config</module>
         <module>dspaceManager</module>
         <module>shareokdata-redis</module>
-    </modules>
+  </modules>
     <properties>
        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

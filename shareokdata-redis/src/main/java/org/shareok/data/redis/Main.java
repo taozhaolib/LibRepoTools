@@ -18,17 +18,17 @@ public class Main {
         ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
         UserRedisImpl impl = (UserRedisImpl) context.getBean("userRedisImpl");
 
-        RedisUser user = (RedisUser) context.getBean("redisUser");
-        user.setUserName("tao.zhao.test2@ou.edu");
-        user.setEmail("tao.zhao.test2@ou.edu");
-        user.setPassword("12345");
-        user.setSessionKey(RedisUtil.getRandomString());
-        user.setStartTime(new Date());
+//        RedisUser user = (RedisUser) context.getBean("user");
+//        user.setUserName("tao.zhao.test2@ou.edu");
+//        user.setEmail("tao.zhao.test2@ou.edu");
+//        user.setPassword("12345");
+//        user.setSessionKey(RedisUtil.getRandomString());
+//        user.setStartTime(new Date());
         //user.setUserId(9);
         
         //impl.addUser(user);
-        user = impl.findUserByUserEmail("tao.zhao.test2@ou.edu");
-        impl.deactivateUserByUserId(user.getUserId());
+        RedisUser user = impl.findUserByUserEmail("tao.zhao@ou.edu");
+      //  impl.deactivateUserByUserId(user.getUserId());
         
 
         System.out.println("Redis template is working!");

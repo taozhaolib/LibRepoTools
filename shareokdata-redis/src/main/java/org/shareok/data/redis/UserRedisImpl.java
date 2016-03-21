@@ -56,8 +56,8 @@ public class UserRedisImpl implements UserRedis {
         try{
             redisTemplate.setConnectionFactory(connectionFactory);
             RedisUser existedUser = findUserByUserEmail(user.getEmail());
-            if(null == existedUser){
-                return null;
+            if(null != existedUser){
+                return existedUser;
             }
             
             RedisAtomicLong userIdIndex = new RedisAtomicLong(ShareokdataManager.getRedisGlobalUidSchema(), redisTemplate.getConnectionFactory());
@@ -148,8 +148,14 @@ public class UserRedisImpl implements UserRedis {
     public RedisUser findUserByUserEmail(String email){
         BoundHashOperations<String, String, String> userOps = redisTemplate.boundHashOps(ShareokdataManager.getRedisUserNameIdMatchingTable());
         if(null != userOps){
-            long userId = Long.valueOf(userOps.get(email));
-            return findUserByUserId(userId);
+            String id = userOps.get(email);
+            if(null != id && !id.equals("")){
+                long userId = Long.valueOf(userOps.get(email));
+                return findUserByUserId(userId);
+            }            
+            else{
+                return null;
+            }
         }
         else{
             return null;
@@ -217,6 +223,13 @@ public class UserRedisImpl implements UserRedis {
         redis.boundZSetOps("somezkey").add("zvalue", 11);  
         redis.exec(); 
         redis.setEnableTransactionSupport(false);
+    }
+    
+    @Override
+    public RedisUser getNewUser(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
+        RedisUser user = (RedisUser) context.getBean("user");
+        return user;
     }
 
 }

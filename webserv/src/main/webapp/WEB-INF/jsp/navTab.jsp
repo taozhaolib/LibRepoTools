@@ -4,7 +4,7 @@
     Author     : Tao Zhao
 --%>
 
-<div class="container">    
+<div id="main-tab" class="container">    
     <ul class="nav nav-tabs">
         <li class="active dropdown"><a href="/webserv/home">Home</a></li>
         <li><a class="dropdown-toggle" data-toggle="dropdown" href="#">DSpace Data Service

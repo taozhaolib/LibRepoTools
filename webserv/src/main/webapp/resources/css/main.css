@@ -8,6 +8,15 @@ and open the template in the editor.
     Author     : Tao Zhao
 */
 
-.btn-form{
-    background-color: buttonshadow;
+.userInfo{
+    background-color: threedhighlight;
+    float: right;
+    font-size: 14px;
+    width: 300px;
+    padding: 5px 10px 5px 10px;
+}
+
+.heading-text{
+    font-family: serif;
+    font-size: 30px;
 }

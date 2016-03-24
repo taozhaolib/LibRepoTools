@@ -22,6 +22,7 @@ import org.shareok.data.kernel.api.services.user.RedisUserService;
 import org.shareok.data.redis.RedisUser;
 import org.shareok.data.webserv.exceptions.NUllUserException;
 import org.shareok.data.webserv.exceptions.NullSessionException;
+import org.shareok.data.webserv.exceptions.RegisterUserInfoExistedException;
 import org.shareok.data.webserv.exceptions.UserRegisterInfoNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -41,7 +42,6 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
          
-        System.out.println("Pre-handle");
         try {
             String contextPath = request.getServletPath();
             if(contextPath.contains("/")){
@@ -67,41 +67,82 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
                     ExpiringSession session = (ExpiringSession) repo.getSession(httpSession.getId());
                     if(null == session){
                         session = (ExpiringSession) repo.createSession();
-                        session.setMaxInactiveIntervalInSeconds(600);
                     }                    
                     String sessionId = session.getId();
                     RedisUser user = redisUserService.findUserByUserEmail(email);
-                    if(null != user && password.equals(user.getPassword())){
-                        session.setMaxInactiveIntervalInSeconds(600);
-                        user.setSessionKey(sessionId);
-                        user.setUserName(userName);
-                        redisUserService.updateUser(user);
+                    if(null != user){
+                        throw new RegisterUserInfoExistedException("User Email has already Existed!");
                     }
-                    else if(null == user){
+                    else {
                         user = redisUserService.getNewUser();
                         user.setEmail(email);
                         user.setPassword(password);
+                        if(null == userName || userName.equals("")){
+                            userName = email;
+                        }
+                        user.setUserName(userName);
                         user.setSessionKey(sessionId);
                         redisUserService.addUser(user);
-                    }
-                    else if(null != user && !password.equals(user.getPassword())){
-                        throw new UserRegisterInfoNotFoundException("Your login information does not match our records!`");
                     }
                     
                     setSessionUserInfo(session, user);
                     repo.save(session);
-//                    HttpServletResponse httpReponse = (HttpServletResponse)response;
-//                    httpReponse.sendRedirect("/webserv/home");
                 }
-                else{
-                    boolean sessionValidated = false;
+                else if(contextPath.equals("userLogin")){
+                    String email = (String) request.getParameter("email");
+                    String password = (String) request.getParameter("password");
+                    if(null == email || "".equals(email)){
+                        throw new UserRegisterInfoNotFoundException("Valid email information is required for logging in!");
+                    }
+                    if(null == password || "".equals(password)){
+                        throw new UserRegisterInfoNotFoundException("Valid password is required for logging in!");
+                    }
+                    /*****************
+                     * Some password validation logic here:
+                     */                    
+                    HttpSession httpSession = (HttpSession)request.getSession();
+                    ExpiringSession session = (ExpiringSession) repo.getSession(httpSession.getId());
+                    if(null == session || session.isExpired()){
+                        session = (ExpiringSession) repo.createSession();
+                    }                    
+                    String sessionId = session.getId();
+                    RedisUser user = redisUserService.findUserByUserEmail(email);
+                    
+                    if(null == user){
+                        throw new UserRegisterInfoNotFoundException("User information cannot be found!");
+                    }
+                    
+                    user.setSessionKey(sessionId);
+                    redisUserService.updateUser(user);
+                    
+                    setSessionUserInfo(session, user);
+                    repo.save(session);
+                }
+                else if(contextPath.equals("logout")){
                     HttpSession session = (HttpSession) request.getSession(false);
                     if(null != session){
                         ExpiringSession exSession = (ExpiringSession) repo.getSession(session.getId());
                         if(null != exSession){
-                            RedisUser user = (RedisUser) session.getAttribute(ShareokdataManager.getSessionRedisUserAttributeName());
-                            if(null != user){
-                                RedisUser userPersisted = redisUserService.findAuthenticatedUser(user.getEmail(), session.getId());
+                            String email = (String) session.getAttribute("email");
+                            if(null != email){
+                                redisUserService.invalidateUserSessionIdByEmail(email);
+                            }
+                            exSession.isExpired();
+                            repo.delete(exSession.getId());
+                        }
+                        session.invalidate();
+                    }
+                }
+                // *** The following situation applies to authentication logic based on session information ***
+                else {
+                    boolean sessionValidated = false;
+                    HttpSession session = (HttpSession) request.getSession(false);
+                    if(null != session){
+                        ExpiringSession exSession = (ExpiringSession) repo.getSession(session.getId());
+                        if(null != exSession && !exSession.isExpired()){
+                            String email = (String) session.getAttribute("email");
+                            if(null != email){
+                                RedisUser userPersisted = redisUserService.findAuthenticatedUser(email, session.getId());
                                 if(null != userPersisted){
                                     sessionValidated = true;
                                 }
@@ -120,9 +161,6 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
                         HttpServletResponse httpReponse = (HttpServletResponse)response;
                         httpReponse.sendRedirect("/webserv/login");
                     }
-                    else{
-                        ;
-                    }
                 }
             }
             else{
@@ -135,6 +173,9 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
             request.setAttribute("errorMessage", ex);
             request.getRequestDispatcher("/WEB-INF/jsp/userError.jsp").forward(request, response);
         } catch (UserRegisterInfoNotFoundException ex) {
+            request.setAttribute("errorMessage", ex);
+            request.getRequestDispatcher("/WEB-INF/jsp/userError.jsp").forward(request, response);
+        } catch (RegisterUserInfoExistedException ex) {
             request.setAttribute("errorMessage", ex);
             request.getRequestDispatcher("/WEB-INF/jsp/userError.jsp").forward(request, response);
         }

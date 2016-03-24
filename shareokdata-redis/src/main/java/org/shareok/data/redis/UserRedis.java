@@ -16,6 +16,7 @@ public interface UserRedis {
     public RedisUser findUserByUserId(long userId);
     public RedisUser findUserByUserEmail(String email);
     public RedisUser findAuthenticatedUser(String email, String sessionKey);
+    public void invalidateUserSessionIdByEmail(String email);
     public void deleteUserByUserId(long userId);
     public void deactivateUserByUserId(long userId);
 }

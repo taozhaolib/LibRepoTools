@@ -74,7 +74,7 @@ public class UserRedisImpl implements UserRedis {
                     operations.opsForHash().put("user:"+uid, "userId", uid);
                     operations.opsForHash().put("user:"+uid, "password", user.getPassword());
                     operations.opsForHash().put("user:"+uid, "isActive", String.valueOf(true));
-                    operations.opsForHash().put("user:"+uid, "sessionKey", (null != user.getSessionKey() ? user.getSessionKey() : RedisUtil.getRandomString()));
+                    operations.opsForHash().put("user:"+uid, "sessionKey", (null != user.getSessionKey() ? user.getSessionKey() : ""));
                     operations.opsForHash().put("user:"+uid, "startTime", (null != user.getStartTime() ? user.getStartTime().toString(): (new Date().toString())));
                     
                     operations.boundHashOps("users");
@@ -110,7 +110,7 @@ public class UserRedisImpl implements UserRedis {
                     operations.put(userKey, "email", user.getEmail());
                     operations.put(userKey, "password", user.getPassword());
                     operations.put(userKey, "isActive", String.valueOf(true));
-                    operations.put(userKey, "sessionKey", (null != user.getSessionKey() ? user.getSessionKey() : RedisUtil.getRandomString()));
+                    operations.put(userKey, "sessionKey", (null != user.getSessionKey() ? user.getSessionKey() : ""));
 
                     if(!oldUserEmail.equals(user.getEmail())){
                         operations.delete("users", oldUserEmail);
@@ -232,4 +232,10 @@ public class UserRedisImpl implements UserRedis {
         return user;
     }
 
+    @Override
+    public void invalidateUserSessionIdByEmail(String email){
+        RedisUser user = findUserByUserEmail(email);
+        user.setSessionKey("");
+        updateUser(user);
+    }
 }

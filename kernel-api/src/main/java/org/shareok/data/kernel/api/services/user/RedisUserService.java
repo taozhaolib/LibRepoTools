@@ -21,4 +21,5 @@ public interface RedisUserService {
     public RedisUser findAuthenticatedUser(String email, String sessionKey);
     //public void deleteUserByUserId(long userId);
     public void deactivateUserByUserId(long userId);
+    public void invalidateUserSessionIdByEmail(String email);
 }

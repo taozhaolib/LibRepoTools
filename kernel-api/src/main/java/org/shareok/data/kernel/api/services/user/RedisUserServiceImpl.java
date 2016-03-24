@@ -49,4 +49,9 @@ public class RedisUserServiceImpl implements RedisUserService{
     public RedisUser getNewUser(){
         return userRedis.getNewUser();
     }
+    
+    @Override
+    public void invalidateUserSessionIdByEmail(String email){
+        userRedis.invalidateUserSessionIdByEmail(email);
+    }
 }

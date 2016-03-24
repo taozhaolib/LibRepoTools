@@ -28,9 +28,7 @@
     
     <div class="container">
         <div class="page-header">
-            <h1>ShareOK Data Processing Center</h1>      
+            <span class="heading-text">Welcome to LibRepoTools</span><%@ include file="userInfo.jsp" %>      
         </div> 
     </div>
-    
-    <%@ include file="userInfo.jsp" %>
     

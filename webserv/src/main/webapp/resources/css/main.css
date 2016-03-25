@@ -9,14 +9,17 @@ and open the template in the editor.
 */
 
 .userInfo{
-    background-color: threedhighlight;
+    background-color: threedshadow;
     float: right;
     font-size: 14px;
+    text-align: center;
+    vertical-align: bottom;
     width: 300px;
     padding: 5px 10px 5px 10px;
 }
 
 .heading-text{
-    font-family: serif;
-    font-size: 30px;
+    font-family: initial;
+    font-weight: bolder;
+    font-size: 35px;
 }

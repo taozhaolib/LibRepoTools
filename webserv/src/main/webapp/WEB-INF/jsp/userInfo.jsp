@@ -8,6 +8,8 @@
    String welcome = "";
    String logText = "";
    String logTextHref = "";
+   String registerText = "";
+   String registerTextHref = "";
    if(null != session){
        String email = (String)session.getAttribute("email");
        if(null != email && !email.equals("")){
@@ -17,9 +19,11 @@
            logTextHref = "/webserv/logout";
        }
        else{
-           welcome = "Welcome";
-           logText = "Log in";
-           logTextHref = "/webserv/login";
+            welcome = "";
+            logText = "Log in";
+            logTextHref = "/webserv/login";
+            registerText = "Register";
+            registerTextHref = "/webserv/newUser";
        }
    }
 %>
@@ -27,7 +31,8 @@
 <div id="userIndoDiv" class="userInfo">
     <% out.print(welcome); %>
     <a id="logLink" class="logLinkClass" href="<% out.print(logTextHref); %>" > &nbsp; <% out.print(logText); %></a>
-    <% if(logText.equals("/webserv/login")) { %>
-        <a id="registerLink" class="logLinkClass" href="/webserv/register" >New User Register</a>
+    <% if(logText.equals("Log in")) { %>
+        &nbsp;&nbsp;&nbsp;<span>or</span>&nbsp;&nbsp;&nbsp;
+        <a id="registerLink" class="logLinkClass" href="/webserv/newUser" >Register</a>
     <% } %>
 </div>

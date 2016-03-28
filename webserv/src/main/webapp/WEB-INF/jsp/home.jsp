@@ -10,13 +10,9 @@
     <div class="container">
         <div class="jumbotron">
             <div class="panel panel-primary">
-                <div class="panel-heading"><h4>About ShareOK Data:</h4></div>
+                <div class="panel-heading"><h4>About LibRepoTools:</h4></div>
                 <div class="panel-body">
                     <center>
-                    <h4 class="ok">
-                
-                    ShareOK Data handles </BR><br/>
-                    </h4>
                     
                     <div class="well" style="width: 50%">Data import and export</div>
                        <div class="well" style="width: 50%">Data inter-platform migration</div>

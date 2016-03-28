@@ -25,8 +25,6 @@ import org.shareok.data.webserv.exceptions.NullSessionException;
 import org.shareok.data.webserv.exceptions.RegisterUserInfoExistedException;
 import org.shareok.data.webserv.exceptions.UserRegisterInfoNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.session.ExpiringSession;
 import org.springframework.session.Session;
 import org.springframework.session.SessionRepository;
@@ -46,7 +44,7 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
             String contextPath = request.getServletPath();
             if(contextPath.contains("/")){
                 contextPath = contextPath.split("/")[1];
-            }//.getContextPath();
+            }
             if(null != contextPath && !"".equals(contextPath) && ShareokdataManager.requiredUserAuthentication(contextPath)){
                 SessionRepository<Session> repo = (SessionRepository<Session>) request.getAttribute(SessionRepository.class.getName());
                 
@@ -85,7 +83,7 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
                         redisUserService.addUser(user);
                     }
                     
-                    setSessionUserInfo(session, user);
+                    setSessionUserInfo(session, httpSession, user);
                     repo.save(session);
                 }
                 else if(contextPath.equals("userLogin")){
@@ -115,7 +113,8 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
                     user.setSessionKey(sessionId);
                     redisUserService.updateUser(user);
                     
-                    setSessionUserInfo(session, user);
+                    setSessionUserInfo(session, httpSession, user);
+                    httpSession.setAttribute("email", email);
                     repo.save(session);
                 }
                 else if(contextPath.equals("logout")){
@@ -193,16 +192,24 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
         System.out.println("After completion handle");
     }
     
-    private void setSessionUserInfo(ExpiringSession session, RedisUser user){
+    private void setSessionUserInfo(ExpiringSession session, HttpSession httpSession, RedisUser user){
         
         try{
             if(null == session){
                 throw new NullSessionException("The ExpiringSession Session is NULL!");
             }
+            if(null == httpSession){
+                throw new NullSessionException("The Http Session is NULL!");
+            }
             if(null == user){
                 throw new NUllUserException("The User Information is NULL!");
             }
 
+            httpSession.setAttribute("userName", user.getUserName());
+            httpSession.setAttribute("email", user.getEmail());
+            httpSession.setAttribute("userId", user.getUserId());
+            httpSession.setAttribute("isActive", user.isIsActive());
+            
             session.setAttribute("userName", user.getUserName());
             session.setAttribute("email", user.getEmail());
             session.setAttribute("userId", user.getUserId());

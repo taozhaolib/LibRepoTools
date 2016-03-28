@@ -42,46 +42,17 @@ public class LoginPageController{
     
     @RequestMapping("/register")
     public ModelAndView register(HttpServletRequest req, HttpServletResponse res) {
-         ModelAndView model = new ModelAndView();
-         String email = (String)req.getParameter("email");
-         model.addObject("email", email);
-         HttpSession session = req.getSession();
-         if(null != session){
-            String userName = (String)session.getAttribute("userName");
-            model.addObject("userName", userName);
-            String userId = (String)session.getAttribute("userId");
-            model.addObject("userId", userId);
-            String isActive = (String)session.getAttribute("isActive");
-            model.addObject("isActive", isActive);
-         }
-         model.setViewName("home");
-
-         return model;
+         return new ModelAndView("redirect:home");
     }
     
     @RequestMapping("/userLogin")
-    public String userLogin(ModelMap model) {
-         
-
-         return "home";
+    public ModelAndView userLogin(HttpServletRequest req) {
+        
+        return new ModelAndView("redirect:home");
     }
     
     @RequestMapping("/logout")
     public ModelAndView logout(HttpServletRequest req, HttpServletResponse res) {
-         ModelAndView model = new ModelAndView();
-//         String email = (String)req.getParameter("email");
-//         model.addObject("email", email);
-//         HttpSession session = req.getSession();
-//         if(null != session){
-//            String userName = (String)session.getAttribute("userName");
-//            model.addObject("userName", userName);
-//            String userId = (String)session.getAttribute("userId");
-//            model.addObject("userId", userId);
-//            String isActive = (String)session.getAttribute("isActive");
-//            model.addObject("isActive", isActive);
-//         }
-         model.setViewName("home");
-
-         return model;
+        return new ModelAndView("redirect:home");
     }
 }

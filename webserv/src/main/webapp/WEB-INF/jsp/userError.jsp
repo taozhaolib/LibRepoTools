@@ -6,13 +6,26 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+    
+    <%@ include file="header.jsp" %>   
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>User Information Error</title>
     </head>
+    
+    <%
+        String errorMessage = (String)request.getAttribute("errorMessage");
+        errorMessage = (null == errorMessage || "".equals(errorMessage)) ? "" : errorMessage; 
+     %>
+
     <body>
-        <h1>Your user information does not match the records!</h1>
-        <h2>Error message: <%= request.getParameter("errorMessage") %> </h2>
+        <div class="container">
+        <div class="jumbotron">
+        <h4>Your user information does not match the records!</h4>
+        <h5>Error message: <%= errorMessage %> </h5>
+        <br>
+        <input type="button"  class="btn btn-form" onclick="location.href='/webserv/home'" value="Back to Home">
+        </div>
+        </div>
     </body>
 </html>

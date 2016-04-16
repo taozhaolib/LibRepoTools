@@ -18,7 +18,6 @@
                        <div class="well" style="width: 50%">Data inter-platform migration</div>
                        <div class="well" style="width: 50%">Data customization</div>
                        <div class="well" style="width: 50%">Data publication</div>
-                       <div class="well" style="width: 50%">Data standardization</div>
                     </center>
                 </div>
               </div>

@@ -106,7 +106,7 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
                     String sessionId = session.getId();
                     RedisUser user = redisUserService.findUserByUserEmail(email);
                     
-                    if(null == user){
+                    if(null == user || !password.equals(user.getPassword())){
                         throw new UserRegisterInfoNotFoundException("User information cannot be found!");
                     }
                     
@@ -166,16 +166,16 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
                 ;
             }
         } catch (IOException ex) {
-                request.setAttribute("errorMessage", ex);
+                request.setAttribute("errorMessage", ex.getMessage());
                 request.getRequestDispatcher("/WEB-INF/jsp/userError.jsp").forward(request, response);
         } catch (ServletException ex) {
-            request.setAttribute("errorMessage", ex);
+            request.setAttribute("errorMessage", ex.getMessage());
             request.getRequestDispatcher("/WEB-INF/jsp/userError.jsp").forward(request, response);
         } catch (UserRegisterInfoNotFoundException ex) {
-            request.setAttribute("errorMessage", ex);
+            request.setAttribute("errorMessage", ex.getMessage());
             request.getRequestDispatcher("/WEB-INF/jsp/userError.jsp").forward(request, response);
         } catch (RegisterUserInfoExistedException ex) {
-            request.setAttribute("errorMessage", ex);
+            request.setAttribute("errorMessage", ex.getMessage());
             request.getRequestDispatcher("/WEB-INF/jsp/userError.jsp").forward(request, response);
         }
          

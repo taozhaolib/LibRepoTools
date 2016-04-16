@@ -28,7 +28,7 @@
                                 </div>
                                 <br/><br/>
                                 <div class="form-group">
-                                    <label class="control-label col-sm-2" for="nickname">Nick name (optional): </label>
+                                    <label class="control-label col-sm-2" for="nickname">Nick name (Recommended): </label>
                                     <div class="col-sm-10">
                                        <input type="text" class="form-control" name="nickname">
                                     </div>

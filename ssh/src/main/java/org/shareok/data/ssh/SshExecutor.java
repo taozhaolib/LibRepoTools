@@ -12,6 +12,7 @@ import com.jcraft.jsch.*;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Properties;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
@@ -55,6 +56,7 @@ public class SshExecutor {
         this.charset = charset;
     }
 
+    @Autowired
     public void setSshConnector(SshConnector sshConnector) {
         this.sshConnector = sshConnector;
     }
@@ -112,7 +114,7 @@ public class SshExecutor {
      */
     public void execCmd(String command) {
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        //BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         BufferedReader reader = null;
 
         try {

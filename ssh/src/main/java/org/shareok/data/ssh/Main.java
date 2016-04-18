@@ -26,8 +26,10 @@ public class Main {
         exec.setSshConnector(connector);
         try{
             //exec.getConnect();
-            //exec.upload("/home/vagrant", "/Users/zhao0677/Documents/plos_articles.xlsx");
-            exec.execCmd("sudo /srv/dspace/bin/dspace version");
+            //exec.upload("/home/vagrant", "/Users/zhao0677/Projects/shareokdata/test-load.zip");
+            //exec.execCmd("sudo /srv/dspace/bin/dspace version");
+            //exec.execCmd("sudo unzip /home/vagrant/test-load.zip");
+            exec.execCmd("sudo /srv/dspace/bin/dspace import --add --eperson=tao.zhao@ou.edu --collection=123456789/2 --source=/home/vagrant/test-load --mapfile=/home/vagrant/mapfile");
         }
         catch(Exception jex){
             jex.printStackTrace();

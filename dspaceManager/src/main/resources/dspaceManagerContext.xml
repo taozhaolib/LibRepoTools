@@ -10,6 +10,10 @@
     <context:annotation-config />
     
     <import resource="classpath*:**/documentProcessorContext.xml"/>
+    <import resource="classpath*:**/sshContext.xml"/>
     
+    <bean id="dspaceSshHandler" class="org.shareok.data.dspacemanager.DspaceSshHandler">
+        
+    </bean>
 </beans>
 

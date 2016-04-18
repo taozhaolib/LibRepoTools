@@ -83,8 +83,9 @@ public class FileUtil {
     }
     
     /**
-     *
-     * @param fileName
+     * Get the file path without extension
+     * 
+     * @param fileName : full path of the file
      * @return
      */
     public static String getFileNameWithoutExtension(String fileName) {

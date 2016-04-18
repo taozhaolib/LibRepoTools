@@ -25,5 +25,9 @@
 
     </bean>
     
+    <bean id="dspaceSshServiceImpl" class="org.shareok.data.kernel.api.services.dspace.DspaceSshServiceImpl">
+        
+    </bean>
+    
 </beans>
 

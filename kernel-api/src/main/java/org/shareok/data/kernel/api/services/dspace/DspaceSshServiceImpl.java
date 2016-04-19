@@ -7,11 +7,13 @@ package org.shareok.data.kernel.api.services.dspace;
 
 import org.shareok.data.dspacemanager.DspaceSshHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Tao Zhao
  */
+@Service
 public class DspaceSshServiceImpl implements DspaceSshService {
     private DspaceSshHandler handler;
 
@@ -19,6 +21,7 @@ public class DspaceSshServiceImpl implements DspaceSshService {
         return handler;
     }
 
+    @Override
     @Autowired
     public void setHandler(DspaceSshHandler handler) {
         this.handler = handler;

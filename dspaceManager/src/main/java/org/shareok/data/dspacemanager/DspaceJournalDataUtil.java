@@ -17,6 +17,9 @@ import java.util.logging.Logger;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.documentProcessor.FileZipper;
+import org.shareok.data.ssh.SshExecutor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -71,10 +74,10 @@ public class DspaceJournalDataUtil {
         int length = filePathInfo.length;
         
         String folderPath = filePathInfo[length-3] + File.separator + filePathInfo[length-2] + File.separator;
-        String oldFileLink = File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "journal" + File.separator + folderPath + filePathInfo[length-1] + File.separator;
+        String oldFileLink = File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "journal" + File.separator + folderPath + filePathInfo[length-1];
         downloadLinks.put("oldFile", oldFileLink);
         
-        String loadingFileLink = File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "journal" + File.separator + folderPath + "output.zip" + File.separator;
+        String loadingFileLink = File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "journal" + File.separator + folderPath + "output.zip";
         downloadLinks.put("loadingFile", loadingFileLink);
         
         return downloadLinks;
@@ -141,5 +144,16 @@ public class DspaceJournalDataUtil {
      */
     public static String getSampleDublinCoreLink(){
         return File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "journal" + File.separator + "sampleDC.xml";
+    }
+    
+    public static String getImportFilePath(String uploadFileName, String publisher){
+        return ShareokdataManager.getShareokdataPath() + File.separator + "uploads" + File.separator +
+                publisher + File.separator + uploadFileName;
+    }
+    
+    public static SshExecutor getSshExecForDspace(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("sshContext.xml");
+        SshExecutor sshExecutor = (SshExecutor)context.getBean("sshExecutor");
+        return sshExecutor;
     }
 }

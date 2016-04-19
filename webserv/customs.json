@@ -1,5 +1,7 @@
 {
-    "elements": {},
+    "elements": {
+        "c:set": {}
+    },
     "attributes": {
         "size": {
             "context": "input"

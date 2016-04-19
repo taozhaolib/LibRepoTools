@@ -100,13 +100,15 @@ public class JournalDataController {
                 String filePath = DspaceJournalServiceManager.getDspaceJournalDataService(publisher).getDsapceJournalLoadingFiles(file);
                 // Some logic to process the file path to get download links:
                 Map downloadLinks = DspaceJournalDataUtil.getDspaceDownloadLinks(filePath);
+                String downloadLink = (String)downloadLinks.get("loadingFile");
                 String sampleDublinCoreLink = DspaceJournalDataUtil.getSampleDublinCoreLink();
                 ModelAndView model = new ModelAndView();
                 model.setViewName("journalDataUpload");
                 model.addObject("oldFile", (String)downloadLinks.get("oldFile"));
-                model.addObject("loadingFile", (String)downloadLinks.get("loadingFile"));
+                model.addObject("loadingFile", downloadLink);
                 model.addObject("sampleDublinCore", sampleDublinCoreLink);
                 model.addObject("publisher", publisher);
+                model.addObject("uploadFile", downloadLink.split("/journal/"+publisher+"/")[1]);
                 return model;
             } catch (Exception e) {
                 Logger.getLogger(JournalDataController.class.getName()).log(Level.SEVERE, null, e);

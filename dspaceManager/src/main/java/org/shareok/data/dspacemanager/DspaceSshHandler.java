@@ -6,14 +6,15 @@
 package org.shareok.data.dspacemanager;
 
 import java.io.File;
-import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.ssh.SshExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Tao Zhao
  */
+@Service
 public class DspaceSshHandler {
     private String uploadDst;
     private String uploadFile; // *** suppose the uploaded file is a ZIP file ***
@@ -115,10 +116,11 @@ public class DspaceSshHandler {
         //exec.upload("/home/vagrant", "/Users/zhao0677/Projects/shareokdata/test-load.zip");
         String uploadFileName = new File(uploadFile).getName();
         String uploadFileNameWithoutExtension = uploadFileName.split("\\.")[0];
-        String unzipCommand = "sudo tar -xvf " + uploadDst + File.separator + uploadFileName;
+        String unzipCommand = "sudo unzip -o " + uploadDst + File.separator + uploadFileName;
+        //String unzipCommand = "sudo tar -xvf " + uploadDst + File.separator + uploadFileName;
         String importCommand = "sudo " + dspaceDirectory + File.separator + "bin" + File.separator + 
                                "dspace import --add " + "--eperson=" + dspaceUser + " --collection=" + collectionId +
-                               " --source=" + uploadDst + File.separator + "  " + uploadFileNameWithoutExtension + " --mapfile=" + uploadDst +
+                               " --source=" + uploadDst + File.separator + uploadFileNameWithoutExtension + " --mapfile=" + uploadDst +
                                File.separator + "mapfile";
         //sudo unzip /home/vagrant//Users/zhao0677/Projects/shareokdata/test-load.zip
         //sudo /srv/dspace/bin/dspace import --add --eperson=tao.zhao@ou.edu --collection=123456789/2 --source=/home/vagrant//Users/zhao0677/Projects/shareokdata/test-load.zip --mapfile=/home/vagrant/mapfile

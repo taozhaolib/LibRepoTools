@@ -47,6 +47,13 @@ public class ShareokdataManager {
         prop = properties;
     }
     
+    public static String getShareokdataPath(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("shareokdataPath");
+    }
+    
     public static String getSageUploadPath(){
         if(null == prop){
             loadProperties();

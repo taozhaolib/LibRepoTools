@@ -13,11 +13,13 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Properties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Tao Zhao
  */
+@Service
 public class SshExecutor {
 
 

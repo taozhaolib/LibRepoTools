@@ -21,7 +21,7 @@
                         <input type="file" name="file" />
                         <br />
                         <!-- <button type="button" class="btn btn-primary btn-md">Upload File</button> -->
-                        <input type="submit" class="btn btn-info btn-primary" value="Upload File">
+                        <input type="submit" class="btn btn-info btn-primary" value="Generate the Simple Archive Format">
                         </form>
                     <BR>
                     <BR>
@@ -29,7 +29,7 @@
                         <h4>Download the original uploaded file and the DSpace simple archive format files:</h4>
                         <a href="${oldFile}" class="btn btn-info btn-sm" role="button">Download the Uploaded File</a>
                         &nbsp;&nbsp;
-                        <a href="${loadingFile}" class="btn btn-info btn-sm" role="button">Download the Simple Archive Format Files</a>
+                        <a href="${loadingFile}" class="btn btn-info btn-sm" role="button">Download the Simple Archive Format</a>
                         <BR><BR>
                     </div>
                     <BR>

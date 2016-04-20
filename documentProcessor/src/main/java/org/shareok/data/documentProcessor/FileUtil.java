@@ -10,10 +10,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -258,5 +263,35 @@ public class FileUtil {
     		file.delete();
     		System.out.println("File is deleted : " + file.getAbsolutePath());
     	}
+    }
+    
+    public static String saveMultipartFileByTimePath(MultipartFile file, String uploadPath){
+        String uploadedFilePath = null;
+        try{
+            String oldFileName = file.getOriginalFilename();
+            String extension = FileUtil.getFileExtension(oldFileName);
+            oldFileName = FileUtil.getFileNameWithoutExtension(oldFileName);
+            //In the future the new file name will also has the user name
+            String time = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+            String newFileName = oldFileName + "." + extension;
+            
+            if(null != uploadPath){
+                File uploadFolder = new File(uploadPath);
+                if(!uploadFolder.exists()){
+                    uploadFolder.mkdir();
+                }
+                File uploadTimeFolder = new File(uploadPath + File.separator + time);
+                if(!uploadTimeFolder.exists()){
+                    uploadTimeFolder.mkdir();
+                }
+            }
+            uploadedFilePath = uploadPath + File.separator + time + File.separator + newFileName;
+            File uploadedFile = new File(uploadedFilePath);
+            file.transferTo(uploadedFile);
+        }
+        catch(Exception ex){
+            Logger.getLogger(FileUtil.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return uploadedFilePath;
     }
 }

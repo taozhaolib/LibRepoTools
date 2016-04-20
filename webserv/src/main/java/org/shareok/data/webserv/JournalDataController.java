@@ -102,13 +102,15 @@ public class JournalDataController {
                 Map downloadLinks = DspaceJournalDataUtil.getDspaceDownloadLinks(filePath);
                 String downloadLink = (String)downloadLinks.get("loadingFile");
                 String sampleDublinCoreLink = DspaceJournalDataUtil.getSampleDublinCoreLink();
+                String uploadFileLink = downloadLink.split("/journal/"+publisher+"/")[1];
+                uploadFileLink = uploadFileLink.substring(0, uploadFileLink.length()-1);
                 ModelAndView model = new ModelAndView();
                 model.setViewName("journalDataUpload");
                 model.addObject("oldFile", (String)downloadLinks.get("oldFile"));
                 model.addObject("loadingFile", downloadLink);
                 model.addObject("sampleDublinCore", sampleDublinCoreLink);
                 model.addObject("publisher", publisher);
-                model.addObject("uploadFile", downloadLink.split("/journal/"+publisher+"/")[1]);
+                model.addObject("uploadFile", uploadFileLink);
                 return model;
             } catch (Exception e) {
                 Logger.getLogger(JournalDataController.class.getName()).log(Level.SEVERE, null, e);

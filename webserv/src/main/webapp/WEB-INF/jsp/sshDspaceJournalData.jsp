@@ -4,14 +4,28 @@
     Author     : Tao Zhao
 --%>
 <!-- This block of code requires a value of publisher -->
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <div class="container">
+    
     <div class="jumbotron">
         <div class="panel panel-primary">
-            <div class="panel-heading"><h4>Importing the simple archive format files into the DSpace repository:</h4></div>
+            <div class="panel-heading"><h4>Importing the simple archive format into DSpace repository:</h4></div>
             <div class="panel-body">
                 <center>
-                    <form role="form" action="/webserv/ssh/dspace/journal/${publisher}/import" method="post" enctype="multipart/form-data">
+                    
+                    <c:if test="${not empty view}">
+                        <form role="form" action="/webserv/ssh/dspace/saf/import" method="post" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label class="control-label col-sm-2" for="saf">Upload the simple archive format:</label>
+                            <div class="col-sm-10">
+                                <input type="file" class="file-input" name="saf" />
+                            </div>
+                        </div><br/><br/><br/>
+                    </c:if>
+                    <c:if test="${empty view}">
+                        <form role="form" action="/webserv/ssh/dspace/journal/${publisher}/import" method="post" enctype="multipart/form-data">
+                    </c:if>
                         <div class="form-group">
                             <label class="control-label col-sm-2" for="host">Dspace Host:</label>
                             <div class="col-sm-10">

@@ -112,7 +112,7 @@ public class SshExecutor {
     /**
      * Execute commands on remote server
      * 
-     * @param command : command to be executed
+     * @param command : command to be executed. Multiple commands are separated by ';;'
      */
     public void execCmd(String command) {
 
@@ -121,7 +121,8 @@ public class SshExecutor {
 
         try {
             getConnect();
-            //while ((command = br.readLine()) != null) {
+//            String[]commands = command.split(";;");
+//            for(String commandLine : commands){
                 channel = session.openChannel("exec");
                 ((ChannelExec) channel).setCommand(command);
                 channel.setInputStream(null);
@@ -136,7 +137,7 @@ public class SshExecutor {
                     //logger.debug(buf);
                     System.out.println(buf);
                 }
-           // }
+//            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSchException e) {

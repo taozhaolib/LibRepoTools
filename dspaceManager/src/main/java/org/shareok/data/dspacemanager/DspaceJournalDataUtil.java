@@ -74,10 +74,10 @@ public class DspaceJournalDataUtil {
         int length = filePathInfo.length;
         
         String folderPath = filePathInfo[length-3] + File.separator + filePathInfo[length-2] + File.separator;
-        String oldFileLink = File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "journal" + File.separator + folderPath + filePathInfo[length-1];
+        String oldFileLink = File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "journal" + File.separator + folderPath + filePathInfo[length-1] + File.separator;
         downloadLinks.put("oldFile", oldFileLink);
         
-        String loadingFileLink = File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "journal" + File.separator + folderPath + "output.zip";
+        String loadingFileLink = File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "journal" + File.separator + folderPath + "output.zip" + File.separator;
         downloadLinks.put("loadingFile", loadingFileLink);
         
         return downloadLinks;

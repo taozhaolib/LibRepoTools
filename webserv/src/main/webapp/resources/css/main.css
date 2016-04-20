@@ -27,3 +27,9 @@ and open the template in the editor.
 input.btn-form{
     background-color: #5bc0de;
 }
+
+.file-input{
+    height: 30px;
+    float: left;
+    margin-left: 2px;
+}

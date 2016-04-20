@@ -68,6 +68,13 @@ public class ShareokdataManager {
         return prop.getProperty("plosUploadPath");
     }
     
+    public static String getSafUploadPath(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("safUploadPath");
+    }
+    
     public static String getUploadPathFunction(String publisher){
         if(null == prop){
             loadProperties();

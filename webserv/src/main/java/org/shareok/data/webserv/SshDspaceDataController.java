@@ -8,6 +8,7 @@ package org.shareok.data.webserv;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
+import org.shareok.data.dspacemanager.DspaceSafUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
 import org.shareok.data.kernel.api.services.dspace.DspaceSshService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 
@@ -61,4 +64,37 @@ public class SshDspaceDataController {
         }
         return null;
    }
+    
+    @RequestMapping(value="/ssh/dspace/saf/page", method=RequestMethod.GET)
+    public ModelAndView sshDspaceSaFImporterPage() {
+       
+        ModelAndView model = new ModelAndView();
+        model.addObject("view", "sshDspaceSafImport");
+        model.setViewName("sshDspaceSafImport");
+        return model;
+    }
+    
+    @RequestMapping(value="/ssh/dspace/saf/import", method=RequestMethod.POST)
+    public ModelAndView sshDspaceSafImport(@ModelAttribute("SpringWeb")DspaceSshHandler handler, @RequestParam("saf") MultipartFile file) {
+        if (!file.isEmpty()) {
+            try {
+                String uploadFile = DspaceSafUtil.saveUploadedData(file);
+                handler.setUploadFile(uploadFile);
+                ModelAndView model = new ModelAndView();
+                model.addObject("view", "sshDspaceSafImport");
+                model.setViewName("sshDspaceSafImport");
+                if(null == handler.getSshExec()){
+                    handler.setSshExec(DspaceJournalDataUtil.getSshExecForDspace());
+                }
+                dsSshService.setHandler(handler);
+                dsSshService.sshImportData();
+                return model;
+            } catch (Exception e) {
+                Logger.getLogger(JournalDataController.class.getName()).log(Level.SEVERE, null, e);
+            }
+        } else {
+            return null;
+        }
+        return null;
+    }
 }

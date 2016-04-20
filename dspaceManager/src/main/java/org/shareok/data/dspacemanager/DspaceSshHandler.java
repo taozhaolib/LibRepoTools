@@ -6,6 +6,8 @@
 package org.shareok.data.dspacemanager;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import org.shareok.data.ssh.SshExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -113,22 +115,23 @@ public class DspaceSshHandler {
         try{
         //The executing user may be "dspace" or something else, so may be a user-switching 
         //command is needed before the import command      
-        //exec.upload("/home/vagrant", "/Users/zhao0677/Projects/shareokdata/test-load.zip");
+        String time = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
         String uploadFileName = new File(uploadFile).getName();
         String uploadFileNameWithoutExtension = uploadFileName.split("\\.")[0];
-        String unzipCommand = "sudo unzip -o " + uploadDst + File.separator + uploadFileName;
+        String newDirCommand = "sudo -u " + userName + " mkdir " + uploadDst + File.separator + time;
+        String unzipCommand = "sudo -u " + userName + " unzip -o " + uploadDst + File.separator + time + File.separator + uploadFileName + " -d " + uploadDst + File.separator + time;
         //String unzipCommand = "sudo tar -xvf " + uploadDst + File.separator + uploadFileName;
         String importCommand = "sudo " + dspaceDirectory + File.separator + "bin" + File.separator + 
                                "dspace import --add " + "--eperson=" + dspaceUser + " --collection=" + collectionId +
-                               " --source=" + uploadDst + File.separator + uploadFileNameWithoutExtension + " --mapfile=" + uploadDst +
-                               File.separator + "mapfile";
-        //sudo unzip /home/vagrant//Users/zhao0677/Projects/shareokdata/test-load.zip
-        //sudo /srv/dspace/bin/dspace import --add --eperson=tao.zhao@ou.edu --collection=123456789/2 --source=/home/vagrant//Users/zhao0677/Projects/shareokdata/test-load.zip --mapfile=/home/vagrant/mapfile
+                               " --source=" + uploadDst + File.separator + time + File.separator + uploadFileNameWithoutExtension + " --mapfile=" + uploadDst +
+                               File.separator + time + File.separator + "mapfile";
+        //importCommand = newDirCommand + ";;" + unzipCommand + ";;" + importCommand;
         sshExec.getSshConnector().setHost(host);
         sshExec.getSshConnector().setPort(port);
         sshExec.getSshConnector().setUserName(userName);
         sshExec.getSshConnector().setPassword(password);
-        sshExec.upload(uploadDst, uploadFile);
+        sshExec.execCmd(newDirCommand);
+        sshExec.upload(uploadDst + File.separator + time, uploadFile);        
         sshExec.execCmd(unzipCommand);
         sshExec.execCmd(importCommand);
         }

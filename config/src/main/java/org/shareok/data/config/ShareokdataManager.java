@@ -133,4 +133,11 @@ public class ShareokdataManager {
         }
         return prop.getProperty("sessionUserAttributeName");
     }
+    
+    public static String getReportSshDspaceImport(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("reportSshDspaceImport");
+    }
 }

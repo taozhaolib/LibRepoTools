@@ -13,6 +13,8 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Properties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Service;
 
 /**
@@ -29,6 +31,7 @@ public class SshExecutor {
     protected Session session;
     protected Channel channel;
     protected ChannelSftp chSftp;
+    protected String logger;
 
     public String getCharset() {
         return charset;
@@ -78,6 +81,14 @@ public class SshExecutor {
     public void setChSftp(ChannelSftp chSftp) {
         this.chSftp = chSftp;
     }
+
+    public String getLogger() {
+        return logger;
+    }
+
+    public void setLogger(String logger) {
+        this.logger = logger;
+    }
     
     /**
      * Connect to Server
@@ -94,6 +105,7 @@ public class SshExecutor {
         
         jsch = new JSch();
         session = jsch.getSession(userName, host, port);
+        addLogger("New Session created.");
         //logger.debug("Session created.");
         if (password != null) {
             session.setPassword(password);
@@ -103,7 +115,9 @@ public class SshExecutor {
         session.setConfig(config);
         session.setTimeout(timeout);
         session.connect();
-        System.out.println("Connected successfully to remote Server = \"" + host + "\",as user name = \"" + userName + "\", as port =  \"" + port + "\"");
+        //System.out.println("Connected successfully to remote Server = \"" + host + "\",as user name = \"" + userName + "\", as port =  \"" + port + "\"");
+        addLogger("Session connected.");
+        addLogger("Connected successfully to remote Server = " + host + ",as user name = " + userName + ",as port =  " + port);
 //        logger.debug("Session connected.");
 //        logger.debug("Connected successfully to DSpace Server = " + host + ",as user name = " + userName
 //                + ",as port =  " + port);
@@ -135,7 +149,8 @@ public class SshExecutor {
                 String buf = null;
                 while ((buf = reader.readLine()) != null) {
                     //logger.debug(buf);
-                    System.out.println(buf);
+                    //System.out.println(buf);
+                    addLogger(buf);
                 }
 //            }
         } catch (IOException e) {
@@ -162,6 +177,7 @@ public class SshExecutor {
     public void upload(String directory, String uploadFile) {
         try {
             getConnect();
+            addLogger("Opening Channel.");
             //logger.debug("Opening Channel.");
             channel = session.openChannel("sftp");
             channel.connect();
@@ -185,8 +201,9 @@ public class SshExecutor {
 //                 } while (read >= 0);
 //              //   logger.debug("input stream read done.");
 //             }
-
-            chSftp.put(uploadFile, directory, new FileProgressMonitor(fileSize), ChannelSftp.OVERWRITE); // Method 2
+            FileProgressMonitor monitor = getFileProgressMonitor(fileSize);
+            chSftp.put(uploadFile, directory, monitor, ChannelSftp.OVERWRITE); // Method 2
+            addLogger(monitor.getLogger());
 
             // chSftp.put(new FileInputStream(src), dst, new FileProgressMonitor(fileSize), ChannelSftp.OVERWRITE); // Method 3
 
@@ -197,14 +214,28 @@ public class SshExecutor {
 
             if (channel != null) {
                 channel.disconnect();
+                addLogger("channel disconnect");
                 //logger.debug("channel disconnect");
             }
             if (session != null) {
                 session.disconnect();
+                addLogger("channel disconnect");
                 //logger.debug("channel disconnect");
             }
-            System.out.println("File at  <"+ uploadFile + " has been successfully uploaded to remote server at : \"" + directory + "\".");
+            addLogger("File at  <"+ uploadFile + " has been successfully uploaded to remote server at : \"" + directory + "\".");
+            //System.out.println("File at  <"+ uploadFile + " has been successfully uploaded to remote server at : \"" + directory + "\".");
         }
+    }
+    
+    public void addLogger(String info){
+        logger = logger.concat(info + "\n\n");
+    }
+    
+    private FileProgressMonitor getFileProgressMonitor(long fileSize){
+        ApplicationContext context = new ClassPathXmlApplicationContext("sshContext.xml");
+        FileProgressMonitor monitor = (FileProgressMonitor)context.getBean("fileProgressMonitor");
+        monitor.setTransfered(fileSize);
+        return monitor;
     }
 
 

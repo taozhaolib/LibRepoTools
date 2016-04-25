@@ -8,6 +8,10 @@ package org.shareok.data.dspacemanager;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.ssh.SshExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +22,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class DspaceSshHandler {
+    private String logger;
     private String uploadDst;
     private String uploadFile; // *** suppose the uploaded file is a ZIP file ***
     private String host;
@@ -29,6 +34,10 @@ public class DspaceSshHandler {
     private String collectionId;
     private SshExecutor sshExec;
     //private String mapfilePath;
+
+    public String getLogger() {
+        return logger;
+    }
 
     public String getUploadDst() {
         return uploadDst;
@@ -64,6 +73,10 @@ public class DspaceSshHandler {
 
     public String getCollectionId() {
         return collectionId;
+    }
+
+    public void setLogger(String logger) {
+        this.logger = logger;
     }
 
     public void setUploadDst(String uploadDst) {
@@ -113,30 +126,35 @@ public class DspaceSshHandler {
     
     public void importDspace(){
         try{
-        //The executing user may be "dspace" or something else, so may be a user-switching 
-        //command is needed before the import command      
-        String time = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-        String uploadFileName = new File(uploadFile).getName();
-        String uploadFileNameWithoutExtension = uploadFileName.split("\\.")[0];
-        String newDirCommand = "sudo -u " + userName + " mkdir " + uploadDst + File.separator + time;
-        String unzipCommand = "sudo -u " + userName + " unzip -o " + uploadDst + File.separator + time + File.separator + uploadFileName + " -d " + uploadDst + File.separator + time;
-        //String unzipCommand = "sudo tar -xvf " + uploadDst + File.separator + uploadFileName;
-        String importCommand = "sudo " + dspaceDirectory + File.separator + "bin" + File.separator + 
-                               "dspace import --add " + "--eperson=" + dspaceUser + " --collection=" + collectionId +
-                               " --source=" + uploadDst + File.separator + time + File.separator + uploadFileNameWithoutExtension + " --mapfile=" + uploadDst +
-                               File.separator + time + File.separator + "mapfile";
-        //importCommand = newDirCommand + ";;" + unzipCommand + ";;" + importCommand;
-        sshExec.getSshConnector().setHost(host);
-        sshExec.getSshConnector().setPort(port);
-        sshExec.getSshConnector().setUserName(userName);
-        sshExec.getSshConnector().setPassword(password);
-        sshExec.execCmd(newDirCommand);
-        sshExec.upload(uploadDst + File.separator + time, uploadFile);        
-        sshExec.execCmd(unzipCommand);
-        sshExec.execCmd(importCommand);
+            //The executing user may be "dspace" or something else, so may be a user-switching 
+            //command is needed before the import command      
+            String time = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+            String uploadFileName = new File(uploadFile).getName();
+            String uploadFileNameWithoutExtension = uploadFileName.split("\\.")[0];
+            String newDirCommand = "sudo -u " + userName + " mkdir " + uploadDst + File.separator + time;
+            String unzipCommand = "sudo -u " + userName + " unzip -o " + uploadDst + File.separator + time + File.separator + uploadFileName + " -d " + uploadDst + File.separator + time;
+            //String unzipCommand = "sudo tar -xvf " + uploadDst + File.separator + uploadFileName;
+            String importCommand = "sudo " + dspaceDirectory + File.separator + "bin" + File.separator + 
+                                   "dspace import --add " + "--eperson=" + dspaceUser + " --collection=" + collectionId +
+                                   " --source=" + uploadDst + File.separator + time + File.separator + uploadFileNameWithoutExtension + " --mapfile=" + uploadDst +
+                                   File.separator + time + File.separator + "mapfile";
+            //importCommand = newDirCommand + ";;" + unzipCommand + ";;" + importCommand;
+            sshExec.getSshConnector().setHost(host);
+            sshExec.getSshConnector().setPort(port);
+            sshExec.getSshConnector().setUserName(userName);
+            sshExec.getSshConnector().setPassword(password);
+            sshExec.execCmd(newDirCommand);
+            sshExec.upload(uploadDst + File.separator + time, uploadFile);        
+            sshExec.execCmd(unzipCommand);
+            sshExec.execCmd(importCommand);
+            String loggingFile = ShareokdataManager.getReportSshDspaceImport() + File.separator + host + File.separator + time + ".txt";
+            FileUtil.outputStringToFile(sshExec.getLogger(), loggingFile);
+            sshExec.addLogger("The importing logging information has been saved to file : " + loggingFile);
+            setLogger(sshExec.getLogger());
         }
         catch(Exception ex){
-            ex.printStackTrace();
+            Logger.getLogger(DspaceSshHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
 }

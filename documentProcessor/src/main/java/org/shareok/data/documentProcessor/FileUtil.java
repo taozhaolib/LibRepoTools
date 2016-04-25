@@ -8,6 +8,8 @@ package org.shareok.data.documentProcessor;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -293,5 +295,25 @@ public class FileUtil {
             Logger.getLogger(FileUtil.class.getName()).log(Level.SEVERE, null, ex);
         }
         return uploadedFilePath;
+    }
+    
+    public static void outputStringToFile(String loggingIngo, String filePath){
+        try{
+            File file = new File(filePath);
+            FileOutputStream op = new FileOutputStream(file);
+            if(!file.exists()){
+                file.createNewFile();
+                byte[] loggingIngoBytes = loggingIngo.getBytes();
+                op.write(loggingIngoBytes);
+                op.flush();
+                op.close();
+            }
+        }
+        catch(FileNotFoundException ex){
+            Logger.getLogger(FileUtil.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch(IOException ex){
+            Logger.getLogger(FileUtil.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

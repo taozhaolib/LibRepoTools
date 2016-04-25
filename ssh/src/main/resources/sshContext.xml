@@ -18,11 +18,16 @@
         
     <bean id="fileProgressMonitor" class="org.shareok.data.ssh.FileProgressMonitor">
         <constructor-arg type="long" value="0"/>
+        <property name="logger" value="" />
     </bean>
+    
     <bean id="sshConnector" class="org.shareok.data.ssh.SshConnector" >
         <property name="timeout" value="5000" />
     </bean>
-    <bean id="sshExecutor" class="org.shareok.data.ssh.SshExecutor" />
+    
+    <bean id="sshExecutor" class="org.shareok.data.ssh.SshExecutor" >
+        <property name="logger" value="" />
+    </bean>
  
 </beans>
 

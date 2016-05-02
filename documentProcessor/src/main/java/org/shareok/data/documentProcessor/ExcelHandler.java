@@ -190,8 +190,8 @@ public class ExcelHandler implements FileHandler {
             }
             file.close();
         
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ExcelHandler.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(ExcelHandler.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {

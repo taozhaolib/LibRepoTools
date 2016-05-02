@@ -32,6 +32,7 @@ public class SshExecutor {
     protected Channel channel;
     protected ChannelSftp chSftp;
     protected String logger;
+    protected boolean connected;
 
     public String getCharset() {
         return charset;
@@ -89,6 +90,14 @@ public class SshExecutor {
     public void setLogger(String logger) {
         this.logger = logger;
     }
+
+    public boolean isConnected() {
+        return connected;
+    }
+
+    public void setConnected(boolean connected) {
+        this.connected = connected;
+    }
     
     /**
      * Connect to Server
@@ -96,6 +105,10 @@ public class SshExecutor {
      * @throws com.jcraft.jsch.JSchException
      */
     public void getConnect() throws JSchException {
+        
+        if(isConnected()){
+            return;
+        }
         
         String userName = sshConnector.getUserName();
         String host = sshConnector.getHost();
@@ -115,6 +128,7 @@ public class SshExecutor {
         session.setConfig(config);
         session.setTimeout(timeout);
         session.connect();
+        setConnected(true);
         //System.out.println("Connected successfully to remote Server = \"" + host + "\",as user name = \"" + userName + "\", as port =  \"" + port + "\"");
         addLogger("Session connected.");
         addLogger("Connected successfully to remote Server = " + host + ",as user name = " + userName + ",as port =  " + port);
@@ -126,9 +140,9 @@ public class SshExecutor {
     /**
      * Execute commands on remote server
      * 
-     * @param command : command to be executed. Multiple commands are separated by ';;'
+     * @param commands : String[] commands to be executed. Multiple commands are separated by ';;'
      */
-    public void execCmd(String command) {
+    public void execCmd(String[] commands) {
 
         //BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         BufferedReader reader = null;
@@ -136,7 +150,7 @@ public class SshExecutor {
         try {
             getConnect();
 //            String[]commands = command.split(";;");
-//            for(String commandLine : commands){
+            for(String command : commands){
                 channel = session.openChannel("exec");
                 ((ChannelExec) channel).setCommand(command);
                 channel.setInputStream(null);
@@ -152,7 +166,7 @@ public class SshExecutor {
                     //System.out.println(buf);
                     addLogger(buf);
                 }
-//            }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSchException e) {
@@ -165,7 +179,13 @@ public class SshExecutor {
             }
             channel.disconnect();
             session.disconnect();
+            setConnected(false);
         }
+    }
+    
+    public void execCmd(String command) {
+        String[] commands = {command};
+        execCmd(commands);
     }
 
     /**
@@ -222,6 +242,7 @@ public class SshExecutor {
                 addLogger("channel disconnect");
                 //logger.debug("channel disconnect");
             }
+            setConnected(false);
             addLogger("File at  <"+ uploadFile + " has been successfully uploaded to remote server at : \"" + directory + "\".");
             //System.out.println("File at  <"+ uploadFile + " has been successfully uploaded to remote server at : \"" + directory + "\".");
         }

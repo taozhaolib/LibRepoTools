@@ -299,15 +299,15 @@ public class FileUtil {
     
     public static void outputStringToFile(String loggingIngo, String filePath){
         try{
-            File file = new File(filePath);
-            FileOutputStream op = new FileOutputStream(file);
+            File file = new File(filePath);            
             if(!file.exists()){
-                file.createNewFile();
-                byte[] loggingIngoBytes = loggingIngo.getBytes();
-                op.write(loggingIngoBytes);
-                op.flush();
-                op.close();
+                file.createNewFile();                
             }
+            FileOutputStream op = new FileOutputStream(file);
+            byte[] loggingIngoBytes = loggingIngo.getBytes();
+            op.write(loggingIngoBytes);
+            op.flush();
+            op.close();
         }
         catch(FileNotFoundException ex){
             Logger.getLogger(FileUtil.class.getName()).log(Level.SEVERE, null, ex);

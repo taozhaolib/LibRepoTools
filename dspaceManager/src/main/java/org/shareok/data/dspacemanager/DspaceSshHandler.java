@@ -144,9 +144,15 @@ public class DspaceSshHandler {
             sshExec.getSshConnector().setUserName(userName);
             sshExec.getSshConnector().setPassword(password);
             sshExec.execCmd(newDirCommand);
-            sshExec.upload(uploadDst + File.separator + time, uploadFile);        
-            sshExec.execCmd(unzipCommand);
-            sshExec.execCmd(importCommand);
+            sshExec.upload(uploadDst + File.separator + time, uploadFile);  
+            String[] commands = {unzipCommand, importCommand};
+            sshExec.execCmd(commands);
+//            sshExec.execCmd(unzipCommand);
+//            sshExec.execCmd(importCommand);
+            File loggingDir = new File(ShareokdataManager.getReportSshDspaceImport() + File.separator + host);
+            if(!loggingDir.exists()){
+                loggingDir.mkdir();
+            }
             String loggingFile = ShareokdataManager.getReportSshDspaceImport() + File.separator + host + File.separator + time + ".txt";
             FileUtil.outputStringToFile(sshExec.getLogger(), loggingFile);
             sshExec.addLogger("The importing logging information has been saved to file : " + loggingFile);

@@ -68,7 +68,7 @@ public class DspaceJournalDataUtil {
      * @param filePath String : in a form of : /shareokdata/uploads/sage/2016.02.03.14.35.08/sagedata--2016.02.03.14.35.08.xlsx
      * @return Map downloadLinks : the download links to the original uploaded file and the output zip file for DSpace loading
      */
-    public static Map getDspaceDownloadLinks(String filePath){
+    public static Map getDspaceJournalDownloadLinks(String filePath){
         Map downloadLinks = new HashMap<String, String>();
         String[] filePathInfo = filePath.split("/");
         int length = filePathInfo.length;
@@ -109,7 +109,7 @@ public class DspaceJournalDataUtil {
      * @param fileName : the file name generated after the data are processed
      * @return downloadPath : the file path for downloading
      */
-    public static String getDspaceDownloadFilePath(String publisher, String folderName, String fileName){
+    public static String getDspaceJournalDownloadFilePath(String publisher, String folderName, String fileName){
         
         String downloadPath = null;
         Class noparams[] = {};
@@ -142,18 +142,13 @@ public class DspaceJournalDataUtil {
      * Sample file path: now it is hard coded but should be configurable in the future.
      * @return link : the link to download the sample dublin core xml file
      */
-    public static String getSampleDublinCoreLink(){
+    public static String getJournalSampleDublinCoreLink(){
         return File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "journal" + File.separator + "sampleDC.xml";
     }
     
-    public static String getImportFilePath(String uploadFileName, String publisher){
+    public static String getJournalImportFilePath(String uploadFileName, String publisher){
         return ShareokdataManager.getShareokdataPath() + File.separator + "uploads" + File.separator +
                 publisher + File.separator + uploadFileName;
     }
     
-    public static SshExecutor getSshExecForDspace(){
-        ApplicationContext context = new ClassPathXmlApplicationContext("sshContext.xml");
-        SshExecutor sshExecutor = (SshExecutor)context.getBean("sshExecutor");
-        return sshExecutor;
-    }
 }

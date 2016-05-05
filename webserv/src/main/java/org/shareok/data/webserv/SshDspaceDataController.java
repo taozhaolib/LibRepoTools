@@ -7,8 +7,10 @@ package org.shareok.data.webserv;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletResponse;
+import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
-import org.shareok.data.dspacemanager.DspaceSafUtil;
+import org.shareok.data.dspacemanager.DspaceSshDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
 import org.shareok.data.kernel.api.services.dspace.DspaceSshService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,10 +48,10 @@ public class SshDspaceDataController {
        
         if (null != handler) {
             try {
-                String uploadFilePath = DspaceJournalDataUtil.getImportFilePath(handler.getUploadFile(), publisher);
+                String uploadFilePath = DspaceJournalDataUtil.getJournalImportFilePath(handler.getUploadFile(), publisher);
                 handler.setUploadFile(uploadFilePath);
                 if(null == handler.getSshExec()){
-                    handler.setSshExec(DspaceJournalDataUtil.getSshExecForDspace());
+                    handler.setSshExec(DspaceSshDataUtil.getSshExecForDspace());
                 }
                 dsSshService.setHandler(handler);
                 dsSshService.sshImportData();
@@ -78,16 +80,32 @@ public class SshDspaceDataController {
     public ModelAndView sshDspaceSafImport(@ModelAttribute("SpringWeb")DspaceSshHandler handler, @RequestParam("saf") MultipartFile file) {
         if (!file.isEmpty()) {
             try {
-                String uploadFile = DspaceSafUtil.saveUploadedData(file);
+                String uploadFile = DspaceSshDataUtil.saveUploadedData(file);
                 handler.setUploadFile(uploadFile);
                 ModelAndView model = new ModelAndView();
                 model.addObject("view", "sshDspaceSafImport");
                 model.setViewName("sshDspaceSafImport");
                 if(null == handler.getSshExec()){
-                    handler.setSshExec(DspaceJournalDataUtil.getSshExecForDspace());
+                    handler.setSshExec(DspaceSshDataUtil.getSshExecForDspace());
                 }
                 dsSshService.setHandler(handler);
-                dsSshService.sshImportData();
+                String reportPath = dsSshService.sshImportData();   
+                String importTime = null;
+                String failedTime = null;
+                if(null != reportPath && !"".equals(reportPath) && !reportPath.startsWith("Failed import at")){
+                    String reportFileName = FileUtil.getFileNameWithoutExtension(reportPath);
+                    String[] pathInfo = reportFileName.split("\\/");
+                    importTime = pathInfo[pathInfo.length-1];
+                }
+                else{
+                    failedTime = reportPath;
+                }
+                model.addObject("reportPath", reportPath);
+                model.addObject("host", handler.getHost());
+//                model.addObject("port", handler.getPort());
+                model.addObject("collection", handler.getCollectionId());
+                model.addObject("importTime", importTime);
+                model.addObject("failedTime", failedTime);
                 return model;
             } catch (Exception e) {
                 Logger.getLogger(JournalDataController.class.getName()).log(Level.SEVERE, null, e);
@@ -96,5 +114,14 @@ public class SshDspaceDataController {
             return null;
         }
         return null;
+    }
+    
+    @RequestMapping(value="/ssh/dspace/download/{host}/{fileName}/")
+    public void sshDspaceReportDownload(HttpServletResponse response, @PathVariable("host") String host,  @PathVariable("fileName") String fileName){
+        
+        String downloadPath = DspaceSshDataUtil.getSafDownloadLink(host, fileName);
+        
+        WebUtil.setupFileDownload(response, downloadPath);
+        
     }
 }

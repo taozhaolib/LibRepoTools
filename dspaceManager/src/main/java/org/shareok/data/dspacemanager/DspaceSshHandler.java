@@ -124,7 +124,7 @@ public class DspaceSshHandler {
         this.sshExec = sshExec;
     }
     
-    public void importDspace(){
+    public String importDspace(){
         try{
             //The executing user may be "dspace" or something else, so may be a user-switching 
             //command is needed before the import command      
@@ -157,9 +157,11 @@ public class DspaceSshHandler {
             FileUtil.outputStringToFile(sshExec.getLogger(), loggingFile);
             sshExec.addLogger("The importing logging information has been saved to file : " + loggingFile);
             setLogger(sshExec.getLogger());
+            return loggingFile;///shareokdata/report/dspace/ssh-import/172.28.128.7/2016.05.02.00.54.35.txt
         }
         catch(Exception ex){
             Logger.getLogger(DspaceSshHandler.class.getName()).log(Level.SEVERE, null, ex);
+            return "Failed import at " + new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
         }
     }
     

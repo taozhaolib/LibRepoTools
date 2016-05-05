@@ -41,7 +41,7 @@ public class JournalDataController {
     
     @RequestMapping("/dspace/journal/{publisher}")
     public ModelAndView journalHello(HttpServletRequest req, @PathVariable("publisher") String publisher) {
-        String sampleDublinCoreLink = DspaceJournalDataUtil.getSampleDublinCoreLink();
+        String sampleDublinCoreLink = DspaceJournalDataUtil.getJournalSampleDublinCoreLink();
          ModelAndView model = new ModelAndView();
          model.setViewName("journalDataUpload");
          model.addObject("publisher", publisher);
@@ -52,7 +52,7 @@ public class JournalDataController {
     @RequestMapping(value="/download/dspace/journal/{publisher}/{folderName}/{fileName}/")
     public void journalLoadingDataDownload(HttpServletResponse response, @PathVariable("publisher") String publisher, @PathVariable("folderName") String folderName, @PathVariable("fileName") String fileName){
         
-        String downloadPath = DspaceJournalDataUtil.getDspaceDownloadFilePath(publisher, folderName, fileName);
+        String downloadPath = DspaceJournalDataUtil.getDspaceJournalDownloadFilePath(publisher, folderName, fileName);
         
         try{
             File file = new File(downloadPath);
@@ -99,9 +99,9 @@ public class JournalDataController {
             try {
                 String filePath = DspaceJournalServiceManager.getDspaceJournalDataService(publisher).getDsapceJournalLoadingFiles(file);
                 // Some logic to process the file path to get download links:
-                Map downloadLinks = DspaceJournalDataUtil.getDspaceDownloadLinks(filePath);
+                Map downloadLinks = DspaceJournalDataUtil.getDspaceJournalDownloadLinks(filePath);
                 String downloadLink = (String)downloadLinks.get("loadingFile");
-                String sampleDublinCoreLink = DspaceJournalDataUtil.getSampleDublinCoreLink();
+                String sampleDublinCoreLink = DspaceJournalDataUtil.getJournalSampleDublinCoreLink();
                 String uploadFileLink = downloadLink.split("/journal/"+publisher+"/")[1];
                 uploadFileLink = uploadFileLink.substring(0, uploadFileLink.length()-1);
                 ModelAndView model = new ModelAndView();
@@ -126,41 +126,6 @@ public class JournalDataController {
         
         String downloadPath = ShareokdataManager.getDspceSampleDublinCoreFileName();
         
-        try{
-            File file = new File(downloadPath);
-            if(!file.exists()){
-                 String errorMessage = "Sorry. The file you are looking for does not exist";
-                 System.out.println(errorMessage);
-                 OutputStream outputStream = response.getOutputStream();
-                 outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
-                 outputStream.close();
-                 return;
-            }
-
-            String mimeType= URLConnection.guessContentTypeFromName(file.getName());
-            if(mimeType==null){
-                System.out.println("mimetype is not detectable, will take default");
-                mimeType = "application/octet-stream";
-            }
-
-            response.setContentType(mimeType);
-            /* "Content-Disposition : inline" will show viewable types [like images/text/pdf/anything viewable by browser] right on browser 
-                while others(zip e.g) will be directly downloaded [may provide save as popup, based on your browser setting.]*/
-            response.setHeader("Content-Disposition", String.format("attachment; filename=\"" + file.getName() +"\""));
-
-
-            /* "Content-Disposition : attachment" will be directly download, may provide save as popup, based on your browser setting*/
-            //response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", file.getName()));
-
-            response.setContentLength((int)file.length());
-
-            InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
-
-            //Copy bytes from source to destination(outputstream in this example), closes both streams.
-            FileCopyUtils.copy(inputStream, response.getOutputStream());
-        }
-        catch(IOException ioex){
-            Logger.getLogger(JournalDataController.class.getName()).log(Level.SEVERE, null, ioex);
-        }
+        WebUtil.setupFileDownload(response, downloadPath);
     }
 }

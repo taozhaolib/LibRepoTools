@@ -12,6 +12,6 @@ import org.shareok.data.dspacemanager.DspaceSshHandler;
  * @author Tao Zhao
  */
 public interface DspaceSshService {
-    public void sshImportData();
+    public String sshImportData();
     public void setHandler(DspaceSshHandler handler);
 }

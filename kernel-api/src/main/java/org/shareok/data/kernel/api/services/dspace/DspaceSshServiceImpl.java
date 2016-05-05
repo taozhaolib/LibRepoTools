@@ -28,7 +28,7 @@ public class DspaceSshServiceImpl implements DspaceSshService {
     }
     
     @Override
-    public void sshImportData(){
-        handler.importDspace();
+    public String sshImportData(){
+        return handler.importDspace();
     }
 }

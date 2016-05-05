@@ -90,13 +90,13 @@
                      <c:if test="${not empty importTime && empty failedTime}">
                         <div class="panel-heading"><h4>Import into the collection: ${collection} at the server ${host} was conducted at ${importTime}:</h4></div>
                         <div class="panel-body">
-                            <a href="/webserv/ssh/dspace/download/${host}/${importTime}" class="btn btn-info btn-sm" role="button">Download</a>
+                            <a href="/webserv/ssh/dspace/download/${host}/${importTime}/" class="btn btn-info btn-sm" role="button">Download</a>
                         </div>
                     </c:if>
                     <c:if test="${empty importTime && not empty failedTime}">
                         <div class="panel-heading"><h4>Import into the collection: ${collection} at the server ${host} was not completed at ${importTime}:</h4></div>
                         <div class="panel-body">
-                            <a href="/webserv/ssh/dspace/download/${host}/${failedTime}" class="btn btn-info btn-sm" role="button">Download</a>
+                            <a href="/webserv/ssh/dspace/download/${host}/${failedTime}/" class="btn btn-info btn-sm" role="button">Download</a>
                         </div>   
                     </c:if>    
                 </center>

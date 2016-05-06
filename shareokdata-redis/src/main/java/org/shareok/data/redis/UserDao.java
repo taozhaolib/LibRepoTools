@@ -9,8 +9,7 @@ package org.shareok.data.redis;
  *
  * @author Tao Zhao
  */
-public interface UserRedis {
-    public RedisUser getNewUser();
+public interface UserDao {
     public RedisUser addUser(RedisUser user);
     public RedisUser updateUser(RedisUser user);
     public RedisUser findUserByUserId(long userId);

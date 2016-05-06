@@ -8,8 +8,7 @@ package org.shareok.data.redis;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +35,9 @@ import org.shareok.data.config.ShareokdataManager;
  *
  * @author Tao Zhao
  */
-public class UserRedisImpl implements UserRedis {
+public class UserDaoImpl implements UserDao {
     
-    private static String USER_KEY = "User";
+    private static final Logger logger = Logger.getLogger(UserDaoImpl.class);
     
     @Autowired
     private JedisConnectionFactory connectionFactory;
@@ -75,7 +74,7 @@ public class UserRedisImpl implements UserRedis {
                     operations.opsForHash().put("user:"+uid, "password", user.getPassword());
                     operations.opsForHash().put("user:"+uid, "isActive", String.valueOf(true));
                     operations.opsForHash().put("user:"+uid, "sessionKey", (null != user.getSessionKey() ? user.getSessionKey() : ""));
-                    operations.opsForHash().put("user:"+uid, "startTime", (null != user.getStartTime() ? user.getStartTime().toString(): (new Date().toString())));
+                    operations.opsForHash().put("user:"+uid, "startTime", (null != user.getStartTime() ? RedisUtil.getRedisDateFormat().format(user.getStartTime()) : (RedisUtil.getRedisDateFormat().format(new Date()))));
                     
                     operations.boundHashOps("users");
                     operations.opsForHash().put("users", user.getEmail(), uid);
@@ -89,7 +88,7 @@ public class UserRedisImpl implements UserRedis {
             });
         }
         catch(Exception ex){
-            Logger.getLogger(UserRedisImpl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("Cannot add new user", ex);
         }
         return user;
     }
@@ -121,7 +120,7 @@ public class UserRedisImpl implements UserRedis {
             });
         }
         catch(Exception ex){
-            Logger.getLogger(UserRedisImpl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("Cannot update a user", ex);
         }
         return user;
     }
@@ -194,7 +193,7 @@ public class UserRedisImpl implements UserRedis {
             });
         }
         catch(Exception ex){
-            Logger.getLogger(UserRedisImpl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("Cannot delete a user with ID "+userId, ex);
         }
     }
 
@@ -206,7 +205,7 @@ public class UserRedisImpl implements UserRedis {
             redisTemplate.opsForHash().put(key, "isActive", String.valueOf(false));
         }
         catch(Exception ex){
-            Logger.getLogger(UserRedisImpl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("Cannot deactivate a user", ex);
         }
     }
     
@@ -215,7 +214,7 @@ public class UserRedisImpl implements UserRedis {
         RedisTemplate<String, Object> redis = new RedisTemplate<>();
         redis.setConnectionFactory(connectionFactory);
 //        redis.setKeySerializer(ApplicationConfig.StringSerializer.INSTANCE);
-//        redis.setValueSerializer(new JacksonJsonRedisSerializer<User>(UserRedisImpl.class));
+//        redis.setValueSerializer(new JacksonJsonRedisSerializer<User>(UserDaoImpl.class));
         redis.afterPropertiesSet();
         redis.setEnableTransactionSupport(true);//奇怪的是一定要再显示开启redistemplate的事务支持
         redis.multi();  
@@ -223,13 +222,6 @@ public class UserRedisImpl implements UserRedis {
         redis.boundZSetOps("somezkey").add("zvalue", 11);  
         redis.exec(); 
         redis.setEnableTransactionSupport(false);
-    }
-    
-    @Override
-    public RedisUser getNewUser(){
-        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
-        RedisUser user = (RedisUser) context.getBean("user");
-        return user;
     }
 
     @Override

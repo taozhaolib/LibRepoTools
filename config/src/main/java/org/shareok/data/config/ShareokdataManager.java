@@ -140,4 +140,46 @@ public class ShareokdataManager {
         }
         return prop.getProperty("reportSshDspaceImport");
     }
+    
+    public static String getRedisGlobalJobIdSchema(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("redisGlobalJobId"); 
+    }
+    
+    public static String getRedisJobQueryPrefix(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("redisJobIdQueryPrefix");
+    }
+    
+    public static String getRedisJobUserIdMatchingTable(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("redisJobUserIdMatchingTable");
+    }
+    
+    public static int getRedisJobTypeImport(){
+        if(null == prop){
+            loadProperties();
+        }
+        return Integer.valueOf(prop.getProperty("redisJobTypeImport"));
+    }
+    
+    public static int getRedisJobTypeExport(){
+        if(null == prop){
+            loadProperties();
+        }
+        return Integer.valueOf(prop.getProperty("redisJobTypeExport"));
+    }
+    
+    public static String getDateFormat(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("dateFormat");
+    }
 }

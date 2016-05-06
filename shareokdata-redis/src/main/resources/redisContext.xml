@@ -30,7 +30,13 @@
         <property name="sessionKey" value="" />
     </bean>
     
-    <bean id="userRedisImpl" class="org.shareok.data.redis.UserRedisImpl"/>
+    <bean id="userDaoImpl" class="org.shareok.data.redis.UserDaoImpl"/>
+    
+    <bean id="jobDaoImpl" class="org.shareok.data.redis.job.JobDaoImpl"></bean>
+    
+    <bean id="job" class="org.shareok.data.redis.job.RedisJob">
+        <property name="repoType" value="0" />
+    </bean>
     
 <!--    
     <bean id="dateEditor" class="org.springframework.beans.propertyeditors.CustomDateEditor">

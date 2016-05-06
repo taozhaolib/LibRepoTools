@@ -7,7 +7,13 @@ package org.shareok.data.redis;
 
 import java.security.SecureRandom;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.redis.job.JobDao;
+import org.shareok.data.redis.job.JobDaoImpl;
+import org.shareok.data.redis.job.RedisJob;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
@@ -16,6 +22,9 @@ import org.shareok.data.config.ShareokdataManager;
 
 
 public class RedisUtil {
+    
+    public static String[] REDIS_JOB_STATUS= {"undecided", "running", "completed"};
+    public static String[] REDIS_REPO_TYPES = {"unknown", "dspace", "islandora", "fedora", "hydra"};
 
     /**
      *This works by choosing 130 bits from a cryptographically secure random bit generator, and encoding them in base-32. 128 bits is considered to be cryptographically strong, 
@@ -35,5 +44,33 @@ public class RedisUtil {
     
     public static String getUserQueryKey(long uid){
         return ShareokdataManager.getRedisUserIdQueryPrefix()+String.valueOf(uid);
+    }
+    
+    public static String getJobQueryKey(long jobId){
+        return ShareokdataManager.getRedisJobQueryPrefix()+String.valueOf(jobId);
+    }
+    
+    public static UserDao getUserDao(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
+        return (UserDaoImpl) context.getBean("userDaoImpl");
+    }
+    
+    public static JobDao getJobDao(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
+        return (JobDaoImpl) context.getBean("jobDaoImpl");
+    }
+    
+    public static RedisUser getUserInstance(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
+        return (RedisUser) context.getBean("user");
+    }
+    
+    public static RedisJob getJobInstance(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
+        return (RedisJob) context.getBean("job");
+    }
+    
+    public static SimpleDateFormat getRedisDateFormat(){
+        return new SimpleDateFormat(ShareokdataManager.getDateFormat());
     }
 }

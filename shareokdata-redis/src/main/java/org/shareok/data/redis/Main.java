@@ -6,6 +6,9 @@
 package org.shareok.data.redis;
 
 import java.util.Date;
+import java.util.List;
+import org.shareok.data.redis.job.JobDao;
+import org.shareok.data.redis.job.RedisJob;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -15,8 +18,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class Main {
     public static void main(String[] args){
-        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
-        UserRedisImpl impl = (UserRedisImpl) context.getBean("userRedisImpl");
+//        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
+//        UserDaoImpl impl = (UserDaoImpl) context.getBean("userDaoImpl");
 
 //        RedisUser user = (RedisUser) context.getBean("user");
 //        user.setUserName("tao.zhao.test2@ou.edu");
@@ -27,10 +30,13 @@ public class Main {
         //user.setUserId(9);
         
         //impl.addUser(user);
-        RedisUser user = impl.findUserByUserEmail("tao.zhao@ou.edu");
+//        RedisUser user = impl.findUserByUserEmail("tao.zhao@ou.edu");
       //  impl.deactivateUserByUserId(user.getUserId());
-        
-
-        System.out.println("Redis template is working!");
+//        JobDao jobDao = RedisUtil.getJobDao();
+//        long jobId = jobDao.startJob(20, 1, 1, null);
+//        RedisJob job = jobDao.findJobByJobId(jobId);
+//        System.out.print(job.getWorker() + " *** \n");
+//        List<RedisJob> jobs = jobDao.getJobListByUser(20);
+//        System.out.println("Redis template is working!");
     }
 }

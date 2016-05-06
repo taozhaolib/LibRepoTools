@@ -6,7 +6,8 @@
 package org.shareok.data.kernel.api.services.user;
 
 import org.shareok.data.redis.RedisUser;
-import org.shareok.data.redis.UserRedis;
+import org.shareok.data.redis.RedisUtil;
+import org.shareok.data.redis.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -16,42 +17,42 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class RedisUserServiceImpl implements RedisUserService{
     
     @Autowired
-    private UserRedis userRedis;
+    private UserDao userDao;
     
     @Override
     public RedisUser addUser(RedisUser user){
-        return userRedis.addUser(user);
+        return userDao.addUser(user);
     }
     
     @Override
     public RedisUser updateUser(RedisUser user){
-        return userRedis.updateUser(user);
+        return userDao.updateUser(user);
     }
     //public RedisUser findUserByUserId(long userId);
     
     @Override
     public RedisUser findUserByUserEmail(String email){
-        return userRedis.findUserByUserEmail(email);
+        return userDao.findUserByUserEmail(email);
     }
     
     @Override
     public RedisUser findAuthenticatedUser(String email, String sessionKey){
-        return userRedis.findAuthenticatedUser(email, sessionKey);
+        return userDao.findAuthenticatedUser(email, sessionKey);
     }
     //public void deleteUserByUserId(long userId);
     
     @Override
     public void deactivateUserByUserId(long userId){
-        userRedis.deactivateUserByUserId(userId);
+        userDao.deactivateUserByUserId(userId);
     }
     
     @Override
     public RedisUser getNewUser(){
-        return userRedis.getNewUser();
+        return RedisUtil.getUserInstance();
     }
     
     @Override
     public void invalidateUserSessionIdByEmail(String email){
-        userRedis.invalidateUserSessionIdByEmail(email);
+        userDao.invalidateUserSessionIdByEmail(email);
     }
 }

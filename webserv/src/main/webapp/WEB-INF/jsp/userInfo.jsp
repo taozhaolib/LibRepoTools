@@ -3,6 +3,7 @@
     Created on : Mar 11, 2016, 4:58:44 PM
     Author     : Tao Zhao
 --%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%
    String welcome = "";
@@ -14,6 +15,7 @@
        String email = (String)session.getAttribute("email");
        if(null != email && !email.equals("")){
            String userName = (String)session.getAttribute("userName");
+           String userId = String.valueOf(session.getAttribute("userId"));
            welcome = "Welcome, "+userName;
            logText = "Log out";
            logTextHref = "/webserv/logout";
@@ -34,5 +36,7 @@
     <% if(logText.equals("Log in")) { %>
         &nbsp;&nbsp;&nbsp;<span>or</span>&nbsp;&nbsp;&nbsp;
         <a id="registerLink" class="logLinkClass" href="/webserv/newUser" >Register</a>
+    <% } else {%>
+    <c:set var="loggedin" value="${userId}"/>
     <% } %>
 </div>

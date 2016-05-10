@@ -33,3 +33,7 @@ input.btn-form{
     float: left;
     margin-left: 2px;
 }
+
+.spining-class{
+    display: none;
+}

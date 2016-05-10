@@ -6,12 +6,12 @@
 package org.shareok.data.kernel.api.services.dspace;
 
 import org.shareok.data.dspacemanager.DspaceSshHandler;
+import org.shareok.data.kernel.api.services.DataService;
 
 /**
  *
  * @author Tao Zhao
  */
-public interface DspaceSshService {
+public interface DspaceSshService extends DataService {
     public String sshImportData();
-    public void setHandler(DspaceSshHandler handler);
 }

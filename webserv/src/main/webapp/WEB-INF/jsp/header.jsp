@@ -19,6 +19,8 @@
     <!-- Latest compiled JavaScript -->
     <script src="<c:url value="/resources/js/bootstrap.min.js" />"></script>
     
+    <script src="<c:url value="/resources/js/loadingBtn.js" />"></script>
+    
     <link href="<c:url value="/resources/css/main.css" />" rel="stylesheet">
     
     <meta name="viewport" content="width=device-width, initial-scale=1">

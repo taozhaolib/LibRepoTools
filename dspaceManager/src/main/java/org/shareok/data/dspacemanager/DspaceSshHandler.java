@@ -6,11 +6,12 @@
 package org.shareok.data.dspacemanager;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.config.DataHandler;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.ssh.SshExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,11 @@ import org.springframework.stereotype.Service;
  * @author Tao Zhao
  */
 @Service
-public class DspaceSshHandler {
-    private String logger;
+public class DspaceSshHandler implements DataHandler {
+    
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DspaceSshHandler.class);
+    
+    private String reportFilePath;
     private String uploadDst;
     private String uploadFile; // *** suppose the uploaded file is a ZIP file ***
     private String host;
@@ -34,9 +38,9 @@ public class DspaceSshHandler {
     private String collectionId;
     private SshExecutor sshExec;
     //private String mapfilePath;
-
-    public String getLogger() {
-        return logger;
+    
+    public String getReportFilePath(){
+        return reportFilePath;
     }
 
     public String getUploadDst() {
@@ -74,15 +78,17 @@ public class DspaceSshHandler {
     public String getCollectionId() {
         return collectionId;
     }
-
-    public void setLogger(String logger) {
-        this.logger = logger;
+    
+    @Override
+    public void setReportFilePath(String reportFilePath){
+        this.reportFilePath = reportFilePath;
     }
 
     public void setUploadDst(String uploadDst) {
         this.uploadDst = uploadDst;
     }
 
+    @Override
     public void setUploadFile(String uploadFile) {
         this.uploadFile = uploadFile;
     }
@@ -125,14 +131,16 @@ public class DspaceSshHandler {
     }
     
     public String importDspace(){
-        try{
-            //The executing user may be "dspace" or something else, so may be a user-switching 
-            //command is needed before the import command      
+        try{     
             String time = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
             String uploadFileName = new File(uploadFile).getName();
             String uploadFileNameWithoutExtension = uploadFileName.split("\\.")[0];
+            
+            String dspaceTargetFilePath = uploadDst + File.separator + time + File.separator + uploadFileName;
+            
+            // Build up the commands:
             String newDirCommand = "sudo -u " + userName + " mkdir " + uploadDst + File.separator + time;
-            String unzipCommand = "sudo -u " + userName + " unzip -o " + uploadDst + File.separator + time + File.separator + uploadFileName + " -d " + uploadDst + File.separator + time;
+            String unzipCommand = "sudo -u " + userName + " unzip -o " + dspaceTargetFilePath + " -d " + uploadDst + File.separator + time;
             //String unzipCommand = "sudo tar -xvf " + uploadDst + File.separator + uploadFileName;
             String importCommand = "sudo " + dspaceDirectory + File.separator + "bin" + File.separator + 
                                    "dspace import --add " + "--eperson=" + dspaceUser + " --collection=" + collectionId +
@@ -145,24 +153,34 @@ public class DspaceSshHandler {
             sshExec.getSshConnector().setPassword(password);
             sshExec.execCmd(newDirCommand);
             sshExec.upload(uploadDst + File.separator + time, uploadFile);  
+            sshExec.addLogger("The SAF package has been uploaded to the DSpace server: " + dspaceTargetFilePath + "\n");
             String[] commands = {unzipCommand, importCommand};
             sshExec.execCmd(commands);
+            sshExec.addLogger("The SAF package has been imported into the DSpace repository.\n");
 //            sshExec.execCmd(unzipCommand);
 //            sshExec.execCmd(importCommand);
-            File loggingDir = new File(ShareokdataManager.getReportSshDspaceImport() + File.separator + host);
-            if(!loggingDir.exists()){
-                loggingDir.mkdir();
-            }
-            String loggingFile = ShareokdataManager.getReportSshDspaceImport() + File.separator + host + File.separator + time + ".txt";
-            FileUtil.outputStringToFile(sshExec.getLogger(), loggingFile);
-            sshExec.addLogger("The importing logging information has been saved to file : " + loggingFile);
-            setLogger(sshExec.getLogger());
-            return loggingFile;///shareokdata/report/dspace/ssh-import/172.28.128.7/2016.05.02.00.54.35.txt
+            String savedReportFilePath =  saveLoggerToFile();
+            sshExec.addLogger("The importing logging information has been saved to file : " + reportFilePath);
+            
+            return savedReportFilePath;
         }
         catch(Exception ex){
             Logger.getLogger(DspaceSshHandler.class.getName()).log(Level.SEVERE, null, ex);
-            return "Failed import at " + new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+            return null; 
         }
     }
     
+    private String saveLoggerToFile(){
+        try{
+        File reportFile = new File(reportFilePath);
+        if(!reportFile.exists()){
+            reportFile.createNewFile();
+        }
+            FileUtil.outputStringToFile(sshExec.getLogger(), reportFilePath);
+        }
+        catch(IOException ioex){
+            logger.error("Cannot save importing report!");
+        }
+        return reportFilePath;
+    }
 }

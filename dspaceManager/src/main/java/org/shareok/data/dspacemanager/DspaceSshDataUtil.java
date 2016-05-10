@@ -39,4 +39,7 @@ public class DspaceSshDataUtil {
         return FileUtil.saveMultipartFileByTimePath(file, ShareokdataManager.getSafUploadPath());
     }
     
+    public static String createSafImportDirectory(){
+        return null;
+    }
 }

@@ -5,8 +5,10 @@
  */
 package org.shareok.data.config;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -181,5 +183,29 @@ public class ShareokdataManager {
             loadProperties();
         }
         return prop.getProperty("dateFormat");
+    }
+
+    public static SimpleDateFormat getSimpleDateFormat() {
+        return new SimpleDateFormat(ShareokdataManager.getDateFormat());
+    }
+    
+    public static String getJobReportPath(String repoType, String jobType, long jobId){
+        String shareokdataPath = getShareokdataPath();
+        String filePath = shareokdataPath + File.separator + repoType;
+        File file = new File(filePath);
+        if(!file.exists()){
+            file.mkdir();
+        }
+        filePath += File.separator + jobType;
+        file = new File(filePath);
+        if(!file.exists()){
+            file.mkdir();
+        }
+        filePath += File.separator + String.valueOf(jobId);
+        file = new File(filePath);
+        if(!file.exists()){
+            file.mkdir();
+        }
+        return filePath;
     }
 }

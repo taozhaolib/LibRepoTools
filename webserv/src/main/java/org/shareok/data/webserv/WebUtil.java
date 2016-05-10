@@ -6,15 +6,17 @@
 package org.shareok.data.webserv;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.util.FileCopyUtils;
 
@@ -23,6 +25,9 @@ import org.springframework.util.FileCopyUtils;
  * @author Tao Zhao
  */
 public class WebUtil {
+    
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(WebUtil.class);
+    
     public static void setupFileDownload(HttpServletResponse response, String downloadPath){
         try{
             File file = new File(downloadPath);
@@ -58,7 +63,8 @@ public class WebUtil {
             FileCopyUtils.copy(inputStream, response.getOutputStream());
         }
         catch(IOException ioex){
-            Logger.getLogger(JournalDataController.class.getName()).log(Level.SEVERE, null, ioex);
+            logger.error("Cannot set up a file download.", ioex);
         }
     }
+    
 }

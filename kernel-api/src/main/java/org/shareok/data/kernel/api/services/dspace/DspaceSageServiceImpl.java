@@ -8,7 +8,6 @@ package org.shareok.data.kernel.api.services.dspace;
 import org.shareok.data.sagedata.SageSourceDataHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

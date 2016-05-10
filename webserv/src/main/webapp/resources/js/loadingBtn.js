@@ -4,5 +4,9 @@
  * and open the template in the editor.
  */
 
-
+$(document).ready(function(){
+    $(".loading-btn").click(function(){
+        $(".spining-class").show();
+    });
+});
 

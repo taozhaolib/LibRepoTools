@@ -71,7 +71,7 @@ public class JobDaoImpl implements JobDao {
                     operations.opsForHash().put("job:"+jobId, "status", "1");
                     operations.opsForHash().put("job:"+jobId, "type", jobTypeStr);
                     operations.opsForHash().put("job:"+jobId, "repoType", repoTypeStr);
-                    operations.opsForHash().put("job:"+jobId, "startTime", (null != startTimeStr ? RedisUtil.getRedisDateFormat().format(startTimeStr) : RedisUtil.getRedisDateFormat().format(new Date())));
+                    operations.opsForHash().put("job:"+jobId, "startTime", (null != startTimeStr ? ShareokdataManager.getSimpleDateFormat().format(startTimeStr) : ShareokdataManager.getSimpleDateFormat().format(new Date())));
                     operations.opsForHash().put("job:"+jobId, "endTime", "");
                     
                     operations.boundSetOps(uidStr).add(jobId);
@@ -93,6 +93,18 @@ public class JobDaoImpl implements JobDao {
     @Override
     public void endJob(long jobId){
         
+    }
+    
+    @Override
+    public void updateJob(long jobId, String jobInfoType, String value){
+        try{
+            RedisJob job = findJobByJobId(jobId);
+            BoundHashOperations<String, String, String> jobOps = redisTemplate.boundHashOps(RedisUtil.getJobQueryKey(jobId));
+            jobOps.put(jobInfoType, value);
+        }
+        catch(Exception ex){
+            logger.error("Cannot update job info @ " + jobInfoType + " with value = " + value, ex);
+        }
     }
     
     @Override
@@ -157,7 +169,7 @@ public class JobDaoImpl implements JobDao {
             RedisJob job = RedisUtil.getJobInstance();
             job.setJobId(jobId);
             String time = (String)jobOps.get("startTime");
-            job.setStartTime(RedisUtil.getRedisDateFormat().parse(time));
+            job.setStartTime(ShareokdataManager.getSimpleDateFormat().parse(time));
             return job;
         }
         else{

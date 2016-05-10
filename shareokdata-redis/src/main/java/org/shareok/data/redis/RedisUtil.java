@@ -24,7 +24,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class RedisUtil {
     
     public static String[] REDIS_JOB_STATUS= {"undecided", "running", "completed"};
-    public static String[] REDIS_REPO_TYPES = {"unknown", "dspace", "islandora", "fedora", "hydra"};
+    
 
     /**
      *This works by choosing 130 bits from a cryptographically secure random bit generator, and encoding them in base-32. 128 bits is considered to be cryptographically strong, 
@@ -70,7 +70,4 @@ public class RedisUtil {
         return (RedisJob) context.getBean("job");
     }
     
-    public static SimpleDateFormat getRedisDateFormat(){
-        return new SimpleDateFormat(ShareokdataManager.getDateFormat());
-    }
 }

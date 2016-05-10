@@ -26,6 +26,13 @@
     </bean>
     
     <bean id="dspaceSshServiceImpl" class="org.shareok.data.kernel.api.services.dspace.DspaceSshServiceImpl">
+    </bean>
+        
+    <bean id="redisJobServiceImpl" class="org.shareok.data.kernel.api.services.job.RedisJobServiceImpl">
+        
+    </bean>
+    
+    <bean id="jobHandlerImpl" class="org.shareok.data.kernel.api.services.job.JobHandlerImpl">
         
     </bean>
     

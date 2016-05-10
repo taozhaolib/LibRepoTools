@@ -74,7 +74,7 @@ public class UserDaoImpl implements UserDao {
                     operations.opsForHash().put("user:"+uid, "password", user.getPassword());
                     operations.opsForHash().put("user:"+uid, "isActive", String.valueOf(true));
                     operations.opsForHash().put("user:"+uid, "sessionKey", (null != user.getSessionKey() ? user.getSessionKey() : ""));
-                    operations.opsForHash().put("user:"+uid, "startTime", (null != user.getStartTime() ? RedisUtil.getRedisDateFormat().format(user.getStartTime()) : (RedisUtil.getRedisDateFormat().format(new Date()))));
+                    operations.opsForHash().put("user:"+uid, "startTime", (null != user.getStartTime() ? ShareokdataManager.getSimpleDateFormat().format(user.getStartTime()) : (ShareokdataManager.getSimpleDateFormat().format(new Date()))));
                     
                     operations.boundHashOps("users");
                     operations.opsForHash().put("users", user.getEmail(), uid);

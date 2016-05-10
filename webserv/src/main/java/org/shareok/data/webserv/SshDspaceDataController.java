@@ -7,12 +7,14 @@ package org.shareok.data.webserv;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
 import org.shareok.data.kernel.api.services.dspace.DspaceSshService;
+import org.shareok.data.kernel.api.services.job.JobHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -32,6 +34,10 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class SshDspaceDataController {
     
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(SshDspaceDataController.class);
+    
+    private JobHandler jobHandler;
+    
     private DspaceSshService dsSshService;
 
     public DspaceSshService getDsSshService() {
@@ -41,6 +47,11 @@ public class SshDspaceDataController {
     @Autowired
     public void setDsSshService(DspaceSshService dsSshService) {
         this.dsSshService = dsSshService;
+    }
+    
+    @Autowired
+    public void setJobHandler(JobHandler jobHandler) {
+        this.jobHandler = jobHandler;
     }
     
     @RequestMapping(value="/ssh/dspace/journal/{publisher}/{action}", method=RequestMethod.POST)
@@ -77,19 +88,19 @@ public class SshDspaceDataController {
     }
     
     @RequestMapping(value="/ssh/dspace/saf/import", method=RequestMethod.POST)
-    public ModelAndView sshDspaceSafImport(@ModelAttribute("SpringWeb")DspaceSshHandler handler, @RequestParam("saf") MultipartFile file) {
-        if (!file.isEmpty()) {
+    public ModelAndView sshDspaceSafImport(HttpServletRequest request, @ModelAttribute("SpringWeb")DspaceSshHandler handler, @RequestParam("saf") MultipartFile file) {
+        String safLink = (String)request.getParameter("saf-online");
+        String email = (String) request.getSession().getAttribute("email");
+        String nickName = (String) request.getSession().getAttribute("nickname");
+        String userId = String.valueOf(request.getSession().getAttribute("userId"));
+        if (!file.isEmpty() || (null != safLink && !"".equals(safLink))) {
             try {
-                String uploadFile = DspaceSshDataUtil.saveUploadedData(file);
-                handler.setUploadFile(uploadFile);
+                String reportPath = jobHandler.execute(Long.valueOf(userId), "dspace", "ssh-import", handler, file, safLink);
+
                 ModelAndView model = new ModelAndView();
                 model.addObject("view", "sshDspaceSafImport");
                 model.setViewName("sshDspaceSafImport");
-                if(null == handler.getSshExec()){
-                    handler.setSshExec(DspaceSshDataUtil.getSshExecForDspace());
-                }
-                dsSshService.setHandler(handler);
-                String reportPath = dsSshService.sshImportData();   
+ 
                 String importTime = null;
                 String failedTime = null;
                 if(null != reportPath && !"".equals(reportPath) && !reportPath.startsWith("Failed import at")){
@@ -102,13 +113,12 @@ public class SshDspaceDataController {
                 }
                 model.addObject("reportPath", reportPath);
                 model.addObject("host", handler.getHost());
-//                model.addObject("port", handler.getPort());
                 model.addObject("collection", handler.getCollectionId());
                 model.addObject("importTime", importTime);
                 model.addObject("failedTime", failedTime);
                 return model;
             } catch (Exception e) {
-                Logger.getLogger(JournalDataController.class.getName()).log(Level.SEVERE, null, e);
+                logger.error("Cannot import the SAF package into the DSpace server.", e);
             }
         } else {
             return null;

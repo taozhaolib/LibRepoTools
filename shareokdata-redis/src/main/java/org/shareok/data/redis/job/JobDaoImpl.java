@@ -74,7 +74,7 @@ public class JobDaoImpl implements JobDao {
                     operations.opsForHash().put("job:"+jobId, "startTime", (null != startTimeStr ? ShareokdataManager.getSimpleDateFormat().format(startTimeStr) : ShareokdataManager.getSimpleDateFormat().format(new Date())));
                     operations.opsForHash().put("job:"+jobId, "endTime", "");
                     
-                    operations.boundSetOps(uidStr).add(jobId);
+                    operations.boundSetOps("user_"+uidStr+"_job_set").add(jobId);
                     
                     List<Object> jobList= operations.exec();
                     if(!jobList.get(0).equals(true)){
@@ -127,9 +127,9 @@ public class JobDaoImpl implements JobDao {
     @Override
     public List<RedisJob> getJobListByUser(long uid)
     {
-        List<RedisJob> jobs = new ArrayList<RedisJob>();
+        List<RedisJob> jobs = new ArrayList<>();
         try{
-            BoundSetOperations<String, String> jobOps = (BoundSetOperations<String, String>) redisTemplate.boundSetOps(String.valueOf(uid));
+            BoundSetOperations<String, String> jobOps = (BoundSetOperations<String, String>) redisTemplate.boundSetOps("user_"+String.valueOf(uid)+"_job_set");
             Set<String> jobIds = jobOps.members();
             if(null != jobIds){                
                 for(String jobIdStr : jobIds){
@@ -168,8 +168,14 @@ public class JobDaoImpl implements JobDao {
         if(null != jobOps){
             RedisJob job = RedisUtil.getJobInstance();
             job.setJobId(jobId);
-            String time = (String)jobOps.get("startTime");
-            job.setStartTime(ShareokdataManager.getSimpleDateFormat().parse(time));
+            String startTime = (String)jobOps.get("startTime");
+            job.setStartTime(ShareokdataManager.getSimpleDateFormat().parse(startTime));
+            String endTime = (String)jobOps.get("endTime");
+            job.setEndTime(ShareokdataManager.getSimpleDateFormat().parse(endTime));
+            job.setUserId(Long.valueOf(jobOps.get("userId")));
+            job.setStatus(Integer.valueOf(jobOps.get("status")));
+            job.setType(Integer.valueOf(jobOps.get("type")));
+            job.setRepoType(Integer.valueOf(jobOps.get("repoType")));
             return job;
         }
         else{

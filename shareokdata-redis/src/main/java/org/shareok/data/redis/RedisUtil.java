@@ -7,7 +7,6 @@ package org.shareok.data.redis;
 
 import java.security.SecureRandom;
 import java.math.BigInteger;
-import java.text.SimpleDateFormat;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.JobDaoImpl;
@@ -23,7 +22,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class RedisUtil {
     
-    public static String[] REDIS_JOB_STATUS= {"undecided", "running", "completed"};
+    public static String[] REDIS_JOB_STATUS= {"undecided", "running", "completed", "failed"};
     
 
     /**

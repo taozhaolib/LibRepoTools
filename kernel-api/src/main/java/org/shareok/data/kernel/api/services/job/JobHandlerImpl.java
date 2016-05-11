@@ -7,11 +7,13 @@ package org.shareok.data.kernel.api.services.job;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Date;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.DataHandler;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.kernel.api.services.DataService;
 import org.shareok.data.kernel.api.services.ServiceUtil;
+import org.shareok.data.redis.job.RedisJob;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,7 +37,7 @@ public class JobHandlerImpl implements JobHandler {
      * @return : path to the report file
      */
     @Override
-    public String execute(long uid, int repoType, int jobType, DataHandler handler, MultipartFile localFile, String remoteFilePath){
+    public RedisJob execute(long uid, int repoType, int jobType, DataHandler handler, MultipartFile localFile, String remoteFilePath){
         
         ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
         
@@ -67,13 +69,17 @@ public class JobHandlerImpl implements JobHandler {
         
         String savedReportFilePath = ds.executeTask(DataUtil.JOB_TYPES[jobType]);
         if(null != savedReportFilePath && savedReportFilePath.equals(reportFilePath)){
-            
+            redisJobServ.updateJob(jobId, "status", "2");            
         }
-        return reportFilePath;
+        else{
+            redisJobServ.updateJob(jobId, "status", "3");
+        }
+        redisJobServ.updateJob(jobId, "endTime", ShareokdataManager.getSimpleDateFormat().format(new Date()));
+        return redisJobServ.findJobByJobId(jobId);
     }
     
     @Override
-    public String execute(long uid, String repoType, String jobType, DataHandler handler, MultipartFile localFile, String remoteFilePath){
+    public RedisJob execute(long uid, String repoType, String jobType, DataHandler handler, MultipartFile localFile, String remoteFilePath){
         return execute(uid, Arrays.asList(DataUtil.REPO_TYPES).indexOf(repoType), Arrays.asList(DataUtil.JOB_TYPES).indexOf(jobType), handler, localFile, remoteFilePath);
     }
 }

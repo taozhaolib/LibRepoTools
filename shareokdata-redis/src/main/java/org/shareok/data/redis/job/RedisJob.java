@@ -15,7 +15,7 @@ public class RedisJob {
     private Date startTime;
     private Date endTime;
     private long jobId;
-    private int worker;
+    private long userId;
     private int type;
     private int repoType;
     private int status;
@@ -32,8 +32,8 @@ public class RedisJob {
         return jobId;
     }
 
-    public int getWorker() {
-        return worker;
+    public long getUserId() {
+        return userId;
     }
 
     public int getType() {
@@ -62,10 +62,10 @@ public class RedisJob {
 
     /**
      * The ID of the user who runs this job
-     * @param worker 
+     * @param userId 
      */
-    public void setWorker(int worker) {
-        this.worker = worker;
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 
     public void setType(int type) {

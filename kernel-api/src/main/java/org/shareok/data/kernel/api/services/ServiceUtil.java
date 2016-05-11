@@ -16,6 +16,8 @@ import java.net.URL;
 import org.shareok.data.config.DataUtil;
 import java.util.HashMap;
 import java.util.Map;
+import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.redis.job.RedisJob;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
@@ -115,5 +117,11 @@ public class ServiceUtil {
             }
         }
         return false;
+    }
+    
+    public static String getReportFilePathByJob(RedisJob job){
+        return ShareokdataManager.getShareokdataPath() + File.separator + DataUtil.REPO_TYPES[job.getRepoType()] 
+                + File.separator + DataUtil.JOB_TYPES[job.getType()] + File.separator + String.valueOf(job.getJobId()) 
+                + File.separator + String.valueOf(job.getJobId()) + "-report.txt";
     }
 }

@@ -18,7 +18,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import javax.servlet.http.HttpServletResponse;
+import org.shareok.data.config.DataUtil;
+import org.shareok.data.kernel.api.services.ServiceUtil;
+import org.shareok.data.redis.RedisUtil;
+import org.shareok.data.redis.job.RedisJob;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  *
@@ -65,6 +70,16 @@ public class WebUtil {
         catch(IOException ioex){
             logger.error("Cannot set up a file download.", ioex);
         }
+    }
+    
+    public static void outputJobInfoToModel(ModelAndView model, RedisJob job){
+        
+        model.addObject("jobId", job.getJobId());      
+        model.addObject("status", RedisUtil.REDIS_JOB_STATUS[job.getStatus()]);
+        model.addObject("startTime", job.getStartTime());
+        model.addObject("endTime", job.getEndTime());
+        model.addObject("jobType", DataUtil.JOB_TYPES[job.getType()]);
+        model.addObject("repoType", DataUtil.REPO_TYPES[job.getRepoType()]);
     }
     
 }

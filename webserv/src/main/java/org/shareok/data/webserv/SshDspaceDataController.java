@@ -13,8 +13,10 @@ import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
+import org.shareok.data.kernel.api.services.ServiceUtil;
 import org.shareok.data.kernel.api.services.dspace.DspaceSshService;
 import org.shareok.data.kernel.api.services.job.JobHandler;
+import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -95,27 +97,15 @@ public class SshDspaceDataController {
         String userId = String.valueOf(request.getSession().getAttribute("userId"));
         if (!file.isEmpty() || (null != safLink && !"".equals(safLink))) {
             try {
-                String reportPath = jobHandler.execute(Long.valueOf(userId), "dspace", "ssh-import", handler, file, safLink);
-
+                RedisJob job = jobHandler.execute(Long.valueOf(userId), "dspace", "ssh-import", handler, file, safLink);
+                
                 ModelAndView model = new ModelAndView();
-                model.addObject("view", "sshDspaceSafImport");
-                model.setViewName("sshDspaceSafImport");
- 
-                String importTime = null;
-                String failedTime = null;
-                if(null != reportPath && !"".equals(reportPath) && !reportPath.startsWith("Failed import at")){
-                    String reportFileName = FileUtil.getFileNameWithoutExtension(reportPath);
-                    String[] pathInfo = reportFileName.split("\\/");
-                    importTime = pathInfo[pathInfo.length-1];
-                }
-                else{
-                    failedTime = reportPath;
-                }
-                model.addObject("reportPath", reportPath);
+                model.setViewName("jobReport");
                 model.addObject("host", handler.getHost());
                 model.addObject("collection", handler.getCollectionId());
-                model.addObject("importTime", importTime);
-                model.addObject("failedTime", failedTime);
+                model.addObject("reportPath", "/webserv/download/dspace/ssh-import/"+String.valueOf(job.getJobId()));  
+                WebUtil.outputJobInfoToModel(model, job);
+                
                 return model;
             } catch (Exception e) {
                 logger.error("Cannot import the SAF package into the DSpace server.", e);
@@ -126,10 +116,10 @@ public class SshDspaceDataController {
         return null;
     }
     
-    @RequestMapping(value="/ssh/dspace/download/{host}/{fileName}/")
-    public void sshDspaceReportDownload(HttpServletResponse response, @PathVariable("host") String host,  @PathVariable("fileName") String fileName){
+    @RequestMapping(value="/download/dspace/ssh-import/{jobId}")
+    public void sshDspaceReportDownload(HttpServletResponse response, @PathVariable("jobId") String jobId){
         
-        String downloadPath = DspaceSshDataUtil.getSafDownloadLink(host, fileName);
+        String downloadPath = DspaceSshDataUtil.getSafDownloadLink(jobId);
         
         WebUtil.setupFileDownload(response, downloadPath);
         

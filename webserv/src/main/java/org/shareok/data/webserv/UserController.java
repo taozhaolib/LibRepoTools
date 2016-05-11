@@ -5,11 +5,19 @@
  */
 package org.shareok.data.webserv;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.shareok.data.config.DataUtil;
+import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
 import org.shareok.data.kernel.api.services.user.RedisUserService;
+import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -84,14 +92,45 @@ public class UserController{
     }
     
     @RequestMapping("/user/{userId}/jobHistory")
-    public ModelAndView userJobHistory(@PathVariable("userId") String userId){
+    public ModelAndView userJobHistory(HttpServletRequest request, @PathVariable("userId") String userId){
+        
+        ModelAndView model = new ModelAndView();
+        model.setViewName("userJobHistory");
+        String email = (String)request.getSession().getAttribute("email");
+        String nickName = (String) request.getSession().getAttribute("nickname");
+        model.addObject("email", email);
+        model.addObject("nickName", nickName);
+        
         try{
             long uid = Long.valueOf(userId);
             List<RedisJob> jobList = jobService.getJobListByUser(uid);
-            return new ModelAndView("userJobHistory");
+            List<Map<String,String>> parsedJobList = new ArrayList<Map<String, String>>();
+            Map<String, String> parsedJob = new HashMap<String, String>();
+            int size = jobList.size();
+            if(size > 0){                
+                ObjectMapper mapper = new ObjectMapper();
+                for(RedisJob job : jobList){
+                    if(null != job){
+                        parsedJob.clear();
+                        parsedJob.put("jobId", String.valueOf(job.getJobId()));
+                        parsedJob.put("jobType", DataUtil.JOB_TYPES[job.getType()]);
+                        parsedJob.put("repoType", DataUtil.REPO_TYPES[job.getRepoType()]);
+                        parsedJob.put("status", RedisUtil.REDIS_JOB_STATUS[job.getStatus()]);
+                        parsedJob.put("userId", String.valueOf(job.getUserId()));
+                        parsedJob.put("startTime", ShareokdataManager.getSimpleDateFormat().format(job.getStartTime()));
+                        parsedJob.put("endTime", ShareokdataManager.getSimpleDateFormat().format(job.getEndTime()));
+                        parsedJobList.add(parsedJob);
+                    }
+                }
+                String jobListJson = mapper.writeValueAsString(parsedJobList);
+                model.addObject("jobList", jobListJson);
+            }
+            return model;
         }
-        catch(Exception ex){
+        catch(NumberFormatException ex){
             logger.error("Cannot retrieve the job list of user "+userId, ex);
+        } catch (JsonProcessingException ex) {
+            logger.error("Cannot process the job list of user "+ userId + " into JSON data.", ex);
         }
         return null;
     }

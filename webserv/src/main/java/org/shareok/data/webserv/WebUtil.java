@@ -6,20 +6,16 @@
 package org.shareok.data.webserv;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import javax.servlet.http.HttpServletResponse;
 import org.shareok.data.config.DataUtil;
-import org.shareok.data.kernel.api.services.ServiceUtil;
+import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.util.FileCopyUtils;
@@ -76,8 +72,8 @@ public class WebUtil {
         
         model.addObject("jobId", job.getJobId());      
         model.addObject("status", RedisUtil.REDIS_JOB_STATUS[job.getStatus()]);
-        model.addObject("startTime", job.getStartTime());
-        model.addObject("endTime", job.getEndTime());
+        model.addObject("startTime", ShareokdataManager.getSimpleDateFormat().format(job.getStartTime()));
+        model.addObject("endTime", ShareokdataManager.getSimpleDateFormat().format(job.getEndTime()));
         model.addObject("jobType", DataUtil.JOB_TYPES[job.getType()]);
         model.addObject("repoType", DataUtil.REPO_TYPES[job.getRepoType()]);
     }

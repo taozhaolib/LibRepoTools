@@ -17,78 +17,71 @@
                     <c:if test="${not empty view}">
                         <form role="form" action="/webserv/ssh/dspace/saf/import" method="post" enctype="multipart/form-data">
                         <div class="form-group">
-                            <label class="control-label col-sm-4" for="saf">Upload the simple archive format:</label>
-                            <div class="col-sm-8">
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="saf">Upload the simple archive format:</label>
+                            <div class="col-lg-3 col-sm-8">
                                 <input type="file" class="file-input" name="saf" />
-                            </div>                            
-                        </div>
-                        
-                            <br/><br/><br/>
-                    </c:if>
-                    <c:if test="${not empty view}">
-                            <div class="form-group">
-                            <label class="control-label col-sm-4" for="saf-online">Import the online simple archive format package (ZIP file):</label>
-                            <div class="col-sm-8">
+                            </div>
+                            <label class="control-label col-lg-3 col-sm-3 text-left" for="saf-online">Remote online simple archive format package (ZIP file):</label>
+                            <div class="col-lg-4 col-sm-8">
                                 <input type="text" class="form-control" name="saf-online" />
                             </div>
-                        </div><br/><br/><br/>
+                        </div>
+                        
+                            <br/><br/><br/><br>
                     </c:if>
                     <c:if test="${empty view}">
                         <form role="form" action="/webserv/ssh/dspace/journal/${publisher}/import" method="post" enctype="multipart/form-data">
                     </c:if>
          
                         <div class="form-group">
-                            <label class="control-label col-sm-4" for="host">Dspace Host:</label>
-                            <div class="col-sm-8">
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="host">Dspace Host:</label>
+                            <div class="col-lg-6 col-sm-8">
                               <input type="text" class="form-control" name="host" placeholder="Domain or IP address">
                             </div>
-                        </div>
-                        <br/><br/><br/>
-                        <div class="form-group">
-                            <label class="control-label col-sm-4" for="port">Port Number:</label>
-                            <div class="col-sm-8">
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="port">Port Number:</label>
+                            <div class="col-lg-2 col-sm-8">
                               <input type="text" class="form-control" name="port" placeholder="22">
                             </div>
                         </div>
                         <br/><br/><br/>
                         <div class="form-group">
-                            <label class="control-label col-sm-4" for="userName">Server User Name:</label>
-                            <div class="col-sm-8">
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="userName">Server User Name:</label>
+                            <div class="col-lg-4 col-sm-8">
                               <input type="text" class="form-control" name="userName" placeholder="">
+                            </div>
+                            <label class="control-label col-lg-2 col-sm-2 text-left" for="password">Password:</label>
+                            <div class="col-lg-4 col-sm-6">          
+                                <input type="password" class="form-control" name="password" placeholder="Enter password">
                             </div>
                         </div>
                         <br/><br/><br/>
                         <div class="form-group">
-                            <label class="control-label col-sm-4" for="password">Password:</label>
-                            <div class="col-sm-8">          
-                                <input type="password" class="form-control" name="password" placeholder="Enter password">
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="rsaKey">RSA Key File:</label>
+                            <div class="col-lg-4 col-sm-8">
+                              <input type="text" class="form-control" name="rsaKey" placeholder="">
                             </div>
-                        </div>
-                        <br/><br/>
-                        <div class="form-group">
-                            <label class="control-label col-sm-4" for="dspaceUser">DSpace User Name:</label>
-                            <div class="col-sm-8">
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="dspaceUser">DSpace User Name:</label>
+                            <div class="col-lg-4 col-sm-8">
                               <input type="text" class="form-control" name="dspaceUser" placeholder="">
                             </div>
                         </div>
                         <br/><br/><br/>
                         <div class="form-group">
-                            <label class="control-label col-sm-4" for="dspaceDirectory">DSpace Installation Directory:</label>
-                            <div class="col-sm-8">
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="dspaceDirectory">DSpace Installation Directory:</label>
+                            <div class="col-lg-4 col-sm-8">
                               <input type="text" class="form-control" name="dspaceDirectory" placeholder="">
                             </div>
-                        </div>
-                        <br/><br/><br/>
-                        <div class="form-group">
-                            <label class="control-label col-sm-4" for="uploadDst">DSpace Upload Directory:</label>
-                            <div class="col-sm-8">
-                              <input type="text" class="form-control" name="uploadDst" placeholder="">
+                            <div class="form-group">
+                                <label class="control-label col-lg-2 col-sm-4 text-left" for="uploadDst">DSpace Upload Directory:</label>
+                                <div class="col-lg-4 col-sm-8">
+                                  <input type="text" class="form-control" name="uploadDst" placeholder="">
+                                </div>
                             </div>
                         </div>
-                        <br/><br/><br/>
+                        <br/><br/><br/><br>
                         <div class="form-group">
-                            <label class="control-label col-sm-4" for="collectionId">Collection Id:</label>
-                            <div class="col-sm-8">
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="collectionId">Collection Id:</label>
+                            <div class="col-lg-10 col-sm-8">
                               <input type="text" class="form-control" name="collectionId" placeholder="">
                             </div>
                         </div>

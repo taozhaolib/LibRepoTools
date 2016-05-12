@@ -33,6 +33,7 @@ public class DspaceSshHandler implements DataHandler {
     private int port;
     private String userName;
     private String password;
+    private String rsaKey;
     private String dspaceUser;
     private String dspaceDirectory; // the DSpace installation directory
     private String collectionId;
@@ -65,6 +66,10 @@ public class DspaceSshHandler implements DataHandler {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getRsaKey() {
+        return rsaKey;
     }
 
     public String getDspaceUser() {
@@ -109,6 +114,10 @@ public class DspaceSshHandler implements DataHandler {
         this.password = password;
     }
 
+    public void setRsaKey(String rsaKey) {
+        this.rsaKey = rsaKey;
+    }
+
     public void setDspaceUser(String dspaceUser) {
         this.dspaceUser = dspaceUser;
     }
@@ -151,21 +160,22 @@ public class DspaceSshHandler implements DataHandler {
             sshExec.getSshConnector().setPort(port);
             sshExec.getSshConnector().setUserName(userName);
             sshExec.getSshConnector().setPassword(password);
+            sshExec.getSshConnector().setRsaKey(rsaKey);
             sshExec.execCmd(newDirCommand);
             sshExec.upload(uploadDst + File.separator + time, uploadFile);  
-            sshExec.addLogger("The SAF package has been uploaded to the DSpace server: " + dspaceTargetFilePath + "\n");
+            sshExec.addReporter("The SAF package has been uploaded to the DSpace server: " + dspaceTargetFilePath + "\n");
             String[] commands = {unzipCommand, importCommand};
             sshExec.execCmd(commands);
-            sshExec.addLogger("The SAF package has been imported into the DSpace repository.\n");
+            sshExec.addReporter("The SAF package has been imported into the DSpace repository.\n");
 //            sshExec.execCmd(unzipCommand);
 //            sshExec.execCmd(importCommand);
             String savedReportFilePath =  saveLoggerToFile();
-            sshExec.addLogger("The importing logging information has been saved to file : " + reportFilePath);
+            sshExec.addReporter("The importing logging information has been saved to file : " + reportFilePath);
             
             return savedReportFilePath;
         }
         catch(Exception ex){
-            Logger.getLogger(DspaceSshHandler.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("Cannot import the SAF package into DSapce", ex);
             return null; 
         }
     }
@@ -176,7 +186,7 @@ public class DspaceSshHandler implements DataHandler {
         if(!reportFile.exists()){
             reportFile.createNewFile();
         }
-            FileUtil.outputStringToFile(sshExec.getLogger(), reportFilePath);
+            FileUtil.outputStringToFile(sshExec.getReporter(), reportFilePath);
         }
         catch(IOException ioex){
             logger.error("Cannot save importing report!");

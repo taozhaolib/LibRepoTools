@@ -14,6 +14,7 @@ public class SshConnector {
     private int port;
     private String userName;
     private String password;
+    private String rsaKey;
     private int timeout;
 
     public String getHost() {
@@ -30,6 +31,10 @@ public class SshConnector {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getRsaKey() {
+        return rsaKey;
     }
 
     public int getTimeout() {
@@ -50,6 +55,10 @@ public class SshConnector {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setRsaKey(String rsaKey) {
+        this.rsaKey = rsaKey;
     }
 
     public void setTimeout(int timeout) {

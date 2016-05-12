@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class SshExecutor {
 
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(SshExecutor.class);
 
     protected String charset = "UTF-8";
     private SshConnector sshConnector;
@@ -31,7 +32,7 @@ public class SshExecutor {
     protected Session session;
     protected Channel channel;
     protected ChannelSftp chSftp;
-    protected String logger;
+    protected String reporter;
     protected boolean connected;
 
     public String getCharset() {
@@ -83,12 +84,12 @@ public class SshExecutor {
         this.chSftp = chSftp;
     }
 
-    public String getLogger() {
-        return logger;
+    public String getReporter() {
+        return reporter;
     }
 
-    public void setLogger(String logger) {
-        this.logger = logger;
+    public void setReporter(String reporter) {
+        this.reporter = reporter;
     }
 
     public boolean isConnected() {
@@ -110,18 +111,23 @@ public class SshExecutor {
             return;
         }
         
+        try{
         String userName = sshConnector.getUserName();
         String host = sshConnector.getHost();
         String password = sshConnector.getPassword();
+        String rsaKey = sshConnector.getRsaKey();
         int port = sshConnector.getPort();
         int timeout = sshConnector.getTimeout();
         
         jsch = new JSch();
         session = jsch.getSession(userName, host, port);
-        addLogger("New Session created.");
+        addReporter("New Session created.");
         //logger.debug("Session created.");
-        if (password != null) {
+        if (password != null && !"".equals(password)) {
             session.setPassword(password);
+        }
+        else{
+            jsch.addIdentity(rsaKey);
         }
         Properties config = new Properties();
         config.put("StrictHostKeyChecking", "no");
@@ -130,11 +136,16 @@ public class SshExecutor {
         session.connect();
         setConnected(true);
         //System.out.println("Connected successfully to remote Server = \"" + host + "\",as user name = \"" + userName + "\", as port =  \"" + port + "\"");
-        addLogger("Session connected.");
-        addLogger("Connected successfully to remote Server = " + host + ",as user name = " + userName + ",as port =  " + port);
-//        logger.debug("Session connected.");
-//        logger.debug("Connected successfully to DSpace Server = " + host + ",as user name = " + userName
+        addReporter("Session connected.");
+        addReporter("Connected successfully to remote Server = " + host + ",as user name = " + userName + ",as port =  " + port);
+//        reporter.debug("Session connected.");
+//        reporter.debug("Connected successfully to DSpace Server = " + host + ",as user name = " + userName
 //                + ",as port =  " + port);
+        }
+        catch(Exception ex){
+            addReporter("Cannot connect to the server!");
+            logger.error("Cannot connect to the server!", ex);
+        }
     }
 
     /**
@@ -144,7 +155,6 @@ public class SshExecutor {
      */
     public void execCmd(String[] commands) {
 
-        //BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         BufferedReader reader = null;
 
         try {
@@ -164,18 +174,18 @@ public class SshExecutor {
                 while ((buf = reader.readLine()) != null) {
                     //logger.debug(buf);
                     //System.out.println(buf);
-                    addLogger(buf);
+                    addReporter(buf);
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSchException e) {
-            e.printStackTrace();
+        } catch (IOException | JSchException e) {
+            addReporter("Cannot execute the commands.");
+            logger.error("Cannot execute the commands.", e);
         } finally {
             try {
                 reader.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                addReporter("Cannot close the reader after executing the ssh command.");
+                logger.error("Cannot close the reader after executing the ssh command.", e);
             }
             channel.disconnect();
             session.disconnect();
@@ -197,7 +207,7 @@ public class SshExecutor {
     public void upload(String directory, String uploadFile) {
         try {
             getConnect();
-            addLogger("Opening Channel.");
+            addReporter("Opening Channel.");
             //logger.debug("Opening Channel.");
             channel = session.openChannel("sftp");
             channel.connect();
@@ -210,7 +220,7 @@ public class SshExecutor {
 //             byte[] buff = new byte[1024 * 256];
 //             int read;
 //             if (out != null) {
-//              //   logger.debug("Start to read input stream");
+//              //   reporter.debug("Start to read input stream");
 //                InputStream is = new FileInputStream(directory);
 //                do {
 //                    read = is.read(buff, 0, buff.length);
@@ -219,37 +229,37 @@ public class SshExecutor {
 //                     }
 //                     out.flush();
 //                 } while (read >= 0);
-//              //   logger.debug("input stream read done.");
+//              //   reporter.debug("input stream read done.");
 //             }
             FileProgressMonitor monitor = getFileProgressMonitor(fileSize);
             chSftp.put(uploadFile, directory, monitor, ChannelSftp.OVERWRITE); // Method 2
-            addLogger(monitor.getLogger());
+            addReporter(monitor.getLogger());
 
             // chSftp.put(new FileInputStream(src), dst, new FileProgressMonitor(fileSize), ChannelSftp.OVERWRITE); // Method 3
 
         } catch (Exception e) {
-            e.printStackTrace();
+            addReporter("Cannot upload files to the repository server.");
+            logger.error("Cannot upload files to the repository server.", e);
         }finally {
             chSftp.quit();
 
             if (channel != null) {
                 channel.disconnect();
-                addLogger("channel disconnect");
+                addReporter("channel disconnect");
                 //logger.debug("channel disconnect");
             }
             if (session != null) {
                 session.disconnect();
-                addLogger("channel disconnect");
+                addReporter("channel disconnect");
                 //logger.debug("channel disconnect");
             }
             setConnected(false);
-            addLogger("File at  <"+ uploadFile + " has been successfully uploaded to remote server at : \"" + directory + "\".");
-            //System.out.println("File at  <"+ uploadFile + " has been successfully uploaded to remote server at : \"" + directory + "\".");
+            addReporter("File at  <"+ uploadFile + " has been successfully uploaded to remote server at : \"" + directory + "\".");
         }
     }
     
-    public void addLogger(String info){
-        logger = logger.concat(info + "\n\n");
+    public void addReporter(String info){
+        reporter = reporter.concat(info + "\n\n");
     }
     
     private FileProgressMonitor getFileProgressMonitor(long fileSize){
@@ -270,7 +280,7 @@ public class SshExecutor {
 //    public void download(String directory, String downloadFile) {
 //        try {
 //            getConnect();//建立服务器连接
-//            logger.debug("Opening Channel.");
+//            reporter.debug("Opening Channel.");
 //            channel = session.openChannel("sftp"); // 打开SFTP通道
 //            channel.connect(); // 建立SFTP通道的连接
 //            chSftp = (ChannelSftp) channel;
@@ -288,7 +298,7 @@ public class SshExecutor {
 //            byte[] buff = new byte[1024 * 2];
 //            int read;
 //            if (is != null) {
-//                logger.debug("Start to read input stream");
+//                reporter.debug("Start to read input stream");
 //                do {
 //                    read = is.read(buff, 0, buff.length);
 //                    if (read > 0) {
@@ -296,21 +306,21 @@ public class SshExecutor {
 //                    }
 //                    out.flush();
 //                } while (read >= 0);
-//                logger.debug("input stream read done.");
+//                reporter.debug("input stream read done.");
 //            }*/
 //
-//            logger.debug("成功下载文件至"+directory);
+//            reporter.debug("成功下载文件至"+directory);
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        } finally {
 //            chSftp.quit();
 //            if (channel != null) {
 //                channel.disconnect();
-//                logger.debug("channel disconnect");
+//                reporter.debug("channel disconnect");
 //            }
 //            if (session != null) {
 //                session.disconnect();
-//                logger.debug("channel disconnect");
+//                reporter.debug("channel disconnect");
 //            }
 //        }
 //    }
@@ -323,12 +333,12 @@ public class SshExecutor {
 //
 //        try {
 //            getConnect();
-//            logger.debug("Opening Channel.");
+//            reporter.debug("Opening Channel.");
 //            channel = session.openChannel("sftp"); 
 //            channel.connect(); 
 //            chSftp = (ChannelSftp) channel;
 //            chSftp.rm(deleteFile);
-//            logger.debug("成功删除文件"+deleteFile);
+//            reporter.debug("成功删除文件"+deleteFile);
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }

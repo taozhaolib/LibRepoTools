@@ -120,15 +120,16 @@ public class SshExecutor {
         int timeout = sshConnector.getTimeout();
         
         jsch = new JSch();
+        jsch.addIdentity(rsaKey, "xiaomi");
         session = jsch.getSession(userName, host, port);
         addReporter("New Session created.");
         //logger.debug("Session created.");
-        if (password != null && !"".equals(password)) {
-            session.setPassword(password);
-        }
-        else{
-            jsch.addIdentity(rsaKey);
-        }
+//        if (password != null && !"".equals(password)) {
+//            session.setPassword(password);
+//        }
+//        else{
+//            jsch.addIdentity(rsaKey);
+//        }
         Properties config = new Properties();
         config.put("StrictHostKeyChecking", "no");
         session.setConfig(config);
@@ -143,6 +144,7 @@ public class SshExecutor {
 //                + ",as port =  " + port);
         }
         catch(Exception ex){
+            ex.printStackTrace();
             addReporter("Cannot connect to the server!");
             logger.error("Cannot connect to the server!", ex);
         }

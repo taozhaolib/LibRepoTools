@@ -68,7 +68,7 @@ public class JobDaoImpl implements JobDao {
                     operations.boundHashOps("job:"+jobId);
                     operations.opsForHash().put("job:"+jobId, "userId", uidStr);
                     operations.opsForHash().put("job:"+jobId, "jobId", jobId);
-                    operations.opsForHash().put("job:"+jobId, "status", "1");
+                    operations.opsForHash().put("job:"+jobId, "status", "4");
                     operations.opsForHash().put("job:"+jobId, "type", jobTypeStr);
                     operations.opsForHash().put("job:"+jobId, "repoType", repoTypeStr);
                     operations.opsForHash().put("job:"+jobId, "startTime", (null != startTimeStr ? ShareokdataManager.getSimpleDateFormat().format(startTimeStr) : ShareokdataManager.getSimpleDateFormat().format(new Date())));
@@ -143,6 +143,7 @@ public class JobDaoImpl implements JobDao {
         catch(Exception ex){
             logger.error("Cannot get the list of the jobs conducted by user " + uid, ex);
         }
+        RedisUtil.sortJobList(jobs);
         return jobs;
     }
     

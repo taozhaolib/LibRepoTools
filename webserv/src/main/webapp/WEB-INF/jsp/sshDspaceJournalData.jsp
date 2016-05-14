@@ -57,15 +57,40 @@
                         <br/><br/><br/>
                         <div class="form-group">
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="rsaKey">RSA Key File:</label>
-                            <div class="col-lg-4 col-sm-8">
+                            <div class="col-lg-7 col-sm-8">
                               <input type="text" class="form-control" name="rsaKey" placeholder="">
-                            </div>
-                            <label class="control-label col-lg-2 col-sm-4 text-left" for="dspaceUser">DSpace User Name:</label>
-                            <div class="col-lg-4 col-sm-8">
-                              <input type="text" class="form-control" name="dspaceUser" placeholder="">
-                            </div>
+                            </div>                            
+                            <input type="button"  class="btn btn-click col-lg-3" value="Click to Set up Proxy">
                         </div>
-                        <br/><br/><br/>
+                        <br/><br/>
+                        <div class="form-group click-show-slow">
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="proxyHost">Proxy Host:</label>
+                            <div class="col-lg-6 col-sm-8">
+                              <input type="text" class="form-control" name="proxyHost" placeholder="Domain or IP address">
+                            </div>
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="proxyPort">Proxy Port Number:</label>
+                            <div class="col-lg-2 col-sm-8">
+                              <input type="text" class="form-control" name="proxyPort" placeholder="22">
+                            </div>
+                            <br><br><br>
+                        </div>
+                        
+                        <div class="form-group click-show-slow">
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="proxyUserName">Proxy Server User Name:</label>
+                            <div class="col-lg-4 col-sm-8">
+                              <input type="text" class="form-control" name="proxyUserName" placeholder="">
+                            </div>
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="proxyPassword">Proxy Password:</label>
+                            <div class="col-lg-4 col-sm-8">          
+                                <input type="password" class="form-control" name="proxyPassword" placeholder="Enter password">
+                            </div>
+                            <br><br><br>
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="passPhrase">Passphrase:</label>
+                            <div class="col-lg-4 col-sm-8">          
+                                <input type="password" class="form-control" name="passPhrase" placeholder="Enter password">
+                            </div>
+                            <br><br><br>
+                        </div>
                         <div class="form-group">
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="dspaceDirectory">DSpace Installation Directory:</label>
                             <div class="col-lg-4 col-sm-8">
@@ -80,8 +105,12 @@
                         </div>
                         <br/><br/><br/><br>
                         <div class="form-group">
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="dspaceUser">DSpace User Name:</label>
+                            <div class="col-lg-4 col-sm-8">
+                              <input type="text" class="form-control" name="dspaceUser" placeholder="">
+                            </div>
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="collectionId">Collection Id:</label>
-                            <div class="col-lg-10 col-sm-8">
+                            <div class="col-lg-4 col-sm-8">
                               <input type="text" class="form-control" name="collectionId" placeholder="">
                             </div>
                         </div>

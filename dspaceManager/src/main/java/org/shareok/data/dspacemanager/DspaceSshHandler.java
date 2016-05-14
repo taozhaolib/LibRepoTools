@@ -9,8 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.shareok.data.config.DataHandler;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.ssh.SshExecutor;
@@ -26,13 +24,18 @@ public class DspaceSshHandler implements DataHandler {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DspaceSshHandler.class);
     
+    private int port;
+    private int proxyPort;
     private String reportFilePath;
     private String uploadDst;
     private String uploadFile; // *** suppose the uploaded file is a ZIP file ***
-    private String host;
-    private int port;
+    private String host;    
+    private String proxyHost;
     private String userName;
+    private String proxyUserName;
     private String password;
+    private String proxyPassword;
+    private String passPhrase;    
     private String rsaKey;
     private String dspaceUser;
     private String dspaceDirectory; // the DSpace installation directory
@@ -58,6 +61,26 @@ public class DspaceSshHandler implements DataHandler {
 
     public int getPort() {
         return port;
+    }
+
+    public int getProxyPort() {
+        return proxyPort;
+    }
+
+    public String getProxyHost() {
+        return proxyHost;
+    }
+
+    public String getProxyUserName() {
+        return proxyUserName;
+    }
+
+    public String getProxyPassword() {
+        return proxyPassword;
+    }
+
+    public String getPassPhrase() {
+        return passPhrase;
     }
 
     public String getUserName() {
@@ -104,6 +127,26 @@ public class DspaceSshHandler implements DataHandler {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public void setProxyPort(int proxyPort) {
+        this.proxyPort = proxyPort;
+    }
+
+    public void setProxyHost(String proxyHost) {
+        this.proxyHost = proxyHost;
+    }
+
+    public void setProxyUserName(String proxyUserName) {
+        this.proxyUserName = proxyUserName;
+    }
+
+    public void setProxyPassword(String proxyPassword) {
+        this.proxyPassword = proxyPassword;
+    }
+
+    public void setPassPhrase(String passPhrase) {
+        this.passPhrase = passPhrase;
     }
 
     public void setUserName(String userName) {
@@ -161,14 +204,20 @@ public class DspaceSshHandler implements DataHandler {
             sshExec.getSshConnector().setUserName(userName);
             sshExec.getSshConnector().setPassword(password);
             sshExec.getSshConnector().setRsaKey(rsaKey);
+            sshExec.getSshConnector().setPassPhrase(passPhrase);
+            sshExec.getSshConnector().setProxyHost(proxyHost);
+            sshExec.getSshConnector().setProxyPassword(proxyPassword);
+            sshExec.getSshConnector().setProxyUserName(proxyUserName);
+            sshExec.getSshConnector().setProxyPort(proxyPort);
+//            sshExec.execCmd("sudo /srv/shareok/dspace/bin/dspace version ");
             sshExec.execCmd(newDirCommand);
             sshExec.upload(uploadDst + File.separator + time, uploadFile);  
             sshExec.addReporter("The SAF package has been uploaded to the DSpace server: " + dspaceTargetFilePath + "\n");
             String[] commands = {unzipCommand, importCommand};
             sshExec.execCmd(commands);
             sshExec.addReporter("The SAF package has been imported into the DSpace repository.\n");
-//            sshExec.execCmd(unzipCommand);
-//            sshExec.execCmd(importCommand);
+////            sshExec.execCmd(unzipCommand);
+////            sshExec.execCmd(importCommand);
             String savedReportFilePath =  saveLoggerToFile();
             sshExec.addReporter("The importing logging information has been saved to file : " + reportFilePath);
             

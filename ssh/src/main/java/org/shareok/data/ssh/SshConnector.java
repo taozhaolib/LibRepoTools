@@ -10,12 +10,19 @@ package org.shareok.data.ssh;
  * @author Tao Zhao
  */
 public class SshConnector {
-    private String host;
-    private int port;
-    private String userName;
-    private String password;
-    private String rsaKey;
+
     private int timeout;
+    
+    private int port;
+    private int proxyPort;
+    private String host;    
+    private String proxyHost;
+    private String userName;
+    private String proxyUserName;
+    private String password;
+    private String proxyPassword;
+    private String passPhrase;    
+    private String rsaKey;
 
     public String getHost() {
         return host;
@@ -23,6 +30,26 @@ public class SshConnector {
 
     public int getPort() {
         return port;
+    }
+
+    public int getProxyPort() {
+        return proxyPort;
+    }
+
+    public String getProxyHost() {
+        return proxyHost;
+    }
+
+    public String getProxyUserName() {
+        return proxyUserName;
+    }
+
+    public String getProxyPassword() {
+        return proxyPassword;
+    }
+
+    public String getPassPhrase() {
+        return passPhrase;
     }
 
     public String getUserName() {
@@ -55,6 +82,26 @@ public class SshConnector {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public void setProxyPort(int proxyPort) {
+        this.proxyPort = proxyPort;
+    }
+
+    public void setProxyHost(String proxyHost) {
+        this.proxyHost = proxyHost;
+    }
+
+    public void setProxyUserName(String proxyUserName) {
+        this.proxyUserName = proxyUserName;
+    }
+
+    public void setProxyPassword(String proxyPassword) {
+        this.proxyPassword = proxyPassword;
+    }
+
+    public void setPassPhrase(String passPhrase) {
+        this.passPhrase = passPhrase;
     }
 
     public void setRsaKey(String rsaKey) {

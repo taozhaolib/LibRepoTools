@@ -20,7 +20,7 @@
                     <h5>Job Status: ${status}</h5>
                     <h5>Job Started at : ${startTime}</h5>
                     <h5>Job Ended at : ${endTime}</h5>                    
-                    <h5><a href="${reportPath}" class="btn btn-info btn-sm" role="button">Download Job Report</a></h5>    
+                    <a href="${reportPath}" class="btn btn-info btn-sm" role="button">Download Job Report</a>    
                     <input type="button"  class="btn btn-form" onclick="location.href='/webserv/home'" value="Back to home page"><BR>
                 </div>
             </div>

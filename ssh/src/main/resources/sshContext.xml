@@ -22,7 +22,13 @@
     </bean>
     
     <bean id="sshConnector" class="org.shareok.data.ssh.SshConnector" >
-        <property name="timeout" value="5000" />
+        <property name="timeout" value="50000" />
+        <property name="passPhrase" value="" />
+        <property name="password" value="" />
+        <property name="proxyPassword" value="" />
+        <property name="port" value="22" />
+        <property name="proxyPort" value="22" />
+        <property name="rsaKey" value="" />
     </bean>
     
     <bean id="sshExecutor" class="org.shareok.data.ssh.SshExecutor" >

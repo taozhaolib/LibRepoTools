@@ -105,13 +105,14 @@ public class UserController{
             long uid = Long.valueOf(userId);
             List<RedisJob> jobList = jobService.getJobListByUser(uid);
             List<Map<String,String>> parsedJobList = new ArrayList<Map<String, String>>();
-            Map<String, String> parsedJob = new HashMap<String, String>();
+            Map<String, String> parsedJob;
             int size = jobList.size();
             if(size > 0){                
                 ObjectMapper mapper = new ObjectMapper();
-                for(RedisJob job : jobList){
+                for(int i = 0; i < jobList.size(); i++){
+                    RedisJob job = jobList.get(i);
                     if(null != job){
-                        parsedJob.clear();
+                        parsedJob = new HashMap<String, String>();
                         parsedJob.put("jobId", String.valueOf(job.getJobId()));
                         parsedJob.put("jobType", DataUtil.JOB_TYPES[job.getType()]);
                         parsedJob.put("repoType", DataUtil.REPO_TYPES[job.getRepoType()]);

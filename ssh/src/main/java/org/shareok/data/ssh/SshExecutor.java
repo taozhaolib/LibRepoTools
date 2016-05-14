@@ -113,39 +113,52 @@ public class SshExecutor {
         
         try{
         String userName = sshConnector.getUserName();
+        String proxyUserName = sshConnector.getProxyUserName();
         String host = sshConnector.getHost();
+        String proxyHost = sshConnector.getProxyHost();
         String password = sshConnector.getPassword();
+        String proxyPassword = sshConnector.getProxyPassword();
+        String passPhrase = sshConnector.getPassPhrase();
         String rsaKey = sshConnector.getRsaKey();
         int port = sshConnector.getPort();
+        int proxyPort = sshConnector.getProxyPort();
         int timeout = sshConnector.getTimeout();
         
         jsch = new JSch();
-        jsch.addIdentity(rsaKey, "xiaomi");
-        session = jsch.getSession(userName, host, port);
-        addReporter("New Session created.");
-        //logger.debug("Session created.");
-//        if (password != null && !"".equals(password)) {
-//            session.setPassword(password);
-//        }
-//        else{
-//            jsch.addIdentity(rsaKey);
-//        }
-        Properties config = new Properties();
+        if(null != rsaKey && !"".equals(rsaKey)){
+            jsch.addIdentity(rsaKey, (null != passPhrase && !"".equals(passPhrase)) ? passPhrase : "");
+        }
+        
+        if(null != proxyHost && !"".equals(proxyHost)){
+            int forwardedPort = getProxyConnection(host, port, proxyUserName, proxyHost, proxyPassword, proxyPort);
+            session = jsch.getSession(userName, "127.0.0.1", forwardedPort);   
+            addReporter("New Session tunnel to the server has been created.");
+        }
+        else{
+            session = jsch.getSession(userName, host, port);
+            if (password != null && !"".equals(password)) {
+                session.setPassword(password);
+            }
+            addReporter("New Session to the server has been created.");
+        }
+        
+        Properties config = new Properties(); 
         config.put("StrictHostKeyChecking", "no");
         session.setConfig(config);
         session.setTimeout(timeout);
         session.connect();
+        
         setConnected(true);
         //System.out.println("Connected successfully to remote Server = \"" + host + "\",as user name = \"" + userName + "\", as port =  \"" + port + "\"");
-        addReporter("Session connected.");
         addReporter("Connected successfully to remote Server = " + host + ",as user name = " + userName + ",as port =  " + port);
 //        reporter.debug("Session connected.");
 //        reporter.debug("Connected successfully to DSpace Server = " + host + ",as user name = " + userName
 //                + ",as port =  " + port);
         }
         catch(Exception ex){
-            ex.printStackTrace();
+            //ex.printStackTrace();
             addReporter("Cannot connect to the server!");
+            addReporter(ex.getMessage());
             logger.error("Cannot connect to the server!", ex);
         }
     }
@@ -161,9 +174,9 @@ public class SshExecutor {
 
         try {
             getConnect();
-//            String[]commands = command.split(";;");
-            for(String command : commands){
-                channel = session.openChannel("exec");
+            channel = session.openChannel("exec");
+
+            for(String command : commands){                
                 ((ChannelExec) channel).setCommand(command);
                 channel.setInputStream(null);
                 ((ChannelExec) channel).setErrStream(System.err);
@@ -269,6 +282,22 @@ public class SshExecutor {
         FileProgressMonitor monitor = (FileProgressMonitor)context.getBean("fileProgressMonitor");
         monitor.setTransfered(fileSize);
         return monitor;
+    }
+    
+    private int getProxyConnection(String host, int port, String proxyUserName, String proxyHost, String proxyPassword, int proxyPort) throws JSchException{
+        
+        addReporter("Start to connect to proxy server...");        
+        Session proxySession = jsch.getSession(proxyUserName, proxyHost, proxyPort);
+        addReporter("Session for proxy server connection is set up.");
+        if(null != proxyPassword && !"".equals(proxyPassword)){
+            proxySession.setPassword(proxyPassword);
+        }
+        Properties config = new Properties(); 
+        config.put("StrictHostKeyChecking", "no");
+        proxySession.setConfig(config);
+        proxySession.connect();
+        addReporter("Successfully connected to proxy server.");
+        return proxySession.setPortForwardingL(0, host, port);
     }
 
 

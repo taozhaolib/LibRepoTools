@@ -8,5 +8,9 @@ $(document).ready(function(){
     $(".loading-btn").click(function(){
         $(".spining-class").show();
     });
+    $(".btn-click").click(function(){
+        $(".click-show-slow").toggle("slow", function(){});
+    })
+    $(".click-show-slow").hide();
 });
 

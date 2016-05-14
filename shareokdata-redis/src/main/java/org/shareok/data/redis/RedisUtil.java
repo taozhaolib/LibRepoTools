@@ -7,6 +7,9 @@ package org.shareok.data.redis;
 
 import java.security.SecureRandom;
 import java.math.BigInteger;
+import java.util.Comparator;
+import java.util.List;
+import org.apache.log4j.Logger;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.JobDaoImpl;
@@ -22,7 +25,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class RedisUtil {
     
-    public static String[] REDIS_JOB_STATUS= {"undecided", "running", "completed", "failed"};
+    private static final Logger logger = Logger.getLogger(UserDaoImpl.class);
+    
+    public static String[] REDIS_JOB_STATUS= {"undecided", "running", "completed", "failed", "built"};
     
 
     /**
@@ -69,4 +74,21 @@ public class RedisUtil {
         return (RedisJob) context.getBean("job");
     }
     
+    public static void sortJobList(List<RedisJob> jobList){
+        jobList.sort(new Comparator<RedisJob>(){
+            @Override
+            public int compare(RedisJob o1, RedisJob o2) {
+                int result = 0;
+                try{
+                    if(null != o1 && null != o2){
+                        result = Math.toIntExact(o1.getJobId() - o2.getJobId());
+                    }
+                }
+                catch(UnsupportedOperationException uoex){
+                    logger.error("Cannot compare the tow job objects", uoex);
+                }
+                return result;
+            }
+        });
+    }
 }

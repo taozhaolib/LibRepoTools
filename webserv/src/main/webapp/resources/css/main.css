@@ -37,3 +37,7 @@ input.btn-form{
 .spining-class{
     display: none;
 }
+
+input.btn-click{
+    background-color: lightskyblue;
+}

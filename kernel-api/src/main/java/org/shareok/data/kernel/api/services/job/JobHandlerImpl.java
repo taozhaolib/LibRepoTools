@@ -66,7 +66,7 @@ public class JobHandlerImpl implements JobHandler {
         handler.setUploadFile(filePath);
         handler.setReportFilePath(reportFilePath);
         ds.setHandler(handler);
-        
+        redisJobServ.updateJob(jobId, "status", "1"); 
         String savedReportFilePath = ds.executeTask(DataUtil.JOB_TYPES[jobType]);
         if(null != savedReportFilePath && savedReportFilePath.equals(reportFilePath)){
             redisJobServ.updateJob(jobId, "status", "2");            

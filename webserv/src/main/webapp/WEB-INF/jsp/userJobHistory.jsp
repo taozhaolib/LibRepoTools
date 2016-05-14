@@ -22,7 +22,7 @@
     <script type="text/javascript">
         $(document).ready(function(){
             var jobList = '<%= request.getAttribute("jobList") %>';        
-            var data = $.parseJSON(jobList);//alert(data);
+            var data = $.parseJSON(jobList);
             $.each(data, function(){
                 var trObj = new Object();
 
@@ -59,6 +59,14 @@
                 trText += "<td>" + trObj.startTime + "</td>";
                 trText += "<td>" + trObj.endTime + "</td>";
                 trText += "</tr>";
+                trObj.jobId = "";
+                trObj.repoType = "";
+                trObj.jobType = "";
+                trObj.userId = "";
+                trObj.status = "";
+                trObj.startTime = "";
+                trObj.endTime = "";
+                
 
                 $('#jobHistoryTable tbody').append(trText);
             });

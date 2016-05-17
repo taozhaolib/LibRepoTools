@@ -20,6 +20,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import org.apache.poi.util.IOUtils;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -33,6 +35,8 @@ import org.xml.sax.InputSource;
  */
 public class FileUtil {
 
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(FileUtil.class);
+    
     /**
      * Get the path of the file in the resources folder 
      * 
@@ -315,5 +319,18 @@ public class FileUtil {
         catch(IOException ex){
             Logger.getLogger(FileUtil.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public static MultipartFile getMultiPartFileFromFilePath(String filePath, String contentType){
+        MultipartFile multipartFile = null;
+        try{
+            File file = new File(filePath);
+            FileInputStream input = new FileInputStream(file);
+            multipartFile = new MockMultipartFile("file", file.getName(), contentType, IOUtils.toByteArray(input));
+        }
+        catch(IOException ioex){
+            logger.error("Cannot get the multipart file form " + filePath, ioex);
+        }
+        return multipartFile;
     }
 }

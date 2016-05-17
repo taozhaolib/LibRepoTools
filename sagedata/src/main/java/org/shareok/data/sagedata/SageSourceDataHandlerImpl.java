@@ -24,7 +24,6 @@ import org.shareok.data.documentProcessor.FileHandlerFactory;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.sagedata.exceptions.EmptyFilePathException;
 import org.shareok.data.config.ShareokdataManager;
-import org.shareok.data.documentProcessor.FileZipper;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;

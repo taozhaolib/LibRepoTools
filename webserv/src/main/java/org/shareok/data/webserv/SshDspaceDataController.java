@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
@@ -55,19 +56,22 @@ public class SshDspaceDataController {
     }
     
     @RequestMapping(value="/ssh/dspace/journal/{publisher}/{action}", method=RequestMethod.POST)
-    public ModelAndView sshDspaceJournalDataHandler(@ModelAttribute("SpringWeb")DspaceSshHandler handler, @PathVariable("publisher") String publisher, @PathVariable("action") String action) {
+    public ModelAndView sshDspaceJournalDataHandler(HttpServletRequest request, @ModelAttribute("SpringWeb")DspaceSshHandler handler, @PathVariable("publisher") String publisher, @PathVariable("action") String action) {
        
+        String safLink = (String)request.getParameter("saf-online");
+        String userId = String.valueOf(request.getSession().getAttribute("userId"));
         if (null != handler) {
             try {
                 String uploadFilePath = DspaceJournalDataUtil.getJournalImportFilePath(handler.getUploadFile(), publisher);
-                handler.setUploadFile(uploadFilePath);
-                if(null == handler.getSshExec()){
-                    handler.setSshExec(DspaceSshDataUtil.getSshExecForDspace());
-                }
-                dsSshService.setHandler(handler);
-                dsSshService.sshImportData();
+                RedisJob job = jobHandler.execute(Long.valueOf(userId), "dspace", "ssh-import", handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
+                
                 ModelAndView model = new ModelAndView();
-                model.setViewName("journalDataUpload");
+                model.setViewName("jobReport");
+                model.addObject("host", handler.getHost());
+                model.addObject("collection", handler.getCollectionId());
+                model.addObject("reportPath", "/webserv/download/dspace/ssh-import/"+String.valueOf(job.getJobId()));  
+                WebUtil.outputJobInfoToModel(model, job);
+                
                 return model;
             } catch (Exception e) {
                 Logger.getLogger(JournalDataController.class.getName()).log(Level.SEVERE, null, e);

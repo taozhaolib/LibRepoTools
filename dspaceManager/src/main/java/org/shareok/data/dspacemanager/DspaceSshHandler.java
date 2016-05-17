@@ -198,6 +198,10 @@ public class DspaceSshHandler implements DataHandler {
                                    "dspace import --add " + "--eperson=" + dspaceUser + " --collection=" + collectionId +
                                    " --source=" + uploadDst + File.separator + time + File.separator + uploadFileNameWithoutExtension + " --mapfile=" + uploadDst +
                                    File.separator + time + File.separator + "mapfile";
+            sshExec.addReporter("Three commands to be executed:");
+            sshExec.addReporter("Build up a new directory for the new importing: "+newDirCommand);
+            sshExec.addReporter("Unzip the uploaded SAF package: "+unzipCommand);
+            sshExec.addReporter("Import the SAF package into DSpace: "+importCommand);
             //importCommand = newDirCommand + ";;" + unzipCommand + ";;" + importCommand;
             sshExec.getSshConnector().setHost(host);
             sshExec.getSshConnector().setPort(port);

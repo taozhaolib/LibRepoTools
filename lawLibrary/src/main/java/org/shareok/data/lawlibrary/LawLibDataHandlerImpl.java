@@ -6,6 +6,7 @@
 package org.shareok.data.lawlibrary;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.shareok.data.documentProcessor.CsvHandler;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.lawlibrary.exceptions.DateReformatException;
 import org.springframework.beans.factory.annotation.Autowired;
+import safbuilder.SAFPackage;
 
 /**
  *
@@ -244,5 +246,15 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
             logger.error("Cannot reformat the date", ex);
         }
         return null;
+    }
+    
+    public void getSafPackage(){
+        try{
+            SAFPackage safPack = new SAFPackage();
+            safPack.processMetaPack(outputCsvFilePath, Boolean.TRUE);
+        }
+        catch(IOException ioex){
+            logger.error("Cannot generate SAF package for the law library documents", ioex);
+        }
     }
 }

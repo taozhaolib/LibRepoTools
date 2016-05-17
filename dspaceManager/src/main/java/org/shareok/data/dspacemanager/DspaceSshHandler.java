@@ -191,13 +191,13 @@ public class DspaceSshHandler implements DataHandler {
             String dspaceTargetFilePath = uploadDst + File.separator + time + File.separator + uploadFileName;
             
             // Build up the commands:
-            String newDirCommand = "sudo -u " + userName + " mkdir " + uploadDst + File.separator + time;
-            String unzipCommand = "sudo -u " + userName + " unzip -o " + dspaceTargetFilePath + " -d " + uploadDst + File.separator + time;
+            String newDirCommand = " bash -c \"mkdir " + uploadDst + File.separator + time + "\"";
+            String unzipCommand = " bash -c \"unzip -o " + dspaceTargetFilePath + " -d " + uploadDst + File.separator + time + "\"";
             //String unzipCommand = "sudo tar -xvf " + uploadDst + File.separator + uploadFileName;
-            String importCommand = "sudo " + dspaceDirectory + File.separator + "bin" + File.separator + 
+            String importCommand = "sudo " + dspaceDirectory + File.separator + "bin" + File.separator +
                                    "dspace import --add " + "--eperson=" + dspaceUser + " --collection=" + collectionId +
                                    " --source=" + uploadDst + File.separator + time + File.separator + uploadFileNameWithoutExtension + " --mapfile=" + uploadDst +
-                                   File.separator + time + File.separator + "mapfile";
+                                   File.separator + time + File.separator + "mapfile ";
             sshExec.addReporter("Three commands to be executed:");
             sshExec.addReporter("Build up a new directory for the new importing: "+newDirCommand);
             sshExec.addReporter("Unzip the uploaded SAF package: "+unzipCommand);

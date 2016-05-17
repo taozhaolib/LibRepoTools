@@ -63,7 +63,7 @@ public class SshDspaceDataController {
         if (null != handler) {
             try {
                 String uploadFilePath = DspaceJournalDataUtil.getJournalImportFilePath(handler.getUploadFile(), publisher);
-                RedisJob job = jobHandler.execute(Long.valueOf(userId), "dspace", "plos-ssh-import", handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
+                RedisJob job = jobHandler.execute(Long.valueOf(userId), "dspace", "journal-ssh-import", handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
                 
                 ModelAndView model = new ModelAndView();
                 model.setViewName("jobReport");

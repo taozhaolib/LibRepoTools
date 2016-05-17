@@ -11,5 +11,5 @@ package org.shareok.data.config;
  */
 public class DataUtil {
     public static String[] REPO_TYPES = {"unknown", "dspace", "islandora", "fedora", "hydra"};
-    public static String[] JOB_TYPES = {"unknown", "ssh-import", "rest-import"};
+    public static String[] JOB_TYPES = {"unknown", "ssh-import", "rest-import", "journal-ssh-import"};
 }

@@ -174,9 +174,9 @@ public class SshExecutor {
 
         try {
             getConnect();
-            channel = session.openChannel("exec");
-
-            for(String command : commands){                
+            
+            for(String command : commands){     
+                channel = session.openChannel("exec");
                 ((ChannelExec) channel).setCommand(command);
                 channel.setInputStream(null);
                 ((ChannelExec) channel).setErrStream(System.err);

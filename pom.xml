@@ -17,6 +17,7 @@
         <module>dspaceManager</module>
         <module>shareokdata-redis</module>
         <module>ssh</module>
+        <module>lawLibrary</module>
     </modules>
     <properties>
        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

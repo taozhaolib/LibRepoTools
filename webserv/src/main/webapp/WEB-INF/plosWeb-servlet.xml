@@ -21,7 +21,7 @@
         <property name="suffix" value=".jsp" />
     </bean>
    
-    <mvc:resources mapping="/resources/**" location="/resources/"  cache-period="31556926"/>
+    <mvc:resources mapping="/resources/**" location="/resources/"  cache-period="524288000"/>
     <mvc:annotation-driven />
 
     
@@ -29,7 +29,7 @@
         class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
  
          <!-- setting maximum upload size -->
-        <property name="maxUploadSize" value="209715200" />
+        <property name="maxUploadSize" value="524288000" />
 
     </bean>
     

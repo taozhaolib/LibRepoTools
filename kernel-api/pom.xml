@@ -37,5 +37,10 @@
             <artifactId>shareokdata-redis</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>dspaceManager</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

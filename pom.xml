@@ -11,7 +11,15 @@
         <module>documentProcessor</module>
         <module>googleDocGw</module>
         <module>sagedata</module>
-  </modules>
+        <module>webserv</module>
+        <module>kernel-api</module>
+        <module>config</module>
+        <module>dspaceManager</module>
+        <module>shareokdata-redis</module>
+        <module>ssh</module>
+        <module>lawLibrary</module>
+        <module>../SAFBuilder</module>
+    </modules>
     <properties>
        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -95,8 +103,14 @@
          <dependency>
              <groupId>org.json</groupId>
              <artifactId>json</artifactId>
-             <version>20090211</version>
+             <version>20160212</version>
          </dependency>
+         
+         <dependency>
+		<groupId>com.fasterxml.jackson.core</groupId>
+		<artifactId>jackson-databind</artifactId>
+		<version>2.6.3</version>
+	</dependency>
        
      </dependencies>
      

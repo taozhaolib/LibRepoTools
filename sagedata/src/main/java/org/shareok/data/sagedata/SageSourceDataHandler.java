@@ -5,7 +5,9 @@
  */
 package org.shareok.data.sagedata;
 
+import java.io.File;
 import java.util.HashMap;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -16,4 +18,7 @@ public interface SageSourceDataHandler {
     public HashMap getData();
     public void processSourceData();
     public void outputMetaData();
+    public String getDspaceLoadingData(String filePath);
+    public String getDspaceLoadingData(MultipartFile file);
+    public String saveUploadedData(MultipartFile file);
 }

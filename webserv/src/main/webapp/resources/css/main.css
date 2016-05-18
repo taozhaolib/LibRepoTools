@@ -1,0 +1,43 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Jan 28, 2016, 10:57:31 AM
+    Author     : Tao Zhao
+*/
+
+.userInfo{
+    background-color: threedshadow;
+    float: right;
+    font-size: 14px;
+    text-align: center;
+    vertical-align: bottom;
+    width: 300px;
+    padding: 5px 10px 5px 10px;
+}
+
+.heading-text{
+    font-family: initial;
+    font-weight: bolder;
+    font-size: 35px;
+}
+
+input.btn-form{
+    background-color: #5bc0de;
+}
+
+.file-input{
+    height: 30px;
+    float: left;
+    margin-left: 2px;
+}
+
+.spining-class{
+    display: none;
+}
+
+input.btn-click{
+    background-color: lightskyblue;
+}

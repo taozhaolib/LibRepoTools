@@ -8,11 +8,21 @@ package org.shareok.data.documentProcessor;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import org.apache.poi.util.IOUtils;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -25,6 +35,8 @@ import org.xml.sax.InputSource;
  */
 public class FileUtil {
 
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(FileUtil.class);
+    
     /**
      * Get the path of the file in the resources folder 
      * 
@@ -75,6 +87,23 @@ public class FileUtil {
 //            else {
 //                return "";
 //            }
+        }
+        else {
+            return "";
+        }
+    }
+    
+    /**
+     * Get the file path without extension
+     * 
+     * @param fileName : full path of the file
+     * @return
+     */
+    public static String getFileNameWithoutExtension(String fileName) {
+
+        if(null != fileName && !"".equals(fileName)) {
+            String[] nameFragments = fileName.split("\\.(?=[^\\.]+$)");
+            return nameFragments[0];
         }
         else {
             return "";
@@ -145,5 +174,163 @@ public class FileUtil {
         DocumentBuilder builder = factory.newDocumentBuilder();
         InputSource is = new InputSource(new FileInputStream(xml));
         return builder.parse(is);
+    }
+    
+    /**
+     * Return the folder path of a file
+     * Note: suppose the file path is separated by the File.separator
+     * 
+     * @param filePath
+     * @return String : folder path
+     */
+    public static String getFileContainerPath(String filePath){
+        String fileContainerPath = null;
+        try{
+            String[] filePathInfo = filePath.split("/");
+            if(filePathInfo.length == 1){
+                return File.separator;
+            }
+            else{
+                filePathInfo[filePathInfo.length-1] = "";
+                fileContainerPath = String.join(File.separator, filePathInfo);
+            }
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+        return fileContainerPath;
+    }
+    
+    
+    /**
+     *
+     * @param filePath : String
+     */
+    public static void deleteDirectory(String filePath){
+        
+        File directory = new File(filePath);
+ 
+    	//make sure directory exists
+    	if(!directory.exists()){
+ 
+           System.out.println("Directory does not exist.");
+           System.exit(0);
+ 
+        }else{
+ 
+           try{
+        	   
+               delete(directory);
+        	
+           }catch(IOException e){
+               e.printStackTrace();
+               System.exit(0);
+           }
+        }
+ 
+    	System.out.println("Done");
+    }
+ 
+    public static void delete(File file)
+    	throws IOException{
+ 
+    	if(file.isDirectory()){
+ 
+    		//directory is empty, then delete it
+    		if(file.list().length==0){
+    			
+    		   file.delete();
+    		   System.out.println("Directory is deleted : " 
+                                                 + file.getAbsolutePath());
+    			
+    		}else{
+    			
+    		   //list all the directory contents
+        	   String files[] = file.list();
+     
+        	   for (String temp : files) {
+        	      //construct the file structure
+        	      File fileDelete = new File(file, temp);
+        		 
+        	      //recursive delete
+        	     delete(fileDelete);
+        	   }
+        		
+        	   //check the directory again, if empty then delete it
+        	   if(file.list().length==0){
+           	     file.delete();
+        	     System.out.println("Directory is deleted : " 
+                                                  + file.getAbsolutePath());
+        	   }
+    		}
+    		
+    	}else{
+    		//if file, then delete it
+    		file.delete();
+    		System.out.println("File is deleted : " + file.getAbsolutePath());
+    	}
+    }
+    
+    public static String saveMultipartFileByTimePath(MultipartFile file, String uploadPath){
+        String uploadedFilePath = null;
+        try{
+            String oldFileName = file.getOriginalFilename();
+            String extension = FileUtil.getFileExtension(oldFileName);
+            oldFileName = FileUtil.getFileNameWithoutExtension(oldFileName);
+            //In the future the new file name will also has the user name
+            String time = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+            String newFileName = oldFileName + "." + extension;
+            
+            if(null != uploadPath){
+                File uploadFolder = new File(uploadPath);
+                if(!uploadFolder.exists()){
+                    uploadFolder.mkdir();
+                }
+                File uploadTimeFolder = new File(uploadPath + File.separator + time);
+                if(!uploadTimeFolder.exists()){
+                    uploadTimeFolder.mkdir();
+                }
+            }
+            uploadedFilePath = uploadPath + File.separator + time + File.separator + newFileName;
+            File uploadedFile = new File(uploadedFilePath);
+            file.transferTo(uploadedFile);
+        }
+        catch(Exception ex){
+            Logger.getLogger(FileUtil.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return uploadedFilePath;
+    }
+    
+    public static void outputStringToFile(String loggingIngo, String filePath){
+        try{
+            File file = new File(filePath);            
+            if(!file.exists()){
+                file.createNewFile();                
+            }
+            FileOutputStream op = new FileOutputStream(file);
+            byte[] loggingIngoBytes = loggingIngo.getBytes();
+            op.write(loggingIngoBytes);
+            op.flush();
+            op.close();
+        }
+        catch(FileNotFoundException ex){
+            Logger.getLogger(FileUtil.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch(IOException ex){
+            Logger.getLogger(FileUtil.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public static MultipartFile getMultiPartFileFromFilePath(String filePath, String contentType){
+        MultipartFile multipartFile = null;
+        try{
+            File file = new File(filePath);
+            FileInputStream input = new FileInputStream(file);
+            multipartFile = new MockMultipartFile("file", file.getName(), contentType, IOUtils.toByteArray(input));
+        }
+        catch(IOException ioex){
+            logger.error("Cannot get the multipart file form " + filePath, ioex);
+        }
+        return multipartFile;
     }
 }

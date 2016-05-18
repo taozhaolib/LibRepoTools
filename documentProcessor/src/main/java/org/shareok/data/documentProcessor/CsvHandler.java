@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
@@ -123,7 +124,7 @@ public class CsvHandler implements FileHandler {
                     }
                     else{
                         for(int j = 0; j < fileHeadMapping.length; j++){
-                            String colName = fileHeadMapping[j];
+                            String colName = fileHeadMapping[j].trim();
                             String key = colName + "-" + i;
                             data.put(key, record.get(j));
                         }
@@ -145,14 +146,16 @@ public class CsvHandler implements FileHandler {
             }
         }
     }
-    
+
     /**
      * Output the data into a new CSV file
      * 
      * If the newFileName is not specified, a "-copy" will be attached to the old file name for the new CSV file
+     * 
+     * @return the path of the new CSV file
      */
-    public void outputData() {
-        outputData(""); 
+    public String outputData() {
+        return outputData(""); 
     }
     
     /**
@@ -161,8 +164,10 @@ public class CsvHandler implements FileHandler {
      * 
      * @param newFileName : String. 
      * If the newFileName is not specified, a "-copy" will be attached to the old file name for the new CSV file
+     * 
+     * @return the path of the new CSV file
      */
-    public void outputData(String newFileName) {
+    public String outputData(String newFileName) {
         if(null == data){
             readData();
         }
@@ -179,14 +184,33 @@ public class CsvHandler implements FileHandler {
                 
                 csvFilePrinter = new CSVPrinter(fileWriter, csvFileFormat);
                 csvFilePrinter.printRecord( Arrays.asList(fileHeadMapping));
+                Map<String, String[]> records = new HashMap<>();                
+                List<String> headingList = Arrays.asList(fileHeadMapping);
                 
-                List dataRecord = new ArrayList();
-                for(int i = 0; i < recordCount; i++){
-                    for(int j = 0; j < fileHeadMapping.length; j++){
-                        dataRecord.add((String)data.get(fileHeadMapping[j]+"-"+i));
+                Iterator it = data.keySet().iterator();
+                while(it.hasNext()){
+                    String key = (String)it.next();
+                    String value = (String)data.get(key);
+                    String[] keyInfo = key.split("-");
+                    String row = keyInfo[keyInfo.length-1];
+                    String column = key.replace("-"+row, "");
+
+                    if(null == records.get(row)){
+                        String[] dataRecord = new String[fileHeadMapping.length];
+                        dataRecord[headingList.indexOf(column)] = value;
+                        records.put(row, dataRecord);
                     }
-                    csvFilePrinter.printRecord(dataRecord);
-                    dataRecord.clear();
+                    else{
+                        String[] dataRecord = records.get(row);
+                        dataRecord[headingList.indexOf(column)] = value;
+                    }
+                }
+                
+                Iterator it2 = records.keySet().iterator();
+                while(it2.hasNext()){             
+                    String key = (String)it2.next();
+                    String[] value = (String[])records.get(key);
+                    csvFilePrinter.printRecord(Arrays.asList(value));
                 }
             }
             catch(Exception e){
@@ -205,6 +229,7 @@ public class CsvHandler implements FileHandler {
                 }
             }
         }
+        return newFileName;
     }
     
     /**
@@ -238,7 +263,7 @@ public class CsvHandler implements FileHandler {
             String[] oldFileHeading = fileHeadMapping;
             ArrayList<String> mapList = new ArrayList();
             for(String col : oldFileHeading){
-                mapList.add(col);
+                mapList.add(col.trim());
             }
             mapList.add(position, columnName);
             String[] newFileHeading = mapList.toArray(new String[mapList.size()]);
@@ -271,6 +296,35 @@ public class CsvHandler implements FileHandler {
         catch(Exception e){
             e.printStackTrace();
         }
+    }
+    
+    public void deleteColumnByColumnName(String[] columnNames){
+        
+        if(null == data || data.isEmpty()){
+            readData();
+        }
+        List<String> headingList = new LinkedList<String>(Arrays.asList(fileHeadMapping));
+        List<String> columnList = new LinkedList<String>(Arrays.asList(columnNames));
+        
+        for(String column : columnNames){
+            if(headingList.contains(column)){   
+                headingList.remove(column);
+            }
+        }
+        
+        fileHeadMapping = headingList.toArray(new String[headingList.size()]);
+        
+        if(recordCount > 0){
+            for(int i = 0; i < recordCount; i++){
+                for(String column : columnList){
+                    String key = column + "-" + String.valueOf(i);
+                    if(data.containsKey(key)){
+                        data.remove(key);
+                    }
+                }
+            }
+        }
+        //outputData("");
     }
     
     /**

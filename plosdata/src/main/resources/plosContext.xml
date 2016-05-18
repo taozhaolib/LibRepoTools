@@ -7,6 +7,7 @@
     
     <import resource="classpath*:**/documentProcessorContext.xml"/>
     <import resource="classpath*:**/htmlRequestContext.xml"/>
+    <import resource="classpath*:**/dspaceManagerContext.xml"/>
 
     <bean id="plosRequest" class="org.shareok.data.plosdata.PlosRequest">
         <property name="htmlRequest" ref="htmlRequest" />
@@ -23,7 +24,7 @@
         <property name="type" value="Research Article" />
     </bean>
     
-    <bean id="plosDoiData" class="org.shareok.data.plosdata.PlosDoiData">
+    <bean id="plosDoiDataImpl" class="org.shareok.data.plosdata.PlosDoiDataImpl">
         <property name="data">
             <map>
                

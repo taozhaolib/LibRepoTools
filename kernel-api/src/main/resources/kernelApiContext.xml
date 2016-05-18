@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans  xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+    
+    <context:annotation-config />
+    
+    <import resource="classpath*:**/sageDataContext.xml"/>
+    <import resource="classpath*:**/plosContext.xml"/>
+    <import resource="classpath*:**/redisContext.xml"/>
+    
+    <bean id="plosDspaceServiceImpl" class="org.shareok.data.kernel.api.services.dspace.DspacePlosServiceImpl">
+
+    </bean>
+    
+    <bean id="sageDspaceServiceImpl" class="org.shareok.data.kernel.api.services.dspace.DspaceSageServiceImpl">
+
+    </bean>
+    
+    <bean id="redisUserServiceImpl" class="org.shareok.data.kernel.api.services.user.RedisUserServiceImpl">
+
+    </bean>
+    
+    <bean id="dspaceSshServiceImpl" class="org.shareok.data.kernel.api.services.dspace.DspaceSshServiceImpl">
+    </bean>
+        
+    <bean id="redisJobServiceImpl" class="org.shareok.data.kernel.api.services.job.RedisJobServiceImpl">
+        
+    </bean>
+    
+    <bean id="jobHandlerImpl" class="org.shareok.data.kernel.api.services.job.JobHandlerImpl">
+        
+    </bean>
+    
+</beans>
+

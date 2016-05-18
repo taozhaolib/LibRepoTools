@@ -1,0 +1,56 @@
+<web-app id="WebApp_ID" version="2.4"
+    xmlns="http://java.sun.com/xml/ns/j2ee" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+    http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+ 
+    <display-name>Spring MVC Application</display-name>
+    
+    <welcome-file-list>
+    <welcome-file>index2.jsp</welcome-file>
+  </welcome-file-list>
+
+   <servlet>
+      <servlet-name>plosWeb</servlet-name>
+      <servlet-class>
+         org.springframework.web.servlet.DispatcherServlet
+      </servlet-class>
+      <load-on-startup>0</load-on-startup>
+   </servlet>
+
+   <servlet-mapping>
+      <servlet-name>plosWeb</servlet-name>
+      <url-pattern>/</url-pattern>
+   </servlet-mapping>
+   
+   <context-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>/WEB-INF/spring/session.xml</param-value>
+    </context-param>
+
+    <listener>
+            <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    
+    <filter>
+        <filter-name>springSessionRepositoryFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+    
+    <filter-mapping>
+        <filter-name>springSessionRepositoryFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+<!--
+    <filter>
+            <filter-name>userSessionFilter</filter-name>
+            <filter-class>org.shareok.data.webserv.filters.UserSessionFilter</filter-class>
+    </filter>
+    <filter-mapping>
+            <filter-name>userSessionFilter</filter-name>
+            <url-pattern>/*</url-pattern>
+    </filter-mapping>
+-->
+
+</web-app>

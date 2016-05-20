@@ -38,5 +38,6 @@
         <a id="registerLink" class="logLinkClass" href="/webserv/newUser" >Register</a>
     <% } else {%>
     <c:set var="loggedin" value="${userId}"/>
+    <c:set var="userRole" value="${userRole}"/>
     <% } %>
 </div>

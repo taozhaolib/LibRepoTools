@@ -105,6 +105,13 @@ public class ShareokdataManager {
         return prop.getProperty("redisGlobalUid"); 
     }
     
+    public static String getRedisGlobalServerIdSchema(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("redisGlobalServerId"); 
+    }
+    
     public static String getRedisUserIdQueryPrefix(){
         if(null == prop){
             loadProperties();
@@ -155,6 +162,20 @@ public class ShareokdataManager {
             loadProperties();
         }
         return prop.getProperty("redisJobIdQueryPrefix");
+    }
+    
+    public static String getRedisServerQueryPrefix(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("redisServerIdQueryPrefix");
+    }
+    
+    public static String getRedisServerNameIdMatchingTable(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("redisServerNameIdMatchingTable");
     }
     
     public static String getRedisJobUserIdMatchingTable(){

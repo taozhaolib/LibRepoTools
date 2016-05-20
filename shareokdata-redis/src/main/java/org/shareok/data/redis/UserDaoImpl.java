@@ -62,6 +62,7 @@ public class UserDaoImpl implements UserDao {
             RedisAtomicLong userIdIndex = new RedisAtomicLong(ShareokdataManager.getRedisGlobalUidSchema(), redisTemplate.getConnectionFactory());
             long uidCount = userIdIndex.incrementAndGet();
             final String uid = String.valueOf(uidCount);
+            final String role = String.valueOf(user.getRole());
             
             List<Object> results = redisTemplate.execute(new SessionCallback<List<Object>>() {
                 @Override
@@ -75,9 +76,10 @@ public class UserDaoImpl implements UserDao {
                     operations.opsForHash().put("user:"+uid, "isActive", String.valueOf(true));
                     operations.opsForHash().put("user:"+uid, "sessionKey", (null != user.getSessionKey() ? user.getSessionKey() : ""));
                     operations.opsForHash().put("user:"+uid, "startTime", (null != user.getStartTime() ? ShareokdataManager.getSimpleDateFormat().format(user.getStartTime()) : (ShareokdataManager.getSimpleDateFormat().format(new Date()))));
+                    operations.opsForHash().put("user:"+uid, "role", (null != role && !"".equals(role)? role : "1"));
                     
-                    operations.boundHashOps("users");
-                    operations.opsForHash().put("users", user.getEmail(), uid);
+                    operations.boundHashOps(ShareokdataManager.getRedisUserNameIdMatchingTable());
+                    operations.opsForHash().put(ShareokdataManager.getRedisUserNameIdMatchingTable(), user.getEmail(), uid);
                     
                     List<Object> userList= operations.exec();
                     if(!userList.get(0).equals(true)){
@@ -97,6 +99,7 @@ public class UserDaoImpl implements UserDao {
     public RedisUser updateUser(final RedisUser user){
         try{
             long uid = user.getUserId();
+            final String role = String.valueOf(user.getRole());
             redisTemplate.setConnectionFactory(connectionFactory);
             final String userKey = RedisUtil.getUserQueryKey(uid);
             List<Object> pipelinedResults = redisTemplate.executePipelined(new RedisCallback() {
@@ -110,6 +113,7 @@ public class UserDaoImpl implements UserDao {
                     operations.put(userKey, "password", user.getPassword());
                     operations.put(userKey, "isActive", String.valueOf(true));
                     operations.put(userKey, "sessionKey", (null != user.getSessionKey() ? user.getSessionKey() : ""));
+                    operations.put("user:"+uid, "role", (null != role && !"".equals(role)? role : ""));
 
                     if(!oldUserEmail.equals(user.getEmail())){
                         operations.delete("users", oldUserEmail);
@@ -134,6 +138,7 @@ public class UserDaoImpl implements UserDao {
             user.setEmail(userOps.get("email"));
             user.setUserName(userOps.get("userName"));
             user.setUserId(Long.parseLong(userOps.get("userId")));
+            user.setRole(null == userOps.get("role") || "".equals(userOps.get("role")) ? 0 : Integer.parseInt(userOps.get("role")));
             user.setPassword(userOps.get("password"));
             user.setSessionKey(userOps.get("sessionKey"));
             return user;
@@ -148,9 +153,8 @@ public class UserDaoImpl implements UserDao {
         BoundHashOperations<String, String, String> userOps = redisTemplate.boundHashOps(ShareokdataManager.getRedisUserNameIdMatchingTable());
         if(null != userOps){
             String id = userOps.get(email);
-            if(null != id && !id.equals("")){
-                long userId = Long.valueOf(userOps.get(email));
-                return findUserByUserId(userId);
+            if(null != id && !id.equals("")){                
+                return findUserByUserId(Long.valueOf(id));
             }            
             else{
                 return null;

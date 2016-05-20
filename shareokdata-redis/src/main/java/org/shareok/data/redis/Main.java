@@ -18,18 +18,19 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class Main {
     public static void main(String[] args){
-//        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
-//        UserDaoImpl impl = (UserDaoImpl) context.getBean("userDaoImpl");
-
-//        RedisUser user = (RedisUser) context.getBean("user");
-//        user.setUserName("tao.zhao.test2@ou.edu");
-//        user.setEmail("tao.zhao.test2@ou.edu");
-//        user.setPassword("12345");
-//        user.setSessionKey(RedisUtil.getRandomString());
-//        user.setStartTime(new Date());
-        //user.setUserId(9);
+        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
+        UserDaoImpl impl = (UserDaoImpl) context.getBean("userDaoImpl");
         
-        //impl.addUser(user);
+        RedisUser user = impl.findUserByUserEmail("test@gmail.com");
+//        RedisUser user = (RedisUser) context.getBean("user");
+//        user.setUserName("admin-libtools@ou.edu");
+//        user.setEmail("tao.zhao.admin@ou.edu");
+//        user.setPassword("admin");
+////        user.setSessionKey(RedisUtil.getRandomString());
+//        user.setStartTime(new Date());
+        user.setRole(1);
+        impl.updateUser(user);
+//        impl.addUser(user);
 //        RedisUser user = impl.findUserByUserEmail("tao.zhao@ou.edu");
       //  impl.deactivateUserByUserId(user.getUserId());
 //        JobDao jobDao = RedisUtil.getJobDao();

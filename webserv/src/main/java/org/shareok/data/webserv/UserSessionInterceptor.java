@@ -209,11 +209,13 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
             httpSession.setAttribute("email", user.getEmail());
             httpSession.setAttribute("userId", user.getUserId());
             httpSession.setAttribute("isActive", user.isIsActive());
+            httpSession.setAttribute("userRole", user.getRole());
             
             session.setAttribute("userName", user.getUserName());
             session.setAttribute("email", user.getEmail());
             session.setAttribute("userId", user.getUserId());
             session.setAttribute("isActive", user.isIsActive());
+            session.setAttribute("userRole", user.getRole());
         }
         catch (NullSessionException ex){
             Logger.getLogger(UserSessionInterceptor.class.getName()).log(Level.SEVERE, null, ex);

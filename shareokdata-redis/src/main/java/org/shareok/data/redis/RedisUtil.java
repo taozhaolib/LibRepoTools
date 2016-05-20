@@ -14,6 +14,7 @@ import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.JobDaoImpl;
 import org.shareok.data.redis.job.RedisJob;
+import org.shareok.data.redis.server.RepoServer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -54,6 +55,10 @@ public class RedisUtil {
         return ShareokdataManager.getRedisJobQueryPrefix()+String.valueOf(jobId);
     }
     
+    public static String getServerQueryKey(int serverId){
+        return ShareokdataManager.getRedisServerQueryPrefix()+String.valueOf(serverId);
+    }
+    
     public static UserDao getUserDao(){
         ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
         return (UserDaoImpl) context.getBean("userDaoImpl");
@@ -72,6 +77,13 @@ public class RedisUtil {
     public static RedisJob getJobInstance(){
         ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
         return (RedisJob) context.getBean("job");
+    }
+    
+    public static RepoServer getServerInstance(ApplicationContext context){
+        if(null == context){
+            context = new ClassPathXmlApplicationContext("redisContext.xml");
+        }
+        return (RepoServer) context.getBean("server");
     }
     
     public static void sortJobList(List<RedisJob> jobList){

@@ -18,4 +18,6 @@ Installation:
 Technology stack:
 Java 8, Maven 3, tomcat 7, Spring Core, Spring Data, Spring session, Spring MVC, Redis, JSch.
 
-Contact tao.zhao@ou.edu should you have any questions or problems.
+Please give us your suggestions, comments, and ideas to help us improve this software.
+
+Contact information: tao.zhao@ou.edu

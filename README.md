@@ -3,7 +3,7 @@ LibRepoTools provides a UI to handle data package (e.g. SAF pagkage), date trans
 
 ##Installation:
 
-1. Install Java 8, tomcat 7.0.69 <do NOT use very old version>, maven 3.
+1. Install Java 8, tomcat 7.0.69 (do NOT use very old version tomcat 7), maven 3.
 2. Install and run redis 3.0 or higher with default settings.
 3. Git clone this repository and run mvn install.
 4. At tomcat home directory/config/Catalina/localhost, add the file webserv.xml

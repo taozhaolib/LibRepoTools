@@ -1,5 +1,5 @@
 # LibRepoTools
-LibRepoTools provides a UI to handle data package (e.g. SAF pagkage), date transformation and importing into digital repositories like DSpace. 
+LibRepoTools provides a UI to handle data packaging (e.g. SAF pagkage), date transformation and data importing into digital repositories like DSpace. 
 
 ##Installation:
 

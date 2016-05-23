@@ -7,11 +7,7 @@ Installation:
 2. Install and run redis 3.0 or higher with default settings.
 3. Git clone this repository and run mvn install.
 4. At tomcat home directory/config/Catalina/localhost, add the file webserv.xml:
-  <?xml version="1.0" encoding="UTF-8"?>
-    <Context antiJARLocking="true" 
-    docBase="{LibRepoTools parent directory}/LibRepoTools/shareokdata/webserv/target/webserv-1.0-SNAPSHOT" 
-    path="/webserv"
-  />
+  <?xml version="1.0" encoding="UTF-8"?><Context antiJARLocking="true" docBase="{LibRepoTools parent directory}/LibRepoTools/shareokdata/webserv/target/webserv-1.0-SNAPSHOT" path="/webserv"/>
 5. Start tomcat and go to http://localhost:8080/webserv/home to get the home page.
 
 Technology stack:

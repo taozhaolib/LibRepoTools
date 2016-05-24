@@ -1,5 +1,5 @@
 # LibRepoTools
-LibRepoTools provides a UI to handle data packaging (e.g. SAF package), date transformation and data importing into digital repositories such as DSpace and (soon) Fedora and Islandora. 
+LibRepoTools provides a UI to handle data packaging (e.g. SAF package), date transformation and data importing from local files and remote sites such as PLOS ONE and SAGE Open into digital repositories such as DSpace and (soon) Fedora and Islandora. 
 
 ##Installation:
 

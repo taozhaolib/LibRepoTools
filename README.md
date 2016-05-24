@@ -1,13 +1,13 @@
 # LibRepoTools
-LibRepoTools provides a UI to handle data packaging (e.g. SAF pagkage), date transformation and data importing into digital repositories like DSpace. 
+LibRepoTools provides a UI to handle data packaging (e.g. SAF package), date transformation and data importing into digital repositories such as DSpace and (soon) Fedora and Islandora. 
 
 ##Installation:
 
-1. Install Java 8, tomcat 7.0.69 (do NOT use very old version tomcat 7), maven 3.
-2. Install and run redis 3.0 or higher with default settings.
-3. Git clone this repository and run mvn install.
-4. At tomcat home directory/config/Catalina/localhost, add the file webserv.xml
-5. Start tomcat and go to http://localhost:8080/webserv/home to get the home page.
+1. Install Java 8, Tomcat 7.0.69 (do NOT use very old version Tomcat 7), Maven 3.
+2. Install and run Redis 3.0 or higher with default settings.
+3. Git clone this repository and run: mvn install.
+4. At Tomcat home directory: /config/Catalina/localhost, add the file webserv.xml
+5. Start Tomcat and go to: http://localhost:8080/webserv/home to get the home page.
 6. Sample webserv.xml file:
 ```xml
   <?xml version="1.0" encoding="UTF-8"?>
@@ -16,7 +16,7 @@ LibRepoTools provides a UI to handle data packaging (e.g. SAF pagkage), date tra
 
 
 ##Technology stack:
-Java 8, Maven 3, tomcat 7, Spring Core, Spring Data, Spring session, Spring MVC, Redis, JSch.
+Java 8, Maven 3, Tomcat 7, Spring Core, Spring Data, Spring Session, Spring MVC, Redis, JSch.
 
 ##Demo web site:
 https://libtools-demo.repository.ou.edu/webserv/home

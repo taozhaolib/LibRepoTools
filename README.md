@@ -16,7 +16,7 @@ LibRepoTools provides a UI to handle data packaging (e.g. SAF package), date tra
 
 
 ##Technology stack:
-Java 8, Maven 3, Tomcat 7, Spring Core, Spring Data, Spring Session, Spring MVC, Redis, JSch.
+Java 8(required), Maven 3, Tomcat 7, Spring Core, Spring Data, Spring Session, Spring MVC, Redis, JSch.
 
 ##Demo web site:
 https://libtools-demo.repository.ou.edu/webserv/home

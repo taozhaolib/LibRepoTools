@@ -41,3 +41,8 @@ input.btn-form{
 input.btn-click{
     background-color: lightskyblue;
 }
+
+.server-config-dropdown{
+    margin-top: 20px;
+    margin-left: 40px;
+}

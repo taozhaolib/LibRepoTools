@@ -15,6 +15,7 @@ public class RepoServer {
     private int timeout;    
     private int port;
     private int proxyPort;
+    private int repoType;
     private String serverName;
     private String host;    
     private String proxyHost;
@@ -39,6 +40,10 @@ public class RepoServer {
 
     public int getProxyPort() {
         return proxyPort;
+    }
+
+    public int getRepoType() {
+        return repoType;
     }
 
     public String getServerName() {
@@ -107,6 +112,10 @@ public class RepoServer {
 
     public void setProxyHost(String proxyHost) {
         this.proxyHost = proxyHost;
+    }
+
+    public void setRepoType(int repoType) {
+        this.repoType = repoType;
     }
 
     public void setProxyUserName(String proxyUserName) {

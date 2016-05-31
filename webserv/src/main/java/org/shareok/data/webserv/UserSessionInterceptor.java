@@ -17,6 +17,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.kernel.api.services.user.RedisUserService;
 import org.shareok.data.redis.RedisUser;
@@ -112,7 +113,7 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
                     
                     user.setSessionKey(sessionId);
                     redisUserService.updateUser(user);
-                    
+                     
                     setSessionUserInfo(session, httpSession, user);
                     httpSession.setAttribute("email", email);
                     repo.save(session);
@@ -209,13 +210,13 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
             httpSession.setAttribute("email", user.getEmail());
             httpSession.setAttribute("userId", user.getUserId());
             httpSession.setAttribute("isActive", user.isIsActive());
-            httpSession.setAttribute("userRole", user.getRole());
+            httpSession.setAttribute("userRole", DataUtil.USER_ROLES[user.getRole()]);
             
             session.setAttribute("userName", user.getUserName());
             session.setAttribute("email", user.getEmail());
             session.setAttribute("userId", user.getUserId());
             session.setAttribute("isActive", user.isIsActive());
-            session.setAttribute("userRole", user.getRole());
+            session.setAttribute("userRole", DataUtil.USER_ROLES[user.getRole()]);
         }
         catch (NullSessionException ex){
             Logger.getLogger(UserSessionInterceptor.class.getName()).log(Level.SEVERE, null, ex);

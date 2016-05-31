@@ -17,6 +17,7 @@ import org.shareok.data.config.DataUtil;
 import java.util.HashMap;
 import java.util.Map;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -123,5 +124,12 @@ public class ServiceUtil {
         return ShareokdataManager.getShareokdataPath() + File.separator + DataUtil.REPO_TYPES[job.getRepoType()] 
                 + File.separator + DataUtil.JOB_TYPES[job.getType()] + File.separator + String.valueOf(job.getJobId()) 
                 + File.separator + String.valueOf(job.getJobId()) + "-report.txt";
+    }
+    
+    public static RepoServerService getRepoServerServiceInstance(ApplicationContext context){
+        if(null == context){
+            context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
+        }
+        return (RepoServerService) context.getBean("repoServerServiceImpl");
     }
 }

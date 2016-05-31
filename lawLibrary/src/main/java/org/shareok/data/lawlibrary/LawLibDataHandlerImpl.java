@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.shareok.data.documentProcessor.CsvHandler;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.lawlibrary.exceptions.DateReformatException;
@@ -25,6 +27,7 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(LawLibDataHandlerImpl.class);
     
+    private static final String SERIAL_A_REGX = "^(.*)(-Serial-)(\\d+).pdf$";
     public static final String[] COULUMNS_TO_BE_DELETED = {"Maps", "Fold-Out Charts", "collection name (repeatable)", "Special Collection (repeatable)", "rights (repeatable)", "media_type (repeatable)", "file_format (repeatable)"};
     public static final Map <String, String> COLUMN_NAME_MAP_METADATA_SCHEMA;
     static{
@@ -154,21 +157,8 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
             data = csv.getData();
         }
         try{
-            File pdfFolder = new File(outputFilePath);
-            File[] pdfFlist = pdfFolder.listFiles();
-            for(File file : pdfFlist){
-                String name = file.getName();
-                String parent = file.getParent();
-                if(file.getPath().toLowerCase().endsWith(".pdf")){                
-                    String nameWithoutExtension = FileUtil.getFileNameWithoutExtension(name);
-                    if(nameWithoutExtension.toLowerCase().endsWith(".pdf")){
-                        nameWithoutExtension = nameWithoutExtension.replaceAll(".pdf", "");
-                        nameWithoutExtension = nameWithoutExtension.replaceAll(".PDF", "");
-                    }
-                    pdfFileList.add(nameWithoutExtension + ".pdf");
-                    file.renameTo(new File(parent + File.separator + nameWithoutExtension + ".pdf"));
-                    //file.renameTo(new File(".PDF"));
-                }
+            if(null == pdfFileList || pdfFileList.size() == 0){
+                getPdfFileListFromCleanedOutputPathFiles();
             }
 
             // Remove the unused columns
@@ -190,6 +180,8 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
                     csvFileName = csvFileName.replace(".PDF", "");
                 }                
                 csvFileName += ".pdf";
+                // Process the files that have the "-Serial-" pattern when the actual PDF files end with ***A.PDF
+                csvFileName = matchSerialAFiles(csvFileName);
                 data.put("file_location-" + String.valueOf(i), csvFileName);
                 if(pdfFileList.contains(csvFileName)){
                     matchedPdfFileList.add(csvFileName);
@@ -227,6 +219,7 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
             csv.setRecordCount(newRecordCount);
             outputCsvFilePath = csv.outputData(outputFilePath + File.separator + "metadata.csv");
             FileUtil.outputStringToFile(String.join("\n", matchedPdfFileList), new File(outputFilePath).getPath() + File.separator + "matchedPdfFiles.txt");
+            FileUtil.outputStringToFile(String.join("\n", getUnmatchedFileList()), new File(outputFilePath).getPath() + File.separator + "unmatchedPdfFiles.txt");
         }
         catch(Exception ex){
             logger.error("Cannot clean up the data.", ex);
@@ -255,6 +248,61 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
         }
         catch(IOException ioex){
             logger.error("Cannot generate SAF package for the law library documents", ioex);
+        }
+    }
+    
+    private List<String> getUnmatchedFileList(){
+        List<String> unmatchedFileList = new ArrayList<String>();
+        for(String fileName : pdfFileList){
+            unmatchedFileList.add(fileName);
+        }        
+        unmatchedFileList.removeAll(matchedPdfFileList);
+        return unmatchedFileList;
+    }
+    
+    /**
+     * Many files have name containing XXX-XXX-XXX-Serial-8888A.pdf, e.g. "Senate-46-2-Miscellaneous-20-Serial-1890A.pdf"
+     * In the Excel file where the corresponding file name does not have the A after the number following the "-Serial-" pattern
+     * The regular expression pattern is used to identify these files
+     * 
+     * @param file : the name of the actual PDF file to be matched from the file list of pdf files names
+     */
+    public String matchSerialAFiles(String fileName){
+        Pattern p = Pattern.compile(SERIAL_A_REGX);
+        Matcher m = p.matcher(fileName);
+        if (m.find( )) {            
+           fileName = fileName.substring(0, fileName.length()-4) + "A.pdf";           
+        }        
+        return fileName;
+    }
+    
+    public void getPdfFileListFromTextFile(String filePath){
+        setPdfFileList(FileUtil.readTextFileIntoList(filePath));
+    }
+    
+    public void getMatchedFileListFromTextFile(String filePath){
+        setMatchedPdfFileList(FileUtil.readTextFileIntoList(filePath));
+    }
+    
+    /**
+     * Many pdf files end with .pdf.pdf; in addition, the uppercase and lowercase are messy
+     */
+    public void getPdfFileListFromCleanedOutputPathFiles(){
+        File pdfFolder = new File(outputFilePath);
+        File[] pdfFlist = pdfFolder.listFiles();
+        for(File file : pdfFlist){
+            String name = file.getName();
+            String parent = file.getParent();
+            if(file.getPath().toLowerCase().endsWith(".pdf")){                
+                String nameWithoutExtension = FileUtil.getFileNameWithoutExtension(name);
+                if(nameWithoutExtension.toLowerCase().endsWith(".pdf")){
+                    nameWithoutExtension = nameWithoutExtension.replaceAll(".pdf", "");
+                    nameWithoutExtension = nameWithoutExtension.replaceAll(".PDF", "");
+                }
+                pdfFileList.add(nameWithoutExtension + ".pdf");
+                file.renameTo(new File(parent + File.separator + nameWithoutExtension + ".pdf"));
+                //file.renameTo(new File(".PDF"));
+            }
         }
     }
 }

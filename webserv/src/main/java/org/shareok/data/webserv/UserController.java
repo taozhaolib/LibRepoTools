@@ -8,17 +8,23 @@ package org.shareok.data.webserv;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.kernel.api.services.ServiceUtil;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
+import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.kernel.api.services.user.RedisUserService;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
+import org.shareok.data.redis.server.DspaceServer;
+import org.shareok.data.redis.server.RepoServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -134,5 +140,54 @@ public class UserController{
             logger.error("Cannot process the job list of user "+ userId + " into JSON data.", ex);
         }
         return null;
+    }
+    
+    @RequestMapping("/server/config")
+    public ModelAndView serverConfig(HttpServletRequest request){
+
+        HttpSession session = request.getSession();
+        String userRole = (String) session.getAttribute("userRole");        
+        ModelAndView model = new ModelAndView();
+        
+        try{
+            if(null == userRole || !userRole.equals("admin")){
+                model.setViewName("userError");
+                return model;
+            }
+
+            RepoServerService service = ServiceUtil.getRepoServerServiceInstance(null);
+            Map<String, String> serverList = service.getServerNameIdList();
+
+            if(null != serverList && serverList.size() > 0){
+                
+                ObjectMapper mapper = new ObjectMapper();
+                
+                Collection<String> ids = serverList.values();
+                List<RepoServer> serverObjList = service.getServerObjList(ids);
+                List<RepoServer> repoServerObjList = service.loadRepoServerListByRepoType(serverObjList);
+                
+                for(RepoServer server : repoServerObjList){
+                    String repoType = DataUtil.REPO_TYPES[server.getRepoType()];
+                    if("dspace".equals(repoType)){
+                        DspaceServer ds = (DspaceServer)server;
+                        model.addObject(String.valueOf(ds.getServerId()), mapper.writeValueAsString(ds));
+                    }
+                }
+                
+                String serverListJson = mapper.writeValueAsString(serverList);
+                model.addObject("serverList", serverListJson);
+                //model.addObject("serverObjList", mapper.writeValueAsString(serverObjList));
+            }
+            else{
+                model.addObject("emptyServerList", "There are NO servers set up.");
+            }
+
+            model.setViewName("serverConfig");
+        }
+        catch(Exception ex){
+            logger.error("Cannot retrieve and parse the server list.", ex);
+        }
+        
+        return model;
     }
 }

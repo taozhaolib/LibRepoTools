@@ -31,12 +31,28 @@
         <property name="sessionKey" value="" />
     </bean>
     
+    <bean id="server" class="org.shareok.data.redis.server.RepoServer">
+        <property name="timeout" value="5000" />
+        <property name="port" value="22" />
+        <property name="proxyPort" value="22" />
+        <property name="serverName" value="" />
+        <property name="host" value="" />
+        <property name="proxyHost" value="" />
+        <property name="password" value="" />
+        <property name="proxyPassword" value="" />
+        <property name="userName" value="" />
+        <property name="proxyUserName" value="" />
+        <property name="passPhrase" value= "" />
+        <property name="rsaKey" value="" /> 
+    </bean>
+    
+    <bean id="dspaceServer" class="org.shareok.data.redis.server.DspaceServer" />
+    
     <bean id="userDaoImpl" class="org.shareok.data.redis.UserDaoImpl"/>
     
     <bean id="jobDaoImpl" class="org.shareok.data.redis.job.JobDaoImpl"></bean>
     
     <bean id="serverDaoImpl" class="org.shareok.data.redis.server.RepoServerDaoImpl">
-        <property name="timeout" value="5000" />
     </bean>
     
     <bean id="job" class="org.shareok.data.redis.job.RedisJob">

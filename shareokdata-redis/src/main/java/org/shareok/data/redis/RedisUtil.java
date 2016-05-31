@@ -15,8 +15,11 @@ import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.JobDaoImpl;
 import org.shareok.data.redis.job.RedisJob;
 import org.shareok.data.redis.server.RepoServer;
+import org.shareok.data.redis.server.RepoServerDao;
+import org.shareok.data.redis.server.RepoServerDaoImpl;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.data.redis.core.RedisTemplate;
 
 /**
  *
@@ -84,6 +87,38 @@ public class RedisUtil {
             context = new ClassPathXmlApplicationContext("redisContext.xml");
         }
         return (RepoServer) context.getBean("server");
+    }
+    
+    public static RepoServer getServerInstanceByRepoType(String repoType, ApplicationContext context){
+        if(null == context){
+            context = new ClassPathXmlApplicationContext("redisContext.xml");
+        }
+        if(null == repoType || "".equals(repoType)){
+            return null;
+        }
+        else if("dspace".equals(repoType)){
+            return (RepoServer) context.getBean("dspaceServer");
+        }
+        else if("islandora".equals(repoType)){
+            return (RepoServer) context.getBean("islandoraServer");
+        }
+        else{
+            return null;
+        }
+    }
+    
+    public static RedisTemplate getTemplateInstance(ApplicationContext context){
+        if(null == context){
+            context = new ClassPathXmlApplicationContext("redisContext.xml");
+        }
+        return (RedisTemplate) context.getBean("redisTemplate");
+    }
+    
+    public static RepoServerDao getServerDao(ApplicationContext context){
+        if(null == context){
+            context = new ClassPathXmlApplicationContext("redisContext.xml");
+        }
+        return (RepoServerDaoImpl)context.getBean("serverDaoImpl");
     }
     
     public static void sortJobList(List<RedisJob> jobList){

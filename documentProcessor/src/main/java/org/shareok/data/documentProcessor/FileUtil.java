@@ -6,10 +6,12 @@
 
 package org.shareok.data.documentProcessor;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -332,5 +334,19 @@ public class FileUtil {
             logger.error("Cannot get the multipart file form " + filePath, ioex);
         }
         return multipartFile;
+    }
+    
+    public static List<String> readTextFileIntoList(String filePath){
+        List<String> fileContent = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath)))
+        {
+            String sCurrentLine;
+            while ((sCurrentLine = br.readLine()) != null) {
+                fileContent.add(sCurrentLine.trim());
+            }
+        } catch (IOException e) {
+            logger.error("Cannot read the text file into list with file = "+filePath, e);
+        } 
+        return fileContent;
     }
 }

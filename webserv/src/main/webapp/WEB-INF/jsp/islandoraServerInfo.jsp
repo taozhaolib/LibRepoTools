@@ -6,11 +6,17 @@
 <!-- This block of code requires a value of publisher -->
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<div class="container">
+<div class="container islandora-server-info server-info-container">
     
     <div class="jumbotron">
         <div class="panel panel-primary">
-            <div class="panel-heading"><h4>Importing the simple archive format into DSpace repository:</h4></div>
+            
+                <%@include file="serverSelectDropdown.jsp" %>
+           
+            
+        </div>
+        <div class="panel panel-primary server-config-panel">            
+            <div class="panel-heading"><h4>Importing the simple archive format into Islandora repository:</h4></div>
             <div class="panel-body">
                 <center>
                     

@@ -178,6 +178,13 @@ public class ShareokdataManager {
         return prop.getProperty("redisServerNameIdMatchingTable");
     }
     
+    public static String getRedisDspaceServerTablePrefix(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("redisDspaceServerTablePrefix");
+    }
+    
     public static String getRedisJobUserIdMatchingTable(){
         if(null == prop){
             loadProperties();

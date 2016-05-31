@@ -7,6 +7,6 @@
 <%@ include file="header.jsp" %>   
 <%@ include file="navTab.jsp" %>  
 
-<%@ include file="sshDspaceJournalData.jsp" %>     
+<%@ include file="dspaceServerInfo.jsp" %>     
 </body>
 </html>

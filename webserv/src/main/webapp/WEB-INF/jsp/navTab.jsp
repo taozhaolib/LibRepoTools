@@ -35,6 +35,9 @@
                 <ul class="dropdown-menu">
                   <li class="mainMenuDrop" id="userJobHistory"><a href="/webserv/user/${loggedin}/jobHistory">Job History</a></li>
                   <li class="mainMenuDrop" id="userProfile"><a href="#">Change Profile</a></li>
+                  <c:if test="${not empty userRole && userRole == 'admin'}">
+                  <li class="mainMenuDrop" id="serverConfig"><a href="/webserv/server/config">Server Configuration</a></li>
+                  </c:if>
                 </ul>
              </li>
         </c:if>

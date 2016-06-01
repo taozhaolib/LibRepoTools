@@ -36,11 +36,22 @@ public class DspaceSshServiceImpl implements DspaceSshService {
     public String sshImportData(){
         return handler.importDspace();
     }
+    
+    @Override
+    public String uploadSafDspace(){
+        return handler.uploadSafDspace();
+    }
 
     @Override
     public String executeTask(String jobType) {
         if(jobType.equals("ssh-import")){
             return handler.importDspace();
+        }
+        else if(jobType.equals("ssh-upload")){
+            return handler.uploadSafDspace();
+        }
+        else if(jobType.equals("ssh-import-uloaded")){
+            return handler.importUploadedSafDspace();
         }
         else{
             return null;

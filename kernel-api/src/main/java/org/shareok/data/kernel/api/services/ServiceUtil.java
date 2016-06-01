@@ -32,7 +32,14 @@ public class ServiceUtil {
     
     private static final Map<String, String> serviceBeanMap = new HashMap<String, String>();
     static {
-        serviceBeanMap.put("dspace-ssh-import", "dspaceSshServiceImpl");
+        for(String job : DataUtil.JOB_TYPES){
+            for(String repo : DataUtil.REPO_TYPES){
+                String beanKey = repo + "-" + job;
+                if(repo.equals("dspace") && job.contains("ssh")){
+                    serviceBeanMap.put(beanKey, "dspaceSshServiceImpl");
+                }
+            }
+        }
     }
     
     public static String getServiceBean(int repoType, int jobType){

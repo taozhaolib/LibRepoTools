@@ -27,7 +27,7 @@ public class RedisUtil {
     
     private static final Logger logger = Logger.getLogger(UserDaoImpl.class);
     
-    public static String[] REDIS_JOB_STATUS= {"undecided", "running", "completed", "failed", "built"};
+    public static String[] REDIS_JOB_STATUS= {"undecided", "running", "completed", "failed", "built", "imported"};
     
 
     /**

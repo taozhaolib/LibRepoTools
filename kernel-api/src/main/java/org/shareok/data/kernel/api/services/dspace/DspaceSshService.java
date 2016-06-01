@@ -14,4 +14,5 @@ import org.shareok.data.kernel.api.services.DataService;
  */
 public interface DspaceSshService extends DataService {
     public String sshImportData();
+    public String uploadSafDspace();
 }

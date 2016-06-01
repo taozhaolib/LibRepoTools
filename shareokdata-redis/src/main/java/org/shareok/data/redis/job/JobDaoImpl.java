@@ -7,11 +7,15 @@ package org.shareok.data.redis.job;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.redis.RedisUser;
 import org.shareok.data.redis.RedisUtil;
+import org.shareok.data.redis.exceptions.EmptyJobInfoException;
+import org.shareok.data.redis.exceptions.EmptyJobTypeException;
 import org.shareok.data.redis.exceptions.NonExistingUserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -98,7 +102,7 @@ public class JobDaoImpl implements JobDao {
     @Override
     public void updateJob(long jobId, String jobInfoType, String value){
         try{
-            RedisJob job = findJobByJobId(jobId);
+            //RedisJob job = findJobByJobId(jobId);
             BoundHashOperations<String, String, String> jobOps = redisTemplate.boundHashOps(RedisUtil.getJobQueryKey(jobId));
             jobOps.put(jobInfoType, value);
         }
@@ -187,5 +191,60 @@ public class JobDaoImpl implements JobDao {
             logger.error("Cannot find the job information by job ID "+jobId, ex);
         }
         return null;
+    }
+    
+    @Override
+    public void updateJobInfoByJobType(long jobId, String jobType, Map values){
+        
+        try{
+            if(null == jobType || "".equals(jobType)){
+                throw new EmptyJobTypeException("Job type is empty for updating job info by job type.");
+            }
+//            RedisJob job = findJobByJobId(jobId);
+            switch (jobType) {
+                case "ssh-upload":
+                case "ssh-import":
+                    {
+                        if(null == values || values.get("uploadedPackagePath") == null){
+                            throw new EmptyJobInfoException("Job information is empty for updating job info by job type");
+                        }       BoundHashOperations<String, String, String> jobOps = redisTemplate.boundHashOps(RedisUtil.getJobQueryKey(jobId));
+                        jobOps.put("uploadedPackagePath", (String)values.get("uploadedPackagePath"));
+                        if(jobType.equals("ssh-upload")){
+                            jobOps.put("imported", "false");
+                        }
+                        break;
+                    }
+                case "ssh-import-uploaded":
+                    {
+                        if(null == values || values.get("uploading-jobId") == null){
+                            throw new EmptyJobInfoException("Job information is empty for updating job info by job type");
+                        }       String uploadingJobId = (String)values.get("uploading-jobId");
+                        BoundHashOperations<String, String, String> jobOps = redisTemplate.boundHashOps(RedisUtil.getJobQueryKey(jobId));
+                        jobOps.put("uploading-jobId", uploadingJobId);
+                        updateJob(Long.parseLong(uploadingJobId), "imported", "true");
+                        break;
+                    }
+            }
+            
+        }
+        catch(EmptyJobTypeException | EmptyJobInfoException ex){
+            logger.error("Cannot update job info for the job type "+jobType, ex);
+        }
+        
+    }
+    
+    @Override
+    public Map<String, String> getJobInfoByAttributes(long jobId, String[] jobAttributes){
+        Map<String, String> jobInfo = new HashMap<>();
+        try{
+            for(String attr : jobAttributes){
+                BoundHashOperations<String, String, String> jobOps = redisTemplate.boundHashOps(RedisUtil.getJobQueryKey(jobId));
+                jobInfo.put(attr, (String)jobOps.get(attr));
+            }
+        }
+        catch(Exception ex){
+            logger.error("Cannot get the job info based on the job attributes", ex);
+        }
+        return jobInfo;
     }
 }

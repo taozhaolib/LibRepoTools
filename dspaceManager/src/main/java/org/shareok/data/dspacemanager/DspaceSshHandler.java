@@ -225,7 +225,90 @@ public class DspaceSshHandler implements DataHandler {
             String savedReportFilePath =  saveLoggerToFile();
             sshExec.addReporter("The importing logging information has been saved to file : " + reportFilePath);
             
-            return savedReportFilePath;
+            return dspaceTargetFilePath;
+        }
+        catch(Exception ex){
+            logger.error("Cannot import the SAF package into DSapce", ex);
+            return null; 
+        }
+    }
+    
+    public String uploadSafDspace(){
+        try{     
+            String time = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+            String uploadFileName = new File(uploadFile).getName();
+            String uploadFileNameWithoutExtension = uploadFileName.split("\\.")[0];
+            
+            String dspaceTargetFilePath = uploadDst + File.separator + time + File.separator + uploadFileName;
+            
+            // Build up the commands:
+            String newDirCommand = " bash -c \"mkdir " + uploadDst + File.separator + time + "\"";
+            
+            sshExec.addReporter("Two steps to be completed:");
+            sshExec.addReporter("Build up a new directory for the SAF package: "+newDirCommand);
+            sshExec.addReporter("Upload the SAF package zip file to the DSpace server at  "+uploadDst);
+   
+            //importCommand = newDirCommand + ";;" + unzipCommand + ";;" + importCommand;
+            sshExec.getSshConnector().setHost(host);
+            sshExec.getSshConnector().setPort(port);
+            sshExec.getSshConnector().setUserName(userName);
+            sshExec.getSshConnector().setPassword(password);
+            sshExec.getSshConnector().setRsaKey(rsaKey);
+            sshExec.getSshConnector().setPassPhrase(passPhrase);
+            sshExec.getSshConnector().setProxyHost(proxyHost);
+            sshExec.getSshConnector().setProxyPassword(proxyPassword);
+            sshExec.getSshConnector().setProxyUserName(proxyUserName);
+            sshExec.getSshConnector().setProxyPort(proxyPort);
+//            sshExec.execCmd("sudo /srv/shareok/dspace/bin/dspace version ");
+            sshExec.execCmd(newDirCommand);
+            sshExec.upload(uploadDst + File.separator + time, uploadFile);  
+            sshExec.addReporter("The SAF package has been uploaded to the DSpace server: " + dspaceTargetFilePath + "\n");
+            
+            String savedReportFilePath =  saveLoggerToFile();
+            sshExec.addReporter("The importing logging information has been saved to file : " + reportFilePath);
+            
+            return dspaceTargetFilePath;
+        }
+        catch(Exception ex){
+            logger.error("Cannot import the SAF package into DSapce", ex);
+            return null; 
+        }
+    }
+    
+    public String importUploadedSafDspace(){
+        try{                
+            String mapFilePath = FileUtil.getFileContainerPath(uploadFile) + "mapfile";
+            File uploadFileObj = new File(uploadFile);
+            String uploadFileName = uploadFileObj.getName();
+            String upzippedFilePath = FileUtil.getFileContainerPath(uploadFile) + FileUtil.getFileNameWithoutExtension(uploadFileName);//.getFileNameWithoutExtension(uploadFile);
+            String unzipCommand = " bash -c \"unzip -o " + uploadFile + " -d " + FileUtil.getFileContainerPath(uploadFile) + "\"";
+            String importCommand = "sudo " + dspaceDirectory + File.separator + "bin" + File.separator +
+                                   "dspace import --add " + "--eperson=" + dspaceUser + " --collection=" + collectionId +
+                                   " --source=" + upzippedFilePath + " --mapfile=" + mapFilePath;
+            sshExec.addReporter("Two commands to be executed:");
+            sshExec.addReporter("Unzip the uploaded SAF package: "+unzipCommand);
+            sshExec.addReporter("Import the SAF package into DSpace: "+importCommand);
+            //importCommand = newDirCommand + ";;" + unzipCommand + ";;" + importCommand;
+            sshExec.getSshConnector().setHost(host);
+            sshExec.getSshConnector().setPort(port);
+            sshExec.getSshConnector().setUserName(userName);
+            sshExec.getSshConnector().setPassword(password);
+            sshExec.getSshConnector().setRsaKey(rsaKey);
+            sshExec.getSshConnector().setPassPhrase(passPhrase);
+            sshExec.getSshConnector().setProxyHost(proxyHost);
+            sshExec.getSshConnector().setProxyPassword(proxyPassword);
+            sshExec.getSshConnector().setProxyUserName(proxyUserName);
+            sshExec.getSshConnector().setProxyPort(proxyPort);
+//            sshExec.execCmd("sudo /srv/shareok/dspace/bin/dspace version ");
+           String[] commands = {unzipCommand, importCommand};
+            sshExec.execCmd(commands);
+            sshExec.addReporter("The SAF package has been imported into the DSpace repository.\n");
+////            sshExec.execCmd(unzipCommand);
+////            sshExec.execCmd(importCommand);
+            String savedReportFilePath =  saveLoggerToFile();
+            sshExec.addReporter("The importing logging information has been saved to file : " + reportFilePath);
+            
+            return uploadFile;
         }
         catch(Exception ex){
             logger.error("Cannot import the SAF package into DSapce", ex);

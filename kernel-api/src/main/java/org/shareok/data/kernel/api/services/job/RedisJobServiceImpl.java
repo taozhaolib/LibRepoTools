@@ -7,6 +7,7 @@ package org.shareok.data.kernel.api.services.job;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,16 @@ public class RedisJobServiceImpl implements RedisJobService {
     @Override
     public void executeJob(long uid, int jobType, int repoType){
         
+    }
+
+    @Override
+    public void updateJobInfoByJobType(long jobId, String jobType, Map values) {
+        jobDao.updateJobInfoByJobType(jobId, jobType, values);
+    }
+
+    @Override
+    public Map<String, String> getJobInfoByAttributes(long jobId, String[] jobAttributes) {
+        return jobDao.getJobInfoByAttributes(jobId, jobAttributes);
     }
     
 }

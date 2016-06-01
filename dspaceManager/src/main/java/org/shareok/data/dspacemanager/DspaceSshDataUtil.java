@@ -25,8 +25,8 @@ public class DspaceSshDataUtil {
         return sshExecutor;
     }
     
-    public static String getSafDownloadLink(String jobId){
-        return ShareokdataManager.getShareokdataPath()+ File.separator + "dspace" + File.separator + "ssh-import" + File.separator + jobId + File.separator + jobId + "-report.txt";
+    public static String getSafDownloadLink(String jobType, String jobId){
+        return ShareokdataManager.getShareokdataPath()+ File.separator + "dspace" + File.separator + jobType + File.separator + jobId + File.separator + jobId + "-report.txt";
     }
 
     /**

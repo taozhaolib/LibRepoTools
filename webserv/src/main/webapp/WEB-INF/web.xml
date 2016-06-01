@@ -41,6 +41,13 @@
         <filter-name>springSessionRepositoryFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+    
+    <jsp-config>
+        <taglib>
+        <taglib-uri>/WEB-INF/jsp/tld/textProcess</taglib-uri>
+        <taglib-location>/WEB-INF/jsp/tld/textProcess.tld</taglib-location>
+        </taglib>
+    </jsp-config>
 
 <!--
     <filter>

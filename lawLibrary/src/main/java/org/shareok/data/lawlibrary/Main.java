@@ -20,7 +20,7 @@ public class Main {
         ApplicationContext context = new ClassPathXmlApplicationContext("lawLibContext.xml");
         LawLibDataHandlerImpl handle = (LawLibDataHandlerImpl) context.getBean("lawLibDataHandlerImpl");
         handle.setInputFilePath("/Users/zhao0677/Projects/law-library/test1.csv");
-        handle.setOutputFilePath("/Users/zhao0677/Projects/law-library/test-pdf");
+        handle.setOutputFilePath("/Users/zhao0677/Projects/law-library/SAF packages 2/pdf");
 //        List matched = handle.getMatchedPdfFileList();
 //        matched.add("1");
 //        matched.add("2");

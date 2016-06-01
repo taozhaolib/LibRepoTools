@@ -9,8 +9,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.shareok.data.documentProcessor.CsvHandler;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.lawlibrary.exceptions.DateReformatException;
@@ -227,6 +229,8 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
             csv.setRecordCount(newRecordCount);
             outputCsvFilePath = csv.outputData(outputFilePath + File.separator + "metadata.csv");
             FileUtil.outputStringToFile(String.join("\n", matchedPdfFileList), new File(outputFilePath).getPath() + File.separator + "matchedPdfFiles.txt");
+            String[] unmatchedList = getUnmatchedListFromMatchedList();
+            FileUtil.outputStringToFile(String.join("\n", unmatchedList), new File(outputFilePath).getPath() + File.separator + "unmatchedPdfFiles.txt");
         }
         catch(Exception ex){
             logger.error("Cannot clean up the data.", ex);
@@ -256,5 +260,13 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
         catch(IOException ioex){
             logger.error("Cannot generate SAF package for the law library documents", ioex);
         }
+    }
+    
+    private String[] getUnmatchedListFromMatchedList(){
+        Set<String> matchedSet = new HashSet<String>(matchedPdfFileList);
+        Set<String> pdfSet = new HashSet<String>(pdfFileList);
+        pdfSet.removeAll(matchedSet);
+        String[] unmatchedList = pdfSet.toArray(new String[pdfSet.size()]);
+        return unmatchedList;
     }
 }

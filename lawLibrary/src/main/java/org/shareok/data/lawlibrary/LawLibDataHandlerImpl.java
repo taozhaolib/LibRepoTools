@@ -178,14 +178,30 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
                 if(csvFileName.toLowerCase().endsWith(".pdf")){
                     csvFileName = csvFileName.replace(".pdf", "");
                     csvFileName = csvFileName.replace(".PDF", "");
-                }                
+                } //              837 9004 kim 
                 csvFileName += ".pdf";
                 // Process the files that have the "-Serial-" pattern when the actual PDF files end with ***A.PDF
-                csvFileName = matchSerialAFiles(csvFileName);
+                String csvFileNameWithA = matchSerialAFiles(csvFileName);
                 data.put("file_location-" + String.valueOf(i), csvFileName);
-                if(pdfFileList.contains(csvFileName)){
-                    matchedPdfFileList.add(csvFileName);
-                    newRecordCount++;
+                if(pdfFileList.contains(csvFileName) || pdfFileList.contains(csvFileNameWithA)){
+                    String fileInfo = "";
+                    if(pdfFileList.contains(csvFileName)){
+                        matchedPdfFileList.add(csvFileName);
+                        fileInfo += csvFileName;
+                        newRecordCount++;
+                    }
+                    if(pdfFileList.contains(csvFileNameWithA)){
+                        matchedPdfFileList.add(csvFileNameWithA);
+                        if("".equals(fileInfo)){
+                            fileInfo += csvFileNameWithA;
+                        }
+                        else{
+                            fileInfo += "||"+csvFileNameWithA;
+                        }
+                        newRecordCount++;
+                    }
+                    
+                    
                     for(String column : csv.getFileHeadMapping()){
                         if(null == column || column.equals("")){
                             continue;
@@ -205,6 +221,9 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
                             else if(column.contains("Document Title") && value.contains("Document not titled")){
                                 value = (String)data.get("Official treaty name (title-alternative)-" + String.valueOf(i));
                                 data.put("Official treaty name (title-alternative)-" + String.valueOf(i), "");
+                            }
+                            else if(column.contains("file_location")){
+                                value = fileInfo;
                             }
                             cleanData.put(newKey, value);
                         }
@@ -239,16 +258,6 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
             logger.error("Cannot reformat the date", ex);
         }
         return null;
-    }
-    
-    public void getSafPackage(){
-        try{
-            SAFPackage safPack = new SAFPackage();
-            safPack.processMetaPack(outputCsvFilePath, Boolean.TRUE);
-        }
-        catch(IOException ioex){
-            logger.error("Cannot generate SAF package for the law library documents", ioex);
-        }
     }
     
     private List<String> getUnmatchedFileList(){
@@ -303,6 +312,18 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
                 file.renameTo(new File(parent + File.separator + nameWithoutExtension + ".pdf"));
                 //file.renameTo(new File(".PDF"));
             }
+        }
+    }
+    
+    public void outputSafPackage(){
+        try{
+            String csvPath = outputFilePath + File.separator + "metadata.csv";
+            SAFPackage safPackageInstance = new SAFPackage();
+            safPackageInstance.generateManifest(csvPath);
+            safPackageInstance.processMetaPack(csvPath, true);
+        }
+        catch(IOException ex){
+             logger.error("Cannot generate the SAF package", ex);
         }
     }
 }

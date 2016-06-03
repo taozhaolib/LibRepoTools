@@ -18,7 +18,7 @@
         <module>shareokdata-redis</module>
         <module>ssh</module>
         <module>lawLibrary</module>
-        <module>../SAFBuilder</module>
+        <module>SAFBuilder</module>
     </modules>
     <properties>
        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

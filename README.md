@@ -25,6 +25,10 @@ https://libtools-demo.repository.ou.edu/webserv/home
 1. The config directory under the LibRepoTools installation directory contains all the configuration information. 
 2. Will push out the UI configuration feature soon.
 
+##projects ongoing:
+1. DSpace data process through REST API.
+2. Improting into Islandora/Fedora repository with Bag data.
+
 ##Please give us your suggestions, comments, and ideas to help us improve this software.
 
 ##Contact information: 

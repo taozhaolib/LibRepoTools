@@ -22,6 +22,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.udf.IndexedUDFFinder;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -175,14 +176,21 @@ public class ExcelHandler implements FileHandler {
                         case Cell.CELL_TYPE_STRING:
                             data.put(key, cell.getStringCellValue() + "---str");
                             break;
-                        case Cell.CELL_TYPE_ERROR:
+                        case Cell.CELL_TYPE_BLANK:
+                            data.put(key, "");
+                            break;
+                        case Cell.CELL_TYPE_ERROR:                        
                             data.put(key, "ERROR_VALUE");
+                            break;
+                        case Cell.CELL_TYPE_FORMULA:                                
+                            FormulaEvaluator evaluator = sheet.getWorkbook().getCreationHelper().createFormulaEvaluator();
+                            //handleCell(cell.getCachedFormulaResultType(), cell, evaluator);
+                            data.put(key, String.valueOf(cell.getCachedFormulaResultType()));
                             break;
                         default:
                             data.put(key, cell.getRichStringCellValue() + "---def");
                             break;
-                    }
-                    
+                    }              
                 //    colCount++;
                 }
                 rowCount++;

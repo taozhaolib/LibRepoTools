@@ -10,7 +10,7 @@
     <import resource="classpath*:**/dspaceManagerContext.xml"/>
 
     <bean id="plosRequest" class="org.shareok.data.plosdata.PlosRequest">
-        <property name="htmlRequest" ref="htmlRequest" />
+        <property name="htmlRequest" ref="httpRequestHandler" />
     </bean>
 
     <bean id="plosData" class="org.shareok.data.plosdata.PlosData">

@@ -25,7 +25,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.shareok.data.htmlrequest.HtmlParser;
-import org.shareok.data.htmlrequest.HtmlRequest;
+import org.shareok.data.htmlrequest.HttpRequestHandler;
 import org.shareok.data.sagedata.exceptions.EmptyFilePathException;
 import org.shareok.data.sagedata.exceptions.EmptyJournalDataException;
 import org.shareok.data.sagedata.exceptions.EmptyProcessorDataException;
@@ -44,7 +44,7 @@ public abstract class SageJournalDataProcessorAbstract implements SageJournalDat
     protected String id;
     protected Map data;
     protected String journalName;
-    protected HtmlRequest htmlRequest;
+    protected HttpRequestHandler htmlRequest;
     protected SageJournalData journalData;
     protected ArrayList<SageJournalData> sageJournalDataList;
 
@@ -77,11 +77,11 @@ public abstract class SageJournalDataProcessorAbstract implements SageJournalDat
         this.journalName = journalName;
     }
 
-    public HtmlRequest getHtmlRequest() {
+    public HttpRequestHandler getHtmlRequest() {
         return htmlRequest;
     }
 
-    public void setHtmlRequest(HtmlRequest htmlRequest) {
+    public void setHtmlRequest(HttpRequestHandler htmlRequest) {
         this.htmlRequest = htmlRequest;
     }
 

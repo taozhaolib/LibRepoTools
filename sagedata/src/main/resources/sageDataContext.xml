@@ -31,7 +31,7 @@
         </property>
         <property name="id" value="" />
         <property name="journalName" value="" />
-        <property name="htmlRequest" ref="htmlRequest" />
+        <property name="htmlRequest" ref="httpRequestHandler" />
         <property name="journalData" ref="sageJournalData" />
         <property name="sageJournalDataList" ><list><ref bean="sageJournalData" /></list></property>
     </bean>

@@ -7,17 +7,20 @@
 package org.shareok.data.htmlrequest;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -35,28 +38,11 @@ import org.w3c.dom.Element;
  *
  * @author Tao Zhao
  */
-public class HtmlRequest {
+public class HttpRequestHandler {
+    
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(HttpRequestHandler.class);
     
     private final String USER_AGENT = "Mozilla/5.0";
-    
-    //private PlosOneData data;
-
-    /**
-     * @param args
-     */
-    public static void main(String[] args) throws Exception {
-
- 
-        HtmlRequest http = new HtmlRequest();
-        
-        //http.getOutput("/Users/zhao0677/Projects/plusOne/plosOne.xml");
-
-//        System.out.println("Testing 1 - Send Http GET request");
-//        http.sendGet();
-//
-//        System.out.println("\nTesting 2 - Send Http POST request");
-//        http.sendPost();
-    }
     
     public void getOutput(String fileName) throws IOException {
         try {
@@ -127,36 +113,41 @@ public class HtmlRequest {
 
  
     // HTTP GET request
-    private void sendGet() throws Exception {
+    public String sendGet(String url) {
 
-            String url = "http://www.google.com/search?q=mkyong";
-
+        try{
             URL obj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
-            // optional default is GET
             con.setRequestMethod("GET");
 
-            //add request header
             con.setRequestProperty("User-Agent", USER_AGENT);
 
             int responseCode = con.getResponseCode();
-            System.out.println("\nSending 'GET' request to URL : " + url);
-            System.out.println("Response Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(con.getInputStream()));
             String inputLine;
-            StringBuffer response = new StringBuffer();
+            StringBuilder response = new StringBuilder();
+            
+            response.append(responseCode);
+            response.append("\n");
 
             while ((inputLine = in.readLine()) != null) {
                     response.append(inputLine);
             }
             in.close();
 
-            //print result
-            System.out.println(response.toString());
-
+            return response.toString();
+        }
+        catch (MalformedURLException ex){
+            logger.error("The url has bad format!", ex);
+        } catch (ProtocolException ex) {
+            logger.error("Bad http request method protocol!", ex);
+        } catch (IOException ex) {
+            logger.error("Cannot get the response code!", ex);
+        }
+        return null;
     }
 
     public StringBuffer sendPost(String url) throws Exception {
@@ -202,17 +193,6 @@ public class HtmlRequest {
             
             return response;
 
-//            File file = new File("/Users/zhao0677/Projects/plusOne/plosOne.xml");
-//            if(!file.exists()){
-//                file.createNewFile();
-//            }
-//            FileWriter writer = new FileWriter(file.getAbsoluteFile());
-//            BufferedWriter bw = new BufferedWriter(writer);
-//            bw.write(response.toString());
-//            bw.close();
-            //print result
-            //System.out.println(response.toString());
-
     }
     
     public void getPdfByUrl(String urlString, String filePath) {
@@ -232,12 +212,77 @@ public class HtmlRequest {
             }
             System.out.println("PDF file was downloaded");
         }
-        catch(IOException ex){
-            ex.printStackTrace();
-        }
         catch(Exception e){
             e.printStackTrace();
         }
     }
     
+    /**
+     * 
+     * @param url
+     * @param method : POST/GET/DELETE/PUT
+     * @param headerInfo: Information to set up the header
+     * @param data : data to be sent to the server
+     *          
+     * @return : the response has two lines: first line is the response code and the second line is the text info
+     */
+    public StringBuffer requestWithHeaderInfo(String url, String method, Map<String, String>headerInfo, String data) {
+           
+        try{
+            URL obj = new URL(url);
+            HttpURLConnection con;
+            
+            try{
+                con = (HttpURLConnection) obj.openConnection();
+            }
+            catch(Exception e){
+                con = (HttpsURLConnection) obj.openConnection();
+            }
+
+            //add reuqest header
+            con.setRequestMethod(method);
+            con.setRequestProperty("User-Agent", USER_AGENT);
+            con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+            
+            Iterator it = headerInfo.entrySet().iterator();
+            while(it.hasNext()){
+                Map.Entry pair = (Map.Entry<String, String>)it.next();
+                con.setRequestProperty((String)pair.getKey(), (String)pair.getValue());
+                it.remove();
+            }
+
+            // Send request
+            con.setDoOutput(true);
+            
+            if(null != data){
+                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                wr.write(data.getBytes("UTF-8"));
+                wr.flush();
+                wr.close();
+            }
+            
+
+            int responseCode = con.getResponseCode();
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+            
+            response.append("code:"+responseCode+"\n");
+
+            while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+            }
+            in.close();
+            
+            return response;
+        }
+        catch(Exception ex){
+            logger.error("Cannot get response with this request!", ex);
+        }
+        
+        return null;
+
+    }
 }

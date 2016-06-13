@@ -23,7 +23,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.shareok.data.htmlrequest.HtmlRequest;
+import org.shareok.data.htmlrequest.HttpRequestHandler;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -36,7 +36,7 @@ public class PlosRequest {
     
     private final String USER_AGENT = "Mozilla/5.0";
     
-    private HtmlRequest htmlRequest;
+    private HttpRequestHandler htmlRequest;
     
     /**
      * 
@@ -265,11 +265,11 @@ public class PlosRequest {
         return USER_AGENT;
     }
 
-    public HtmlRequest getHtmlRequest() {
+    public HttpRequestHandler getHtmlRequest() {
         return htmlRequest;
     }
 
-    public void setHtmlRequest(HtmlRequest htmlRequest) {
+    public void setHtmlRequest(HttpRequestHandler htmlRequest) {
         this.htmlRequest = htmlRequest;
     }
     

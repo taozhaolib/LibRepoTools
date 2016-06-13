@@ -261,7 +261,7 @@ public class DspaceSshHandler implements DataHandler {
             sshExec.getSshConnector().setProxyPort(proxyPort);
 //            sshExec.execCmd("sudo /srv/shareok/dspace/bin/dspace version ");
             sshExec.execCmd(newDirCommand);
-            sshExec.upload(uploadDst + File.separator + time, uploadFile);  
+            sshExec.upload(uploadDst + File.separator + time, uploadFile);  System.out.println(" ****** ");
             sshExec.addReporter("The SAF package has been uploaded to the DSpace server: " + dspaceTargetFilePath + "\n");
             
             String savedReportFilePath =  saveLoggerToFile();

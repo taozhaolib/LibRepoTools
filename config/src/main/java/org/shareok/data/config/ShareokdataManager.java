@@ -53,28 +53,48 @@ public class ShareokdataManager {
         if(null == prop){
             loadProperties();
         }
-        return prop.getProperty("shareokdataPath");
+        String shareokdataPath = prop.getProperty("shareokdataPath");
+        File shareokdataPathFile = new File(shareokdataPath);
+        if(!shareokdataPathFile.exists()){
+            shareokdataPathFile.mkdir();
+        }
+        return shareokdataPath;
     }
     
     public static String getSageUploadPath(){
         if(null == prop){
             loadProperties();
         }
-        return prop.getProperty("sageUploadPath");
+        String sageUploadPath = prop.getProperty("shareokdataPath");
+        File sageUploadPathFile = new File(sageUploadPath);
+        if(!sageUploadPathFile.exists()){
+            sageUploadPathFile.mkdir();
+        }
+        return sageUploadPath;
     }
     
     public static String getPlosUploadPath(){
         if(null == prop){
             loadProperties();
         }
-        return prop.getProperty("plosUploadPath");
+        String plosUploadPath = prop.getProperty("shareokdataPath");
+        File plosUploadPathFile = new File(plosUploadPath);
+        if(!plosUploadPathFile.exists()){
+            plosUploadPathFile.mkdir();
+        }
+        return plosUploadPath;
     }
     
     public static String getSafUploadPath(){
         if(null == prop){
             loadProperties();
         }
-        return prop.getProperty("safUploadPath");
+        String safUploadPath = prop.getProperty("shareokdataPath");
+        File safUploadPathFile = new File(safUploadPath);
+        if(!safUploadPathFile.exists()){
+            safUploadPathFile.mkdir();
+        }
+        return safUploadPath;
     }
     
     public static String getUploadPathFunction(String publisher){

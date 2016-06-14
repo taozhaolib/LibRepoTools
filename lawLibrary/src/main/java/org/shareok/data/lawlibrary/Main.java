@@ -29,15 +29,15 @@ public class Main {
 //            handle.setOutputFilePath("/Users/zhao0677/Projects/law-library/SAF4");
 //            handle.readSourceData();
         
-            for(int count = 6; count < 10; count++){
+            //for(int count = 6; count < 10; count++){
                 CsvHandler csv = new CsvHandler();
-                String countStr = String.valueOf(count);
+                //String countStr = String.valueOf(count);
                 LawLibDataHandlerImpl handle = new LawLibDataHandlerImpl();//(LawLibDataHandlerImpl) context.getBean("lawLibDataHandlerImpl");
                 handle.setCsv(csv);
                 handle.setInputFilePath("/Users/zhao0677/Projects/law-library/test1.csv");
-                handle.setOutputFilePath("/Volumes/TOSHIBA EXT 37/law-lib-saf/SAF"+countStr);
+                handle.setOutputFilePath("/Users/zhao0677/Projects/law-library/test");
                 handle.readSourceData();
-            }
+            //}
         
 //        for(int count = 3; count < 5; count++){
 //            String countStr = String.valueOf(count);

@@ -65,6 +65,11 @@ public class RepoServerDaoImpl implements RepoServerDao {
             final String passphrase = server.getPassPhrase();
             final String rsaKey = server.getRsaKey();
             
+            RepoServer existingServer = findServerByName(serverName);
+            if(null != existingServer){
+                return existingServer;
+            }
+            
             List<Object> results = redisTemplate.execute(new SessionCallback<List<Object>>() {
                 @Override
                 public List<Object> execute(RedisOperations operations) throws DataAccessException {

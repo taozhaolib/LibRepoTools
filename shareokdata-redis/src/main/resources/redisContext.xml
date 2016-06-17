@@ -32,6 +32,10 @@
     
     <bean id="jobDaoImpl" class="org.shareok.data.redis.job.JobDaoImpl"></bean>
     
+    <bean id="repoServer" class="org.shareok.data.redis.server.RepoServer"></bean>
+    
+    <bean id="repoServerDaoImpl" class="org.shareok.data.redis.job.RepoServerDaoImpl"></bean>
+    
     <bean id="job" class="org.shareok.data.redis.job.RedisJob">
         <property name="repoType" value="0" />
     </bean>

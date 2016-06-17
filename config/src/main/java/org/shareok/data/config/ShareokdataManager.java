@@ -184,6 +184,13 @@ public class ShareokdataManager {
         return prop.getProperty("redisJobUserIdMatchingTable");
     }
     
+    public static String getRedisServerNameIdMatchingTable(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("redisServerNameIdMatchingTable");
+    }
+    
     public static int getRedisJobTypeImport(){
         if(null == prop){
             loadProperties();
@@ -196,6 +203,13 @@ public class ShareokdataManager {
             loadProperties();
         }
         return Integer.valueOf(prop.getProperty("redisJobTypeExport"));
+    }
+       
+    public static String getRedisServerQueryPrefix(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("redisServerQueryPrefix");
     }
     
     public static String getDateFormat(){

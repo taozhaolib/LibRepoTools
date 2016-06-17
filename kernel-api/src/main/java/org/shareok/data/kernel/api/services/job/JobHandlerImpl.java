@@ -17,6 +17,7 @@ import org.shareok.data.kernel.api.exceptions.EmptyUploadedPackagePathOfSshUploa
 import org.shareok.data.kernel.api.services.DataService;
 import org.shareok.data.kernel.api.services.ServiceUtil;
 import org.shareok.data.redis.job.RedisJob;
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
@@ -49,11 +50,7 @@ public class JobHandlerImpl implements JobHandler {
 
             String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.REPO_TYPES[repoType], DataUtil.JOB_TYPES[jobType], jobId);
 
-            //System.setProperty("logfile.path", jobFilePath + File.separator + String.valueOf(jobId) + ".log");
-
-            logger.debug("sort kind of here");
-
-            DataService ds = ServiceUtil.getDataService(context, repoType, jobType);
+            DataService ds = ServiceUtil.getDataService(context, jobType);
 
             String filePath = "";
             String reportFilePath = jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt";
@@ -62,48 +59,22 @@ public class JobHandlerImpl implements JobHandler {
                 filePath = ServiceUtil.saveUploadedFile(localFile, jobFilePath);
             }
             else if(null != remoteFilePath && !"".equals(remoteFilePath)){
-                if(jobType != 4){
-                    filePath = jobFilePath + File.separator + "downloaded.zip";
-                    ServiceUtil.downloadFile(remoteFilePath, filePath);
-                }
-                else {
-                    long oldJobId = Long.parseLong(remoteFilePath);
-                    Map values = redisJobServ.getJobInfoByAttributes(oldJobId, new String[]{"uploadedPackagePath", "imported"});
-                    if(null != values.get("imported") && "true".equals((String)values.get("imported"))){
-                        return null;
-                    }
-                    Object obj = values.get("uploadedPackagePath");
-                    if(null == obj || "".equals((String)obj)){
-                        throw new EmptyUploadedPackagePathOfSshUploadJobException("The ssh-upload job does NOT have a path to the uploaded package in the server.");
-                    }
-                    filePath = (String)obj;
-                }
+                filePath = processRemoteFileByJobType(jobType, redisJobServ, jobFilePath, remoteFilePath);
             }
 
             handler.setUploadFile(filePath);
             handler.setReportFilePath(reportFilePath);
             ds.setHandler(handler);
+            
             redisJobServ.updateJob(jobId, "status", "1"); 
-            String serverTargetFilePath = ds.executeTask(DataUtil.JOB_TYPES[jobType]);
-            if(null != serverTargetFilePath && !serverTargetFilePath.equals("")){
-                redisJobServ.updateJob(jobId, "status", "2");  
-                Map values = new HashMap();
-                if(jobType == 1 || jobType == 3){
-                    values.put("uploadedPackagePath", serverTargetFilePath);
-                    redisJobServ.updateJobInfoByJobType(jobId, DataUtil.JOB_TYPES[jobType], values);
-                }
-                else if(jobType == 4){
-                    long oldJobId = Long.parseLong(remoteFilePath);
-                    redisJobServ.updateJob(oldJobId, "status", "5");
-                }
-            }
-            else{
-                redisJobServ.updateJob(jobId, "status", "3");
-            }
+            
+            String jobReturnValue = ds.executeTask(DataUtil.JOB_TYPES[jobType]);
+            processJobReturnValue(jobReturnValue, redisJobServ, jobId, jobType, remoteFilePath);
+            
             redisJobServ.updateJob(jobId, "endTime", ShareokdataManager.getSimpleDateFormat().format(new Date()));
             return redisJobServ.findJobByJobId(jobId);
         }
-        catch(Exception ex){
+        catch(BeansException | NumberFormatException | EmptyUploadedPackagePathOfSshUploadJobException ex){
             logger.error("Cannot exectue the job with type "+DataUtil.JOB_TYPES[jobType]+" for repository "+DataUtil.REPO_TYPES[repoType], ex);
         }
         return null;
@@ -111,6 +82,54 @@ public class JobHandlerImpl implements JobHandler {
     
     @Override
     public RedisJob execute(long uid, String jobType, String repoType, DataHandler handler, MultipartFile localFile, String remoteFilePath){
-        return execute(uid, Arrays.asList(DataUtil.REPO_TYPES).indexOf(repoType), Arrays.asList(DataUtil.JOB_TYPES).indexOf(jobType), handler, localFile, remoteFilePath);
+        return execute(uid, Arrays.asList(DataUtil.JOB_TYPES).indexOf(jobType), Arrays.asList(DataUtil.REPO_TYPES).indexOf(repoType), handler, localFile, remoteFilePath);
+    }
+    
+    private String processRemoteFileByJobType(int jobType, RedisJobService redisJobServ, String jobFilePath, String remoteFilePath) throws EmptyUploadedPackagePathOfSshUploadJobException{
+        String filePath = "";
+        switch(jobType){
+            case 5:
+                return "uri--" + remoteFilePath;                
+            case 4:
+                long oldJobId = Long.parseLong(remoteFilePath);
+                Map values = redisJobServ.getJobInfoByAttributes(oldJobId, new String[]{"uploadedPackagePath", "imported"});
+                if(null != values.get("imported") && "true".equals((String)values.get("imported"))){
+                    return null;
+                }
+                Object obj = values.get("uploadedPackagePath");
+                if(null == obj || "".equals((String)obj)){
+                    throw new EmptyUploadedPackagePathOfSshUploadJobException("The ssh-upload job does NOT have a path to the uploaded package in the server.");
+                }
+                filePath = (String)obj;
+                break;
+            default:
+                filePath = jobFilePath + File.separator + "downloaded.zip";
+                ServiceUtil.downloadFile(remoteFilePath, filePath);
+                break;
+        }
+        return filePath;
+    }
+    
+    private void processJobReturnValue(String jobReturnValue, RedisJobService redisJobServ, long jobId, int jobType, String remoteFilePath){
+        if(null != jobReturnValue && !jobReturnValue.equals("")){
+                redisJobServ.updateJob(jobId, "status", "2");  
+                Map values = new HashMap();
+                switch(jobType){
+                    case 1:
+                    case 3:
+                        values.put("uploadedPackagePath", jobReturnValue);
+                        redisJobServ.updateJobInfoByJobType(jobId, DataUtil.JOB_TYPES[jobType], values);
+                        break;
+                    case 4:
+                        long oldJobId = Long.parseLong(remoteFilePath);
+                        redisJobServ.updateJob(oldJobId, "status", "5");
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else{
+                redisJobServ.updateJob(jobId, "status", "3");
+            }
     }
 }

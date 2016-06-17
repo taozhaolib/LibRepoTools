@@ -9,6 +9,7 @@ import org.shareok.data.config.DataHandler;
 import org.shareok.data.dspacemanager.DspaceSshDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,6 +26,7 @@ public class DspaceSshServiceImpl implements DspaceSshService {
 
     @Override
     @Autowired
+    @Qualifier("dspaceSshHandler")
     public void setHandler(DataHandler handler) {
         this.handler = (DspaceSshHandler)handler;
         if(null == this.handler.getSshExec()){
@@ -44,17 +46,15 @@ public class DspaceSshServiceImpl implements DspaceSshService {
 
     @Override
     public String executeTask(String jobType) {
-        if(jobType.equals("ssh-import")){
-            return handler.importDspace();
-        }
-        else if(jobType.equals("ssh-upload")){
-            return handler.uploadSafDspace();
-        }
-        else if(jobType.equals("ssh-import-uloaded")){
-            return handler.importUploadedSafDspace();
-        }
-        else{
-            return null;
+        switch (jobType) {
+            case "ssh-import":
+                return handler.importDspace();
+            case "ssh-upload":
+                return handler.uploadSafDspace();
+            case "ssh-import-uloaded":
+                return handler.importUploadedSafDspace();
+            default:
+                return null;
         }
     }
     

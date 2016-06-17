@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.shareok.data.kernel.api.services.dspace;
+package org.shareok.data.kernel.api.services.islandora;
 
 import org.shareok.data.kernel.api.services.DataService;
 
@@ -11,7 +11,7 @@ import org.shareok.data.kernel.api.services.DataService;
  *
  * @author Tao Zhao
  */
-public interface DspaceSshService extends DataService {
-    public String sshImportData();
-    public String uploadSafDspace();
+public interface IslandoraSshService extends DataService{
+    public String importIslandora();
 }
+

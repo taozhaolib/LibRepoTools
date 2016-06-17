@@ -64,7 +64,7 @@ public class SshDspaceDataController {
         if (null != handler) {
             try {
                 String uploadFilePath = DspaceJournalDataUtil.getJournalImportFilePath(handler.getUploadFile(), publisher);
-                int jobTypeIndex = DataUtil.getJobTypeIndex(action); 
+                int jobTypeIndex = DataUtil.getJobTypeIndex("ssh-" + action, "dspace"); 
                 //RedisJob job = jobHandler.execute(Long.valueOf(userId), "dspace", "ssh-import", handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
                 RedisJob job = jobHandler.execute(Long.valueOf(userId), jobTypeIndex, DataUtil.getRepoTypeIndex("dspace"), handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
                 ModelAndView model = new ModelAndView();
@@ -105,14 +105,14 @@ public class SshDspaceDataController {
         
         if ((null != file && !file.isEmpty()) || (null != safLink && !"".equals(safLink))) {
             try {
-                int jobTypeIndex = DataUtil.getJobTypeIndex(jobType);                                
+                int jobTypeIndex = DataUtil.getJobTypeIndex("ssh-" + jobType, "dspace");                                
                 RedisJob job = jobHandler.execute(Long.valueOf(userId), jobTypeIndex, DataUtil.getRepoTypeIndex("dspace"), handler, file, safLink);
                 
                 ModelAndView model = new ModelAndView();
                 model.setViewName("jobReport");
                 model.addObject("host", handler.getHost());
                 model.addObject("collection", handler.getCollectionId());
-                model.addObject("reportPath", "/webserv/download/dspace/report/"+DataUtil.JOB_TYPES[jobTypeIndex]+"/"+String.valueOf(job.getJobId()));  
+                model.addObject("reportPath", "/webserv/download/report/"+DataUtil.JOB_TYPES[jobTypeIndex]+"/"+String.valueOf(job.getJobId()));  
                 WebUtil.outputJobInfoToModel(model, job);
                 
                 return model;
@@ -125,10 +125,10 @@ public class SshDspaceDataController {
         return null;
     }
     
-    @RequestMapping(value="/download/dspace/report/{jobType}/{jobId}")
+    @RequestMapping(value="/download/report/{jobType}/{jobId}")
     public void sshDspaceReportDownload(HttpServletResponse response, @PathVariable("jobType") String jobType, @PathVariable("jobId") String jobId){
         
-        String downloadPath = DspaceSshDataUtil.getSafDownloadLink(jobType, jobId);
+        String downloadPath = WebUtil.getReportDownloadLink(jobType, jobId);
         
         WebUtil.setupFileDownload(response, downloadPath);
         

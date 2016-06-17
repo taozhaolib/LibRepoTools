@@ -78,4 +78,10 @@ public class WebUtil {
         model.addObject("repoType", DataUtil.REPO_TYPES[job.getRepoType()]);
     }
     
+    public static String getReportDownloadLink(String jobType, String jobId){
+        String[] jobInfo = jobType.split("-");
+        String repoType = jobInfo[jobInfo.length-1];
+        return ShareokdataManager.getShareokdataPath()+ File.separator + repoType + File.separator + jobType + File.separator + jobId + File.separator + jobId + "-report.txt";
+    }
+    
 }

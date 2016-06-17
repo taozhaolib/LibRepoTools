@@ -30,14 +30,20 @@ public class ServiceUtil {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceUtil.class);
     
-    private static final Map<String, String> serviceBeanMap = new HashMap<String, String>();
+    private static final Map<String, String> serviceBeanMap = new HashMap<>();
     static {
         for(String job : DataUtil.JOB_TYPES){
-            for(String repo : DataUtil.REPO_TYPES){
-                String beanKey = repo + "-" + job;
-                if(repo.equals("dspace") && job.contains("ssh")){
-                    serviceBeanMap.put(beanKey, "dspaceSshServiceImpl");
-                }
+            switch(job){
+                case "ssh-import-dspace":
+                case "ssh-upload-dspace":
+                case "ssh-importloaded-dspace":
+                    serviceBeanMap.put(job, "dspaceSshServiceImpl");
+                    break;
+                case "ssh-import-islandora":
+                    serviceBeanMap.put(job, "islandoraSshServiceImpl");
+                    break;
+                default:
+                    break; 
             }
         }
     }
@@ -56,8 +62,8 @@ public class ServiceUtil {
         return serviceBeanMap.get(repoType + "-" + jobType);
     }
     
-    public static DataService getDataService(ApplicationContext context, String repoType, String jobType){
-        String bean = serviceBeanMap.get(repoType + "-" + jobType);  
+    public static DataService getDataService(ApplicationContext context, String jobType){
+        String bean = serviceBeanMap.get(jobType);  
         if(null == context){
             context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
         }
@@ -65,8 +71,8 @@ public class ServiceUtil {
         return ds;
     }
     
-    public static DataService getDataService(ApplicationContext context, int repoType, int jobType){
-        return getDataService(context, DataUtil.REPO_TYPES[repoType], DataUtil.JOB_TYPES[jobType]);
+    public static DataService getDataService(ApplicationContext context, int jobType){
+        return getDataService(context, DataUtil.JOB_TYPES[jobType]);
     }
     
     public static String saveUploadedFile(MultipartFile file, String jobFilePath){

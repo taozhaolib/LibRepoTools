@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,24 +23,14 @@ public class DataUtil {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DataUtil.class);
     
     public static String[] REPO_TYPES = {"unknown", "dspace", "islandora", "fedora", "hydra"};
-    public static String[] JOB_TYPES = {"unknown", "ssh-import", "rest-import", "ssh-upload", "ssh-import-uloaded"};
+    public static String[] JOB_TYPES = {"unknown", "ssh-import-dspace", "rest-import-dspace", "ssh-upload-dspace", "ssh-importloaded-dspace",
+                                        "ssh-import-islandora"};
     
-    public static int getJobTypeIndex(String jobType){
-        if(null == jobType || "".equals(jobType)){
-            return 0;
-        }
-        else if(jobType.equals("import")){
-            return 1;
-        }
-        else if(jobType.equals("upload")){
-            return 3;
-        }
-        else if(jobType.equals("import-uploaded")){
-            return 4;
-        }
-        /**
-         * Some other should also be implemented here.
-         */
+    public static int getJobTypeIndex(String jobType, String repoType){
+        String key = jobType + "-" + repoType;
+        if(null != key || !"".equals(key)){
+            return Arrays.asList(JOB_TYPES).indexOf(key);
+        }        
         else {
             return 0;
         }

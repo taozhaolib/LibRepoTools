@@ -28,7 +28,7 @@
         <li><a class="dropdown-toggle" data-toggle="dropdown" href="#">Islandora Data Service
            <span class="caret"></span></a>
            <ul class="dropdown-menu">
-             <li class="mainMenuDrop" id="dataIs"><a href="#">Islandora Data Manipulation</a></li>
+             <li class="mainMenuDrop" id="dataIs"><a href="/webserv/ssh/islandora/book/import/page/ssh-import">Islandora Book Import</a></li>
            </ul>
         </li>
         <c:if test="${not empty loggedin }">

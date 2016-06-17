@@ -47,11 +47,11 @@ public class DspaceSshServiceImpl implements DspaceSshService {
     @Override
     public String executeTask(String jobType) {
         switch (jobType) {
-            case "ssh-import":
+            case "ssh-import-dspace":
                 return handler.importDspace();
-            case "ssh-upload":
+            case "ssh-upload-dspace":
                 return handler.uploadSafDspace();
-            case "ssh-import-uloaded":
+            case "ssh-importloaded-dspace":
                 return handler.importUploadedSafDspace();
             default:
                 return null;

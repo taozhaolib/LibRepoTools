@@ -65,7 +65,7 @@ public class ShareokdataManager {
         if(null == prop){
             loadProperties();
         }
-        String sageUploadPath = prop.getProperty("shareokdataPath");
+        String sageUploadPath = prop.getProperty("sageUploadPath");
         File sageUploadPathFile = new File(sageUploadPath);
         if(!sageUploadPathFile.exists()){
             sageUploadPathFile.mkdir();
@@ -77,7 +77,7 @@ public class ShareokdataManager {
         if(null == prop){
             loadProperties();
         }
-        String plosUploadPath = prop.getProperty("shareokdataPath");
+        String plosUploadPath = prop.getProperty("plosUploadPath");
         File plosUploadPathFile = new File(plosUploadPath);
         if(!plosUploadPathFile.exists()){
             plosUploadPathFile.mkdir();
@@ -227,5 +227,12 @@ public class ShareokdataManager {
             file.mkdir();
         }
         return filePath;
+    }
+    
+    public static int getRedisJobQueueMaxJobs(){
+        if(null == prop){
+            loadProperties();
+        }
+        return Integer.valueOf(prop.getProperty("redisJobQueueMaxJobs"));
     }
 }

@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
-import org.shareok.data.dspacemanager.DspaceSshDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
 import org.shareok.data.kernel.api.services.dspace.DspaceSshService;
 import org.shareok.data.kernel.api.services.job.JobHandler;
@@ -64,14 +63,14 @@ public class SshDspaceDataController {
         if (null != handler) {
             try {
                 String uploadFilePath = DspaceJournalDataUtil.getJournalImportFilePath(handler.getUploadFile(), publisher);
-                int jobTypeIndex = DataUtil.getJobTypeIndex("ssh-" + action, "dspace"); 
+                int jobTypeIndex = DataUtil.getJobTypeIndex(action, "dspace"); 
                 //RedisJob job = jobHandler.execute(Long.valueOf(userId), "dspace", "ssh-import", handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
                 RedisJob job = jobHandler.execute(Long.valueOf(userId), jobTypeIndex, DataUtil.getRepoTypeIndex("dspace"), handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
                 ModelAndView model = new ModelAndView();
                 model.setViewName("jobReport");
                 model.addObject("host", handler.getHost());
-                model.addObject("collection", handler.getCollectionId());
-                model.addObject("reportPath", "/webserv/download/dspace/ssh-import/"+String.valueOf(job.getJobId()));  
+                model.addObject("collection", handler.getCollectionId()); 
+                model.addObject("reportPath", "/webserv/download/report/"+DataUtil.JOB_TYPES[jobTypeIndex]+"/"+String.valueOf(job.getJobId())); 
                 WebUtil.outputJobInfoToModel(model, job);
                 
                 return model;
@@ -100,12 +99,12 @@ public class SshDspaceDataController {
         String userId = String.valueOf(request.getSession().getAttribute("userId"));
         
         if(null == safLink || safLink.equals("")){
-            safLink = oldJobId;
+            safLink = "job-" + oldJobId;
         }
         
         if ((null != file && !file.isEmpty()) || (null != safLink && !"".equals(safLink))) {
             try {
-                int jobTypeIndex = DataUtil.getJobTypeIndex("ssh-" + jobType, "dspace");                                
+                int jobTypeIndex = DataUtil.getJobTypeIndex(jobType, "dspace");                                
                 RedisJob job = jobHandler.execute(Long.valueOf(userId), jobTypeIndex, DataUtil.getRepoTypeIndex("dspace"), handler, file, safLink);
                 
                 ModelAndView model = new ModelAndView();

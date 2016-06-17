@@ -89,18 +89,23 @@ public class JobHandlerImpl implements JobHandler {
         String filePath = "";
         switch(jobType){
             case 5:
-                return "uri--" + remoteFilePath;                
+                filePath = "uri--" + remoteFilePath;                
             case 4:
-                long oldJobId = Long.parseLong(remoteFilePath);
-                Map values = redisJobServ.getJobInfoByAttributes(oldJobId, new String[]{"uploadedPackagePath", "imported"});
-                if(null != values.get("imported") && "true".equals((String)values.get("imported"))){
-                    return null;
+                if(remoteFilePath.contains("job-")){
+                    long oldJobId = Long.parseLong(remoteFilePath.split("-")[1]);
+                    Map values = redisJobServ.getJobInfoByAttributes(oldJobId, new String[]{"uploadedPackagePath", "status"});
+                    if(null == values.get("status") || !"6".equals((String)values.get("status"))){
+                        return null;
+                    }
+                    Object obj = values.get("uploadedPackagePath");
+                    if(null == obj || "".equals((String)obj)){
+                        throw new EmptyUploadedPackagePathOfSshUploadJobException("The ssh-upload job does NOT have a path to the uploaded package in the server.");
+                    }
+                    filePath = (String)obj;
                 }
-                Object obj = values.get("uploadedPackagePath");
-                if(null == obj || "".equals((String)obj)){
-                    throw new EmptyUploadedPackagePathOfSshUploadJobException("The ssh-upload job does NOT have a path to the uploaded package in the server.");
+                else{
+                    filePath = remoteFilePath;
                 }
-                filePath = (String)obj;
                 break;
             default:
                 filePath = jobFilePath + File.separator + "downloaded.zip";
@@ -119,10 +124,17 @@ public class JobHandlerImpl implements JobHandler {
                     case 3:
                         values.put("uploadedPackagePath", jobReturnValue);
                         redisJobServ.updateJobInfoByJobType(jobId, DataUtil.JOB_TYPES[jobType], values);
+                        if(jobType == 3){
+                            redisJobServ.updateJob(jobId, "uploadedPackagePath", jobReturnValue);
+                            redisJobServ.updateJob(jobId, "status", "6");
+                        }
+                        else if(jobType == 1){
+                            redisJobServ.updateJob(jobId, "status", "2");
+                        }
                         break;
                     case 4:
-                        long oldJobId = Long.parseLong(remoteFilePath);
-                        redisJobServ.updateJob(oldJobId, "status", "5");
+                    case 5:
+                        redisJobServ.updateJob(jobId, "status", "2");
                         break;
                     default:
                         break;

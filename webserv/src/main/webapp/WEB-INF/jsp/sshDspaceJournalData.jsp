@@ -23,7 +23,7 @@
                     
                     <c:if test="${not empty jobType}">
                         <form role="form" action="/webserv/ssh/dspace/saf/job/${jobType}" method="post" enctype="multipart/form-data">
-                        <c:if test="${jobType == 'import' || jobType == 'upload'}">
+                        <c:if test="${jobType == 'ssh-import' || jobType == 'ssh-upload'}">
                             <div class="form-group">
                                 <label class="control-label col-lg-2 col-sm-4 text-left" for="saf">Upload the simple archive format:</label>
                                 <div class="col-lg-3 col-sm-8">
@@ -35,7 +35,7 @@
                                 </div>
                             </div>
                         </c:if>
-                        <c:if test="${jobType == 'import-uploaded'}">
+                        <c:if test="${jobType == 'ssh-importloaded'}">
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="saf-online">Path to the Uploaded Package on the Server:</label>
                                 <div class="col-lg-4 col-sm-8">
                                     <input type="text" class="file-input" name="saf-online" />
@@ -50,7 +50,7 @@
                             <br/><br/><br/><br>
                     </c:if>
                     <c:if test="${empty jobType}">
-                        <form role="form" action="/webserv/ssh/dspace/journal/${publisher}/import" method="post" enctype="multipart/form-data">
+                        <form role="form" action="/webserv/ssh/dspace/journal/${publisher}/ssh-import" method="post" enctype="multipart/form-data">
                     </c:if>
          
                         <div class="form-group">

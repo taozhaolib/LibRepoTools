@@ -15,8 +15,6 @@
     <import resource="classpath*:**/htmlRequestContext.xml"/>
     <import resource="classpath*:**/configContext.xml"/>
 -->
-    
-    <import resource="classpath*:**/dspaceManagerContext.xml"/>
         
     <bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory" p:host-name="127.0.0.1" p:port="6379"/>
     
@@ -36,6 +34,14 @@
     
     <bean id="job" class="org.shareok.data.redis.job.RedisJob">
         <property name="repoType" value="0" />
+    </bean>
+    
+    <bean id="jobQueue" class="org.shareok.data.redis.job.JobQueue">
+        
+    </bean>
+    
+    <bean id="jobQueueDaoImpl" class="org.shareok.data.redis.job.JobQueueDaoImpl">
+        
     </bean>
     
 <!--    

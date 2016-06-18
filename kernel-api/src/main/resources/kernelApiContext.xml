@@ -41,5 +41,7 @@
         
     </bean>
     
+    <bean id="repoServerService" class="org.shareok.data.kernel.api.services.server.RepoServerServiceImpl"></bean>
+    
 </beans>
 

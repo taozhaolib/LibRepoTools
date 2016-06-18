@@ -36,6 +36,7 @@
                 <span class="caret"></span></a>
                 <ul class="dropdown-menu">
                   <li class="mainMenuDrop" id="userJobHistory"><a href="/webserv/user/${loggedin}/jobHistory">Job History</a></li>
+                  <li class="mainMenuDrop" id="userJobHistory"><a href="/webserv/server/config">Server Configuration</a></li>
                   <li class="mainMenuDrop" id="userProfile"><a href="#">Change Profile</a></li>
                 </ul>
              </li>

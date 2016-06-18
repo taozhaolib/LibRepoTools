@@ -5,15 +5,19 @@
  */
 package org.shareok.data.kernel.api.services.server;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import org.shareok.data.redis.server.RepoServer;
 import org.shareok.data.redis.server.RepoServerDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Tao Zhao
  */
+@Service
 public class RepoServerServiceImpl implements RepoServerService{
     
     private RepoServerDao serverDao;
@@ -37,10 +41,10 @@ public class RepoServerServiceImpl implements RepoServerService{
         return serverDao.findServerById(serverId);
     }
     
-//    @Override
-//    public List<RepoServer> getServerObjList(Collection<String> serverIds){
-//        return serverDao.getServerObjList(serverIds);
-//    }
+    @Override
+    public List<RepoServer> getServerObjList(Collection<String> serverIds){
+        return serverDao.getServerObjList(serverIds);
+    }
 //    
 //    @Override
 //    public List<RepoServer> loadRepoServerListByRepoType(List<RepoServer> serverList){

@@ -12,5 +12,10 @@ $(document).ready(function(){
         $(".click-show-slow").toggle("slow", function(){});
     })
     $(".click-show-slow").hide();
+    
+    $(".new-server-btn").click(function(){
+        $("input[class='form-control']").val("");
+        $("input[name='serverId']").val("-1");
+    });
 });
 

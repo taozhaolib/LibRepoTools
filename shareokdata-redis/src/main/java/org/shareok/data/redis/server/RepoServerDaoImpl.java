@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.redis.RedisUtil;
+import org.shareok.data.redis.exceptions.NonExistingServerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -184,8 +185,19 @@ public class RepoServerDaoImpl implements RepoServerDao {
     public RepoServer updateServer(int serverId, String infoType, String value) {
         RepoServer server = null;
         try{
+            if(infoType.equals("serverName")){
+                RepoServer existingServer = findServerById(serverId);
+                if(null == existingServer){
+                    throw new NonExistingServerException("The server to be updated does not exist!");
+                }
+                String oldServerName = existingServer.getServerName(); 
+                if(!oldServerName.equals(value)){
+                    redisTemplate.boundHashOps(ShareokdataManager.getRedisServerNameIdMatchingTable()).delete(ShareokdataManager.getRedisServerNameIdMatchingTable(), oldServerName);
+                    redisTemplate.boundHashOps(ShareokdataManager.getRedisServerNameIdMatchingTable()).put(value, String.valueOf(serverId));
+                }
+            }
             server = findServerById(serverId);
-            BoundHashOperations<String, String, String> serverOps = redisTemplate.boundHashOps(RedisUtil.getServerQueryKey(serverId));
+            BoundHashOperations<String, String, String> serverOps = redisTemplate.boundHashOps(RedisUtil.getServerQueryKey(serverId));            
             serverOps.put(infoType, value);
         }
         catch(Exception ex){
@@ -196,55 +208,71 @@ public class RepoServerDaoImpl implements RepoServerDao {
     
     @Override
     public RepoServer updateServer(RepoServer server){
-        redisTemplate.setConnectionFactory(connectionFactory);
+        
+        try{
+            redisTemplate.setConnectionFactory(connectionFactory);
             
-        final String serverId = String.valueOf(server.getServerId());
-        final String serverName = server.getServerName();
-        final String portStr = String.valueOf(server.getPort());
-        final String proxyPortStr = String.valueOf(server.getProxyPort());
-        final String repoTypeStr = String.valueOf(server.getRepoType());
-        final String timeoutStr = String.valueOf(server.getTimeout());
-        final String host = server.getHost();
-        final String proxyHost = server.getProxyHost();
-        final String userName = server.getUserName();
-        final String proxyUserName = server.getProxyUserName();
-        final String password = server.getPassword();
-        final String proxyPassword = server.getProxyPassword();
-        final String passphrase = server.getPassPhrase();
-        final String rsaKey = server.getRsaKey();
-
-        List<Object> results = redisTemplate.execute(new SessionCallback<List<Object>>() {
-            @Override
-            public List<Object> execute(RedisOperations operations) throws DataAccessException {
-                operations.multi();
-                operations.boundHashOps("server:"+serverId);
-                operations.opsForHash().put("server:"+serverId, "serverId", serverId);
-                operations.opsForHash().put("server:"+serverId, "serverName", serverName);
-                operations.opsForHash().put("server:"+serverId, "port", portStr);
-                operations.opsForHash().put("server:"+serverId, "proxyPort", proxyPortStr);
-                operations.opsForHash().put("server:"+serverId, "timeout", timeoutStr);
-                operations.opsForHash().put("server:"+serverId, "host", host);
-                operations.opsForHash().put("server:"+serverId, "proxyHost", proxyHost);
-                operations.opsForHash().put("server:"+serverId, "userName", userName);
-                operations.opsForHash().put("server:"+serverId, "proxyUserName", proxyUserName);
-                operations.opsForHash().put("server:"+serverId, "password", password);
-                operations.opsForHash().put("server:"+serverId, "host", host);
-                operations.opsForHash().put("server:"+serverId, "proxyPassword", proxyPassword);
-                operations.opsForHash().put("server:"+serverId, "passphrase", passphrase);
-                operations.opsForHash().put("server:"+serverId, "rsaKey", rsaKey);
-                operations.opsForHash().put("server:"+serverId, "repoType", repoTypeStr);
-
-                operations.boundHashOps(ShareokdataManager.getRedisServerNameIdMatchingTable());
-                operations.opsForHash().put(ShareokdataManager.getRedisServerNameIdMatchingTable(), serverName, serverId);
-
-                List<Object> serverList= operations.exec();
-                if(!serverList.get(0).equals(true)){
-                    operations.discard();
-                }
-                return serverList;
+            final String serverId = String.valueOf(server.getServerId());
+            final String serverName = server.getServerName();
+            
+            RepoServer existingServer = findServerById(server.getServerId());
+            if(null == existingServer){
+                throw new NonExistingServerException("The server to be updated does not exist!");
             }
-        });
-        return null;
+            
+            final String oldServerName = existingServer.getServerName();            
+            final String portStr = String.valueOf(server.getPort());
+            final String proxyPortStr = String.valueOf(server.getProxyPort());
+            final String repoTypeStr = String.valueOf(server.getRepoType());
+            final String timeoutStr = String.valueOf(server.getTimeout());
+            final String host = server.getHost();
+            final String proxyHost = server.getProxyHost();
+            final String userName = server.getUserName();
+            final String proxyUserName = server.getProxyUserName();
+            final String password = server.getPassword();
+            final String proxyPassword = server.getProxyPassword();
+            final String passphrase = server.getPassPhrase();
+            final String rsaKey = server.getRsaKey();
+            
+            List<Object> results = redisTemplate.execute(new SessionCallback<List<Object>>() {
+                @Override
+                public List<Object> execute(RedisOperations operations) throws DataAccessException {
+                    operations.multi();
+                    operations.boundHashOps("server:"+serverId);
+//                    operations.opsForHash().put("server:"+serverId, "serverId", serverId);
+                    operations.opsForHash().put("server:"+serverId, "serverName", serverName);
+                    operations.opsForHash().put("server:"+serverId, "port", portStr);
+                    operations.opsForHash().put("server:"+serverId, "proxyPort", proxyPortStr);
+                    operations.opsForHash().put("server:"+serverId, "timeout", timeoutStr);
+                    operations.opsForHash().put("server:"+serverId, "host", host);
+                    operations.opsForHash().put("server:"+serverId, "proxyHost", proxyHost);
+                    operations.opsForHash().put("server:"+serverId, "userName", userName);
+                    operations.opsForHash().put("server:"+serverId, "proxyUserName", proxyUserName);
+                    operations.opsForHash().put("server:"+serverId, "password", password);
+                    operations.opsForHash().put("server:"+serverId, "host", host);
+                    operations.opsForHash().put("server:"+serverId, "proxyPassword", proxyPassword);
+                    operations.opsForHash().put("server:"+serverId, "passphrase", passphrase);
+                    operations.opsForHash().put("server:"+serverId, "rsaKey", rsaKey);
+                    operations.opsForHash().put("server:"+serverId, "repoType", repoTypeStr);
+                    
+                    operations.boundHashOps(ShareokdataManager.getRedisServerNameIdMatchingTable());
+                    if(!oldServerName.equals(serverName)){
+                        operations.opsForHash().delete(ShareokdataManager.getRedisServerNameIdMatchingTable(), oldServerName);
+                    }
+                    operations.opsForHash().put(ShareokdataManager.getRedisServerNameIdMatchingTable(), serverName, serverId);
+                    
+                    List<Object> serverList= operations.exec();
+                    if(serverList.get(0).equals("null")){
+                        operations.discard();
+                    }
+                    return serverList;
+                }
+            });
+        }
+        catch(Exception ex){
+            logger.error("Cannot update the server information", ex);
+        }
+        return server;
     }
 
     @Override

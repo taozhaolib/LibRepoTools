@@ -17,6 +17,9 @@ import org.shareok.data.redis.server.RepoServer;
 public interface RepoServerService {
     public Map<String, String> getServerNameIdList();
     public RepoServer findServerById(int serverId);
+    public RepoServer findServerByName(String serverName);
+    public RepoServer updateServer(RepoServer server);
+    public RepoServer addServer(RepoServer server);
     public List<RepoServer> getServerObjList(Collection<String> serverIds);
 //    public List<RepoServer> loadRepoServerListByRepoType(List<RepoServer> serverList);
 }

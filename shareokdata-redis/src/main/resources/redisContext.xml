@@ -32,7 +32,20 @@
     
     <bean id="jobDaoImpl" class="org.shareok.data.redis.job.JobDaoImpl"></bean>
     
-    <bean id="repoServer" class="org.shareok.data.redis.server.RepoServer"></bean>
+    <bean id="repoServer" class="org.shareok.data.redis.server.RepoServer">
+        <property name="timeout" value="5000" />
+        <property name="port" value="22" />
+        <property name="proxyPort" value="22" />
+        <property name="repoType" value="0" />
+        <property name="serverName" value="" />
+        <property name="host" value="" />
+        <property name="proxyHost" value="" />
+        <property name="userName" value="" />
+        <property name="proxyUserName" value="" />
+        <property name="password" value="" />
+        <property name="passPhrase" value="" />
+        <property name="rsaKey" value="" />
+    </bean>
     
     <bean id="repoServerDaoImpl" class="org.shareok.data.redis.server.RepoServerDaoImpl"></bean>
     

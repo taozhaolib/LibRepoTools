@@ -11,17 +11,19 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import org.apache.log4j.Logger;
-import org.shareok.data.config.DataUtil;
-import org.shareok.data.kernel.api.services.ServiceUtil;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.redis.server.RepoServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 /**
  *
@@ -65,20 +67,11 @@ public class ServerController {
                 ObjectMapper mapper = new ObjectMapper();
                 
                 Collection<String> ids = serverList.values();
-                List<RepoServer> serverObjList = serverService.getServerObjList(ids);
-//                List<RepoServer> repoServerObjList = serverService.loadRepoServerListByRepoType(serverObjList);
-                
-//                for(RepoServer server : repoServerObjList){
-//                    String repoType = DataUtil.REPO_TYPES[server.getRepoType()];
-//                    if("dspace".equals(repoType)){
-//                        DspaceServer ds = (DspaceServer)server;
-//                        model.addObject(String.valueOf(ds.getServerId()), mapper.writeValueAsString(ds));
-//                    }
-//                }
+                List<RepoServer> serverObjList = serverService.getServerObjList(ids);                
                 
                 String serverListJson = mapper.writeValueAsString(serverList);
                 model.addObject("serverList", serverListJson);
-                //model.addObject("serverObjList", mapper.writeValueAsString(serverObjList));
+                model.addObject("serverObjList", mapper.writeValueAsString(serverObjList));
             }
             else{
                 model.addObject("emptyServerList", "There are NO servers set up.");
@@ -90,6 +83,63 @@ public class ServerController {
             logger.error("Cannot retrieve and parse the server list.", ex);
         }
         
+        return model;
+    }
+    
+    @RequestMapping("/server/update")
+    public ModelAndView serverUpdate(RedirectAttributes redirectAttrs, HttpServletRequest request, @ModelAttribute("SpringWeb")RepoServer server){
+        
+        HttpSession session = request.getSession();
+        ModelAndView model = new ModelAndView();
+        RedirectView view = new RedirectView();
+        view.setContextRelative(true);
+        RepoServer existingServer = null;
+        
+        /**
+         * Some server side validation code:
+         */
+        boolean hasError = false;
+        String serverId = (String)request.getParameter("serverId");
+        if(null == server){
+            redirectAttrs.addFlashAttribute("errorMessage", "The server information is empty");
+            hasError = true;
+        }
+        String serverName = server.getServerName();
+        if(null == serverName || "".equals(serverName) ){
+            redirectAttrs.addFlashAttribute("errorMessage", "TThe server name is empty");
+            hasError = true;            
+        }
+        if(null == serverId){
+            redirectAttrs.addFlashAttribute("errorMessage", "The server ID is empty");
+            hasError = true;
+        }
+        else if(serverId.equals("-1")){            
+            existingServer = serverService.findServerByName(serverName);
+            if(null != existingServer){
+                redirectAttrs.addFlashAttribute("errorMessage", "The server name has been used");
+                hasError = true;
+            }
+        }        
+        
+        if(hasError == true){
+            view.setUrl("serverError.jsp");
+            model.setView(view);
+            return model;
+        }
+        
+        if(null != serverId && serverId.equals("-1")){
+            RepoServer newServer = serverService.addServer(server);
+            view.setUrl("/server/config");
+            redirectAttrs.addFlashAttribute("message", "The new server \""+newServer.getServerName()+"\" has been added successfully!");
+            model.setView(view);
+        }
+        else if(null != serverId && !serverId.equals("-1")){
+            existingServer = serverService.updateServer(server);
+            view.setUrl("/server/config");
+            model.setView(view);
+            redirectAttrs.addFlashAttribute("message", "The server \""+existingServer.getServerName()+"\" has been updated successfully!");
+            return model; 
+        }
         return model;
     }
 }

@@ -42,12 +42,22 @@ public class RepoServerServiceImpl implements RepoServerService{
     }
     
     @Override
+    public RepoServer findServerByName(String serverName){
+        return serverDao.findServerByName(serverName);
+    }
+    
+    @Override
     public List<RepoServer> getServerObjList(Collection<String> serverIds){
         return serverDao.getServerObjList(serverIds);
     }
-//    
-//    @Override
-//    public List<RepoServer> loadRepoServerListByRepoType(List<RepoServer> serverList){
-//        return serverDao.loadRepoServerListByRepoType(serverList);
-//    }
+
+    @Override
+    public RepoServer updateServer(RepoServer server){
+        return serverDao.updateServer(server);
+    }
+    
+    @Override
+    public RepoServer addServer(RepoServer server){
+        return serverDao.addServer(server);
+    }
 }

@@ -41,3 +41,8 @@ input.btn-form{
 input.btn-click{
     background-color: lightskyblue;
 }
+
+#server-list{
+    background-color: #337ab7;
+    color: #ffffff;
+}

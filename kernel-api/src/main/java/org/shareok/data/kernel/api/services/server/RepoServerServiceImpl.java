@@ -60,4 +60,9 @@ public class RepoServerServiceImpl implements RepoServerService{
     public RepoServer addServer(RepoServer server){
         return serverDao.addServer(server);
     }
+
+    @Override
+    public int findServerIdByName(String serverName) {
+        return serverDao.findServerIdByName(serverName);
+    }
 }

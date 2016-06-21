@@ -15,6 +15,7 @@ import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.JobDaoImpl;
 import org.shareok.data.redis.job.RedisJob;
 import org.shareok.data.redis.server.RepoServer;
+import org.shareok.data.redis.server.RepoServerDaoImpl;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -104,5 +105,10 @@ public class RedisUtil {
     public static RepoServer getServerInstance(){
         ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
         return (RepoServer) context.getBean("repoServer");
+    }
+    
+    public static RepoServerDaoImpl getServerDaoInstance(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
+        return (RepoServerDaoImpl) context.getBean("repoServerDaoImpl");
     }
 }

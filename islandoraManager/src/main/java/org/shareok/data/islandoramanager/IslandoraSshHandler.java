@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.shareok.data.config.DataHandler;
 import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.ssh.SshExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,19 +33,8 @@ public class IslandoraSshHandler implements DataHandler {
     private String localRecipeFilePath;
     private String recipeFileUri;
     private String uploadDst;
+    private String serverId;
     
-    //Properties for SshConnector
-    private int port;
-    private int proxyPort;
-    private String host;    
-    private String proxyHost;
-    private String userName;
-    private String proxyUserName;
-    private String password;
-    private String proxyPassword;
-    private String passPhrase;    
-    private String rsaKey;
-
     public SshExecutor getSshExec() {
         return sshExec;
     }
@@ -77,49 +67,16 @@ public class IslandoraSshHandler implements DataHandler {
         return uploadDst;
     }
 
-    public int getPort() {
-        return port;
-    }
-
-    public int getProxyPort() {
-        return proxyPort;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public String getProxyHost() {
-        return proxyHost;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public String getProxyUserName() {
-        return proxyUserName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getProxyPassword() {
-        return proxyPassword;
-    }
-
-    public String getPassPhrase() {
-        return passPhrase;
-    }
-
-    public String getRsaKey() {
-        return rsaKey;
+    public String getServerId() {
+        return serverId;
     }
 
     @Autowired
     public void setSshExec(SshExecutor sshExec) {
         this.sshExec = sshExec;
+         if((null == sshExec.getServer() || sshExec.getServer().getServerName().equals("")) && null != serverId && !"".equals(serverId)){
+             this.sshExec.setServer(RedisUtil.getServerDaoInstance().findServerById(Integer.parseInt(serverId)));
+         }
     }
 
     public void setDrupalDirectory(String drupalDirectory) {
@@ -150,46 +107,10 @@ public class IslandoraSshHandler implements DataHandler {
         this.uploadDst = uploadDst;
     }
 
-    public void setPort(int port) {
-        this.port = port;
+    public void setServerId(String serverId) {
+        this.serverId = serverId;
     }
 
-    public void setProxyPort(int proxyPort) {
-        this.proxyPort = proxyPort;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public void setProxyHost(String proxyHost) {
-        this.proxyHost = proxyHost;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public void setProxyUserName(String proxyUserName) {
-        this.proxyUserName = proxyUserName;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setProxyPassword(String proxyPassword) {
-        this.proxyPassword = proxyPassword;
-    }
-
-    public void setPassPhrase(String passPhrase) {
-        this.passPhrase = passPhrase;
-    }
-
-    public void setRsaKey(String rsaKey) {
-        this.rsaKey = rsaKey;
-    }
-    
     public String uploadFileToRepository(){
         return uploadFileToRepository(null);
     }
@@ -217,7 +138,6 @@ public class IslandoraSshHandler implements DataHandler {
     
     public String importIslandora(){
         try{     
-            setUpSshConnector();
             String time = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
             if(null != localRecipeFilePath && !"".equals(localRecipeFilePath)){
                 recipeFileUri = uploadFileToRepository(time);
@@ -269,18 +189,5 @@ public class IslandoraSshHandler implements DataHandler {
         catch(ArrayIndexOutOfBoundsException ex){
             logger.error("Cannot set up the upload file due to array out of bound!", ex);
         }
-    }
-    
-    private void setUpSshConnector(){
-        sshExec.getSshConnector().setHost(host);
-        sshExec.getSshConnector().setPort(port);
-        sshExec.getSshConnector().setUserName(userName);
-        sshExec.getSshConnector().setPassword(password);
-        sshExec.getSshConnector().setRsaKey(rsaKey);
-        sshExec.getSshConnector().setPassPhrase(passPhrase);
-        sshExec.getSshConnector().setProxyHost(proxyHost);
-        sshExec.getSshConnector().setProxyPassword(proxyPassword);
-        sshExec.getSshConnector().setProxyUserName(proxyUserName);
-        sshExec.getSshConnector().setProxyPort(proxyPort);
     }
 }

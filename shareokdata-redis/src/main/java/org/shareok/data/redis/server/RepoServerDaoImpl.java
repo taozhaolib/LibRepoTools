@@ -231,7 +231,7 @@ public class RepoServerDaoImpl implements RepoServerDao {
             final String proxyUserName = server.getProxyUserName();
             final String password = server.getPassword();
             final String proxyPassword = server.getProxyPassword();
-            final String passphrase = server.getPassPhrase();
+            final String passPhrase = server.getPassPhrase();
             final String rsaKey = server.getRsaKey();
             
             List<Object> results = redisTemplate.execute(new SessionCallback<List<Object>>() {
@@ -251,7 +251,7 @@ public class RepoServerDaoImpl implements RepoServerDao {
                     operations.opsForHash().put("server:"+serverId, "password", password);
                     operations.opsForHash().put("server:"+serverId, "host", host);
                     operations.opsForHash().put("server:"+serverId, "proxyPassword", proxyPassword);
-                    operations.opsForHash().put("server:"+serverId, "passphrase", passphrase);
+                    operations.opsForHash().put("server:"+serverId, "passPhrase", passPhrase);
                     operations.opsForHash().put("server:"+serverId, "rsaKey", rsaKey);
                     operations.opsForHash().put("server:"+serverId, "repoType", repoTypeStr);
                     
@@ -321,6 +321,23 @@ public class RepoServerDaoImpl implements RepoServerDao {
         }
         else{
             return null;
+        }
+    }
+    
+    @Override
+    public int findServerIdByName(String serverName){
+        BoundHashOperations<String, String, String> serverOps = redisTemplate.boundHashOps(ShareokdataManager.getRedisServerNameIdMatchingTable());
+        if(null != serverOps){
+            String id = serverOps.get(serverName);
+            if(null != id && !id.equals("")){                
+                return Integer.parseInt(id);
+            }            
+            else{
+                return -1;
+            }
+        }
+        else{
+            return -1;
         }
     }
     

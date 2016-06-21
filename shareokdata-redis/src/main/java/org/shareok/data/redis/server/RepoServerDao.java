@@ -11,18 +11,6 @@ import java.util.Map;
 
 /**
  *
- * private int timeout;
-    
-    private int port;
-    private int proxyPort;
-    private String host;    
-    private String proxyHost;
-    private String userName;
-    private String proxyUserName;
-    private String password;
-    private String proxyPassword;
-    private String passPhrase;    
-    private String rsaKey;
  * @author Tao Zhao
  */
 public interface RepoServerDao {
@@ -36,6 +24,7 @@ public interface RepoServerDao {
     public RepoServer updateServer(RepoServer server);
     public RepoServer findServerById(int serverId);
     public RepoServer findServerByName(String serverName);
+    public int findServerIdByName(String serverName);
     public Map<String, String> getServerNameIdList();
     public List<RepoServer> getServerObjList(Collection<String> serverIds);
 //    public RepoServer loadRepoServerByRepoType(RepoServer server);

@@ -13,7 +13,8 @@
     
     <div class="jumbotron">
         <div class="panel panel-primary server-config-panel">            
-            <div class="panel-heading"><span style="font-size: 20px; font-weight: 800;">Configure the repository server:</span>
+            <div class="panel-heading">
+                <span style="font-size: 20px; font-weight: 800;">Configure the repository server:</span>
                 <span class="btn btn-primary pull-right new-server-btn">Create a new server</span>
                 <span class="pull-right"><%@include file="serverSelectDropdown.jsp" %></span>
             </div>

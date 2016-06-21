@@ -5,6 +5,7 @@
  */
 package org.shareok.data.webserv;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +16,7 @@ import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
 import org.shareok.data.kernel.api.services.dspace.DspaceSshService;
 import org.shareok.data.kernel.api.services.job.JobHandler;
+import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -40,14 +42,25 @@ public class SshDspaceDataController {
     private JobHandler jobHandler;
     
     private DspaceSshService dsSshService;
+    
+    private RepoServerService serverService;
 
     public DspaceSshService getDsSshService() {
         return dsSshService;
     }
 
+    public RepoServerService getServerService() {
+        return serverService;
+    }
+
     @Autowired
     public void setDsSshService(DspaceSshService dsSshService) {
         this.dsSshService = dsSshService;
+    }
+
+    @Autowired
+    public void setServerService(RepoServerService serverService) {
+        this.serverService = serverService;
     }
     
     @Autowired
@@ -60,6 +73,15 @@ public class SshDspaceDataController {
        
         String safLink = (String)request.getParameter("saf-online");
         String userId = String.valueOf(request.getSession().getAttribute("userId"));
+        
+        String serverId = handler.getServerId();
+        if(null == serverId || serverId.equals("")){
+            String serverName = (String)request.getParameter("serverName");
+            if(null != serverName){
+                handler.setServerId(String.valueOf(serverService.findServerIdByName(serverName)));
+            }
+        }
+        
         if (null != handler) {
             try {
                 String uploadFilePath = DspaceJournalDataUtil.getJournalImportFilePath(handler.getUploadFile(), publisher);
@@ -68,7 +90,7 @@ public class SshDspaceDataController {
                 RedisJob job = jobHandler.execute(Long.valueOf(userId), jobTypeIndex, DataUtil.getRepoTypeIndex("dspace"), handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
                 ModelAndView model = new ModelAndView();
                 model.setViewName("jobReport");
-                model.addObject("host", handler.getHost());
+                model.addObject("host", handler.getSshExec().getServer().getHost());
                 model.addObject("collection", handler.getCollectionId()); 
                 model.addObject("reportPath", "/webserv/download/report/"+DataUtil.JOB_TYPES[jobTypeIndex]+"/"+String.valueOf(job.getJobId())); 
                 WebUtil.outputJobInfoToModel(model, job);
@@ -87,8 +109,15 @@ public class SshDspaceDataController {
     public ModelAndView sshDspaceSaFImporterPage(@PathVariable("jobType") String jobType) {
        
         ModelAndView model = new ModelAndView();
-        model.addObject("jobType", jobType);
-        model.setViewName("sshDspaceSafImport");
+        try {            
+            model = WebUtil.getServerList(model, serverService);
+            model.addObject("jobType", jobType);
+            model.setViewName("sshDspaceSafImport");
+        } catch (JsonProcessingException ex) {
+            model.addObject("errorMessage", "Cannot get the server list");
+            model.setViewName("serverError");
+            Logger.getLogger(SshDspaceDataController.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return model;
     }
     
@@ -102,6 +131,14 @@ public class SshDspaceDataController {
             safLink = "job-" + oldJobId;
         }
         
+        String serverId = handler.getServerId();
+        if(null == serverId || serverId.equals("")){
+            String serverName = (String)request.getParameter("serverName");
+            if(null != serverName){
+                handler.setServerId(String.valueOf(serverService.findServerIdByName(serverName)));
+            }
+        }
+        
         if ((null != file && !file.isEmpty()) || (null != safLink && !"".equals(safLink))) {
             try {
                 int jobTypeIndex = DataUtil.getJobTypeIndex(jobType, "dspace");                                
@@ -109,7 +146,7 @@ public class SshDspaceDataController {
                 
                 ModelAndView model = new ModelAndView();
                 model.setViewName("jobReport");
-                model.addObject("host", handler.getHost());
+                model.addObject("host", handler.getSshExec().getServer().getHost());
                 model.addObject("collection", handler.getCollectionId());
                 model.addObject("reportPath", "/webserv/download/report/"+DataUtil.JOB_TYPES[jobTypeIndex]+"/"+String.valueOf(job.getJobId()));  
                 WebUtil.outputJobInfoToModel(model, job);

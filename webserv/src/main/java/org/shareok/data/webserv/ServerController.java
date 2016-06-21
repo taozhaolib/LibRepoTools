@@ -60,29 +60,14 @@ public class ServerController {
 //                return model;
 //            }
 
-            Map<String, String> serverList = serverService.getServerNameIdList();
-
-            if(null != serverList && serverList.size() > 0){
-                
-                ObjectMapper mapper = new ObjectMapper();
-                
-                Collection<String> ids = serverList.values();
-                List<RepoServer> serverObjList = serverService.getServerObjList(ids);                
-                
-                String serverListJson = mapper.writeValueAsString(serverList);
-                model.addObject("serverList", serverListJson);
-                model.addObject("serverObjList", mapper.writeValueAsString(serverObjList));
-            }
-            else{
-                model.addObject("emptyServerList", "There are NO servers set up.");
-            }
-
+            model = WebUtil.getServerList(model, serverService);
             model.setViewName("serverConfig");
         }
         catch(Exception ex){
+            model.addObject("errorMessage", "Cannot get the server list");
+            model.setViewName("serverError");
             logger.error("Cannot retrieve and parse the server list.", ex);
-        }
-        
+        }        
         return model;
     }
     

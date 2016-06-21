@@ -12,6 +12,7 @@ import com.jcraft.jsch.*;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Properties;
+import org.shareok.data.redis.server.RepoServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -27,7 +28,7 @@ public class SshExecutor {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(SshExecutor.class);
 
     protected String charset = "UTF-8";
-    private SshConnector sshConnector;
+    private RepoServer server;
     protected JSch jsch;
     protected Session session;
     protected Channel channel;
@@ -39,8 +40,8 @@ public class SshExecutor {
         return charset;
     }
 
-    public SshConnector getSshConnector() {
-        return sshConnector;
+    public RepoServer getServer() {
+        return server;
     }
 
     public JSch getJsch() {
@@ -64,8 +65,8 @@ public class SshExecutor {
     }
 
     @Autowired
-    public void setSshConnector(SshConnector sshConnector) {
-        this.sshConnector = sshConnector;
+    public void setServer(RepoServer server) {
+        this.server = server;
     }
 
     public void setJsch(JSch jsch) {
@@ -112,48 +113,48 @@ public class SshExecutor {
         }
         
         try{
-        String userName = sshConnector.getUserName();
-        String proxyUserName = sshConnector.getProxyUserName();
-        String host = sshConnector.getHost();
-        String proxyHost = sshConnector.getProxyHost();
-        String password = sshConnector.getPassword();
-        String proxyPassword = sshConnector.getProxyPassword();
-        String passPhrase = sshConnector.getPassPhrase();
-        String rsaKey = sshConnector.getRsaKey();
-        int port = sshConnector.getPort();
-        int proxyPort = sshConnector.getProxyPort();
-        int timeout = sshConnector.getTimeout();
-        
-        jsch = new JSch();
-        if(null != rsaKey && !"".equals(rsaKey)){
-            jsch.addIdentity(rsaKey, (null != passPhrase && !"".equals(passPhrase)) ? passPhrase : "");
-        }
-        
-        if(null != proxyHost && !"".equals(proxyHost)){
-            int forwardedPort = getProxyConnection(host, port, proxyUserName, proxyHost, proxyPassword, proxyPort);
-            session = jsch.getSession(userName, "127.0.0.1", forwardedPort);   
-            addReporter("New Session tunnel to the server has been created.");
-        }
-        else{
-            session = jsch.getSession(userName, host, port);
-            if (password != null && !"".equals(password)) {
-                session.setPassword(password);
+            String userName = server.getUserName();
+            String proxyUserName = server.getProxyUserName();
+            String host = server.getHost();
+            String proxyHost = server.getProxyHost();
+            String password = server.getPassword();
+            String proxyPassword = server.getProxyPassword();
+            String passPhrase = server.getPassPhrase();
+            String rsaKey = server.getRsaKey();
+            int port = server.getPort();
+            int proxyPort = server.getProxyPort();
+            int timeout = server.getTimeout();
+
+            jsch = new JSch();
+            if(null != rsaKey && !"".equals(rsaKey)){
+                jsch.addIdentity(rsaKey, (null != passPhrase && !"".equals(passPhrase)) ? passPhrase : "");
             }
-            addReporter("New Session to the server has been created.");
-        }
-        
-        Properties config = new Properties(); 
-        config.put("StrictHostKeyChecking", "no");
-        session.setConfig(config);
-        session.setTimeout(timeout);
-        session.connect();
-        
-        setConnected(true);
-        //System.out.println("Connected successfully to remote Server = \"" + host + "\",as user name = \"" + userName + "\", as port =  \"" + port + "\"");
-        addReporter("Connected successfully to remote Server = " + host + ",as user name = " + userName + ",as port =  " + port);
-//        reporter.debug("Session connected.");
-//        reporter.debug("Connected successfully to DSpace Server = " + host + ",as user name = " + userName
-//                + ",as port =  " + port);
+
+            if(null != proxyHost && !"".equals(proxyHost)){
+                int forwardedPort = getProxyConnection(host, port, proxyUserName, proxyHost, proxyPassword, proxyPort);
+                session = jsch.getSession(userName, "127.0.0.1", forwardedPort);   
+                addReporter("New Session tunnel to the server has been created.");
+            }
+            else{
+                session = jsch.getSession(userName, host, port);
+                if (password != null && !"".equals(password)) {
+                    session.setPassword(password);
+                }
+                addReporter("New Session to the server has been created.");
+            }
+
+            Properties config = new Properties(); 
+            config.put("StrictHostKeyChecking", "no");
+            session.setConfig(config);
+            session.setTimeout(timeout);
+            session.connect();
+
+            setConnected(true);
+            //System.out.println("Connected successfully to remote Server = \"" + host + "\",as user name = \"" + userName + "\", as port =  \"" + port + "\"");
+            addReporter("Connected successfully to remote Server = " + host + ",as user name = " + userName + ",as port =  " + port);
+    //        reporter.debug("Session connected.");
+    //        reporter.debug("Connected successfully to DSpace Server = " + host + ",as user name = " + userName
+    //                + ",as port =  " + port);
         }
         catch(Exception ex){
             //ex.printStackTrace();

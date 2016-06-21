@@ -5,6 +5,8 @@
  */
 package org.shareok.data.webserv;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,11 +15,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
+import org.shareok.data.redis.server.RepoServer;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -82,6 +89,28 @@ public class WebUtil {
         String[] jobInfo = jobType.split("-");
         String repoType = jobInfo[jobInfo.length-1];
         return ShareokdataManager.getShareokdataPath()+ File.separator + repoType + File.separator + jobType + File.separator + jobId + File.separator + jobId + "-report.txt";
+    }
+    
+    public static ModelAndView getServerList(ModelAndView model, RepoServerService serverService) throws JsonProcessingException{
+        
+        Map<String, String> serverList = serverService.getServerNameIdList();
+
+        if(null != serverList && serverList.size() > 0){
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            Collection<String> ids = serverList.values();
+            List<RepoServer> serverObjList = serverService.getServerObjList(ids);                
+
+            String serverListJson = mapper.writeValueAsString(serverList);
+            model.addObject("serverList", serverListJson);
+            model.addObject("serverObjList", mapper.writeValueAsString(serverObjList));
+        }
+        else{
+            model.addObject("emptyServerList", "There are NO servers set up.");
+        }
+        
+        return model;
     }
     
 }

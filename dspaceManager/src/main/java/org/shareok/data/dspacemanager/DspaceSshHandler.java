@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.shareok.data.config.DataHandler;
 import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.ssh.SshExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,19 +25,10 @@ public class DspaceSshHandler implements DataHandler {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DspaceSshHandler.class);
     
-    private int port;
-    private int proxyPort;
+    private String serverId;
     private String reportFilePath;
     private String uploadDst;
     private String uploadFile; // *** suppose the uploaded file is a ZIP file ***
-    private String host;    
-    private String proxyHost;
-    private String userName;
-    private String proxyUserName;
-    private String password;
-    private String proxyPassword;
-    private String passPhrase;    
-    private String rsaKey;
     private String dspaceUser;
     private String dspaceDirectory; // the DSpace installation directory
     private String collectionId;
@@ -55,46 +47,6 @@ public class DspaceSshHandler implements DataHandler {
         return uploadFile;
     }
 
-    public String getHost() {
-        return host;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public int getProxyPort() {
-        return proxyPort;
-    }
-
-    public String getProxyHost() {
-        return proxyHost;
-    }
-
-    public String getProxyUserName() {
-        return proxyUserName;
-    }
-
-    public String getProxyPassword() {
-        return proxyPassword;
-    }
-
-    public String getPassPhrase() {
-        return passPhrase;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getRsaKey() {
-        return rsaKey;
-    }
-
     public String getDspaceUser() {
         return dspaceUser;
     }
@@ -105,6 +57,10 @@ public class DspaceSshHandler implements DataHandler {
 
     public String getCollectionId() {
         return collectionId;
+    }
+
+    public String getServerId() {
+        return serverId;
     }
     
     @Override
@@ -119,46 +75,6 @@ public class DspaceSshHandler implements DataHandler {
     @Override
     public void setUploadFile(String uploadFile) {
         this.uploadFile = uploadFile;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    public void setProxyPort(int proxyPort) {
-        this.proxyPort = proxyPort;
-    }
-
-    public void setProxyHost(String proxyHost) {
-        this.proxyHost = proxyHost;
-    }
-
-    public void setProxyUserName(String proxyUserName) {
-        this.proxyUserName = proxyUserName;
-    }
-
-    public void setProxyPassword(String proxyPassword) {
-        this.proxyPassword = proxyPassword;
-    }
-
-    public void setPassPhrase(String passPhrase) {
-        this.passPhrase = passPhrase;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setRsaKey(String rsaKey) {
-        this.rsaKey = rsaKey;
     }
 
     public void setDspaceUser(String dspaceUser) {
@@ -177,9 +93,16 @@ public class DspaceSshHandler implements DataHandler {
         return sshExec;
     }
 
+    public void setServerId(String serverId) {
+        this.serverId = serverId;
+    }
+
     @Autowired
     public void setSshExec(SshExecutor sshExec) {
         this.sshExec = sshExec;
+        if((null == sshExec.getServer() || sshExec.getServer().getServerName().equals("")) && null != serverId && !"".equals(serverId)){
+            this.sshExec.setServer(RedisUtil.getServerDaoInstance().findServerById(Integer.parseInt(serverId)));
+        }
     }
     
     public String importDspace(){
@@ -202,18 +125,6 @@ public class DspaceSshHandler implements DataHandler {
             sshExec.addReporter("Build up a new directory for the new importing: "+newDirCommand);
             sshExec.addReporter("Unzip the uploaded SAF package: "+unzipCommand);
             sshExec.addReporter("Import the SAF package into DSpace: "+importCommand);
-            //importCommand = newDirCommand + ";;" + unzipCommand + ";;" + importCommand;
-            sshExec.getSshConnector().setHost(host);
-            sshExec.getSshConnector().setPort(port);
-            sshExec.getSshConnector().setUserName(userName);
-            sshExec.getSshConnector().setPassword(password);
-            sshExec.getSshConnector().setRsaKey(rsaKey);
-            sshExec.getSshConnector().setPassPhrase(passPhrase);
-            sshExec.getSshConnector().setProxyHost(proxyHost);
-            sshExec.getSshConnector().setProxyPassword(proxyPassword);
-            sshExec.getSshConnector().setProxyUserName(proxyUserName);
-            sshExec.getSshConnector().setProxyPort(proxyPort);
-//            sshExec.execCmd("sudo /srv/shareok/dspace/bin/dspace version ");
             sshExec.execCmd(newDirCommand);
             sshExec.upload(uploadDst + File.separator + time, uploadFile);  
             sshExec.addReporter("The SAF package has been uploaded to the DSpace server: " + dspaceTargetFilePath + "\n");
@@ -248,18 +159,6 @@ public class DspaceSshHandler implements DataHandler {
             sshExec.addReporter("Build up a new directory for the SAF package: "+newDirCommand);
             sshExec.addReporter("Upload the SAF package zip file to the DSpace server at  "+uploadDst);
    
-            //importCommand = newDirCommand + ";;" + unzipCommand + ";;" + importCommand;
-            sshExec.getSshConnector().setHost(host);
-            sshExec.getSshConnector().setPort(port);
-            sshExec.getSshConnector().setUserName(userName);
-            sshExec.getSshConnector().setPassword(password);
-            sshExec.getSshConnector().setRsaKey(rsaKey);
-            sshExec.getSshConnector().setPassPhrase(passPhrase);
-            sshExec.getSshConnector().setProxyHost(proxyHost);
-            sshExec.getSshConnector().setProxyPassword(proxyPassword);
-            sshExec.getSshConnector().setProxyUserName(proxyUserName);
-            sshExec.getSshConnector().setProxyPort(proxyPort);
-//            sshExec.execCmd("sudo /srv/shareok/dspace/bin/dspace version ");
             sshExec.execCmd(newDirCommand);
             sshExec.upload(uploadDst + File.separator + time, uploadFile);  System.out.println(" ****** ");
             sshExec.addReporter("The SAF package has been uploaded to the DSpace server: " + dspaceTargetFilePath + "\n");
@@ -288,19 +187,8 @@ public class DspaceSshHandler implements DataHandler {
             sshExec.addReporter("Two commands to be executed:");
             sshExec.addReporter("Unzip the uploaded SAF package: "+unzipCommand);
             sshExec.addReporter("Import the SAF package into DSpace: "+importCommand);
-            //importCommand = newDirCommand + ";;" + unzipCommand + ";;" + importCommand;
-            sshExec.getSshConnector().setHost(host);
-            sshExec.getSshConnector().setPort(port);
-            sshExec.getSshConnector().setUserName(userName);
-            sshExec.getSshConnector().setPassword(password);
-            sshExec.getSshConnector().setRsaKey(rsaKey);
-            sshExec.getSshConnector().setPassPhrase(passPhrase);
-            sshExec.getSshConnector().setProxyHost(proxyHost);
-            sshExec.getSshConnector().setProxyPassword(proxyPassword);
-            sshExec.getSshConnector().setProxyUserName(proxyUserName);
-            sshExec.getSshConnector().setProxyPort(proxyPort);
-//            sshExec.execCmd("sudo /srv/shareok/dspace/bin/dspace version ");
-           String[] commands = {unzipCommand, importCommand};
+           
+            String[] commands = {unzipCommand, importCommand};
             sshExec.execCmd(commands);
             sshExec.addReporter("The SAF package has been imported into the DSpace repository.\n");
 ////            sshExec.execCmd(unzipCommand);

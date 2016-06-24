@@ -14,8 +14,11 @@ import java.util.HashMap;
 import java.util.Map;
 import org.shareok.data.config.DataHandler;
 import org.shareok.data.config.DataUtil;
+import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.redis.RedisUtil;
+import org.shareok.data.redis.job.JobDao;
+import org.shareok.data.redis.job.RedisJob;
 import org.shareok.data.ssh.SshExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -146,13 +149,13 @@ public class IslandoraSshHandler implements DataHandler {
         String entries = (String)DataUtil.JOB_TYPE_DATA_SCHEMA.get(DataUtil.JOB_TYPES[jobType]);
         for(String entry : entries.split(",")){
             try {
-                Field f = IslandoraSshHandler.class.getField(entry);
+                Field f = IslandoraSshHandler.class.getDeclaredField(entry);
                 if(null != f){
                     data.put(f.getName(), (String)f.get(this));
                 }
             } catch (NoSuchFieldException | SecurityException ex) {
             } catch (IllegalArgumentException | IllegalAccessException ex) {
-            }
+            }            
         }
         return data;
     }
@@ -239,6 +242,23 @@ public class IslandoraSshHandler implements DataHandler {
 
     @Override
     public void loadJobInfoByJobId(long jobId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        JobDao jobDao = RedisUtil.getJobDao();
+        RedisJob job = jobDao.findJobByJobId(jobId);
+        setJobType(job.getType());
+        String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.JOB_TYPES[jobType], jobId);
+        setReportFilePath(jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt");
+        setServerId(String.valueOf(job.getServerId()));
+        String schema = (String)DataUtil.JOB_TYPE_DATA_SCHEMA.get(DataUtil.JOB_TYPES[job.getType()]);
+        Map data = RedisUtil.getJobDao().getJobInfoByAttributes(jobId, schema.split(","));
+        for(Field f : IslandoraSshHandler.class.getDeclaredFields()){
+            try {
+                String fieldName = f.getName();
+                if(data.containsKey(fieldName)){
+                    f.set(this, (String)data.get(fieldName));
+                }
+            } catch (SecurityException ex) {
+            } catch (IllegalArgumentException | IllegalAccessException ex) {
+            }            
+        }
     }
 }

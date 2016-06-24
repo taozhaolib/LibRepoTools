@@ -14,6 +14,14 @@
     <import resource="classpath*:**/sshContext.xml"/>
     
     <bean id="islandoraSshHandler" class="org.shareok.data.islandoramanager.IslandoraSshHandler">
+        <property name="reportFilePath" value="" />
+        <property name="drupalDirectory" value="" />
+        <property name="tmpPath" value="" />
+        <property name="parentPid" value="" />
+        <property name="localRecipeFilePath" value="" />
+        <property name="recipeFileUri" value="" />
+        <property name="uploadDst" value="" />
+        <property name="serverId" value="" />
     </bean>
         
 <!--    <bean id="dspaceApiHandlerImpl" class="org.shareok.data.dspacemanager.DspaceApiHandlerImpl"> -->

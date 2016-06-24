@@ -141,7 +141,7 @@ public class DspaceSshHandler implements DataHandler {
         JobDao jobDao = RedisUtil.getJobDao();
         RedisJob job = jobDao.findJobByJobId(jobId);
         setJobType(job.getType());
-        String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.REPO_TYPES[job.getRepoType()], DataUtil.JOB_TYPES[jobType], jobId);
+        String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.JOB_TYPES[jobType], jobId);
         setReportFilePath(jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt");
         setServerId(String.valueOf(job.getServerId()));
         String schema = (String)DataUtil.JOB_TYPE_DATA_SCHEMA.get(DataUtil.JOB_TYPES[job.getType()]);

@@ -223,8 +223,9 @@ public class ShareokdataManager {
         return new SimpleDateFormat(ShareokdataManager.getDateFormat());
     }
     
-    public static String getJobReportPath(String repoType, String jobType, long jobId){
+    public static String getJobReportPath(String jobType, long jobId){
         String shareokdataPath = getShareokdataPath();
+        String repoType = jobType.split("-")[2];
         String filePath = shareokdataPath + File.separator + repoType;
         File file = new File(filePath);
         if(!file.exists()){

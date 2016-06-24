@@ -282,7 +282,8 @@ public class JobDaoImpl implements JobDao {
                     operations.opsForHash().put("job:"+jobId, "endTime", "");
                     if(null != values && values.size() > 0){
                         for (String key : values.keySet()) {
-                            operations.opsForHash().put("job:"+jobId, key, (String)values.get(key));
+                            String value = (null != values.get(key)) ? (String)values.get(key) : "";
+                            operations.opsForHash().put("job:"+jobId, key, value);
                         }
                     }
                     

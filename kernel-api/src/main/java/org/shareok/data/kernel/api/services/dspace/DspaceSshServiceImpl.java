@@ -5,14 +5,8 @@
  */
 package org.shareok.data.kernel.api.services.dspace;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.shareok.data.config.DataHandler;
 import org.shareok.data.config.DataUtil;
-import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.dspacemanager.DspaceSshDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
 import org.shareok.data.kernel.api.services.ServiceUtil;
@@ -108,15 +102,13 @@ public class DspaceSshServiceImpl implements DspaceSshService {
             RedisJob job = jobService.findJobByJobId(jobId);
             jobService.updateJob(jobId, "status", "1");
             if(null == handler){
-                ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
+                ApplicationContext context = new ClassPathXmlApplicationContext("dspaceManagerContext.xml");
                 handler = (DspaceSshHandler)context.getBean("dspaceSshHandler");
             }
             handler.loadJobInfoByJobId(jobId);
-//            handler.setFilePath(job.getFilePath());
-            //executeTask(jobTypeStr);
             String jobReturnValue = executeTask(jobTypeStr);
             ServiceUtil.processJobReturnValue(jobReturnValue, job);
-            System.out.println(" The job "+String.valueOf(jobId)+" has been processed! filePath = "+job.getFilePath());
+//            System.out.println(" The job "+String.valueOf(jobId)+" has been processed! filePath = "+job.getFilePath());
         }
         Thread.currentThread().interrupt();
     }

@@ -59,7 +59,7 @@ public class JobHandlerImpl implements JobHandler {
             RedisJob newJob = redisJobServ.createJob(uid, handler.getJobType(), handler.outputJobDataByJobType());
             long jobId = newJob.getJobId();
 
-            String jobFilePath = ShareokdataManager.getJobReportPath(handler.getRepoType(), DataUtil.JOB_TYPES[handler.getJobType()], jobId);
+            String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.JOB_TYPES[handler.getJobType()], jobId);
 
             DataService ds = ServiceUtil.getDataService(context, handler.getJobType());
 

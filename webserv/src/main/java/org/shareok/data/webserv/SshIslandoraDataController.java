@@ -62,8 +62,8 @@ public class SshIslandoraDataController {
         return null;
     }
 
-    @RequestMapping(value="/ssh/islandora/book/import/job/{jobType}", method=RequestMethod.POST)
-    public ModelAndView sshIslandoraImport(HttpServletRequest request, @ModelAttribute("SpringWeb")IslandoraSshHandler handler, @RequestParam(value = "recipeLocal", required=false) MultipartFile file, @PathVariable("jobType") String jobType) {
+    @RequestMapping(value="/ssh/islandora/book/import/job/{jobTypeStr}", method=RequestMethod.POST)
+    public ModelAndView sshIslandoraImport(HttpServletRequest request, @ModelAttribute("SpringWeb")IslandoraSshHandler handler, @RequestParam(value = "recipeLocal", required=false) MultipartFile file, @PathVariable("jobTypeStr") String jobTypeStr) {
         String recipeFileUri = (String)request.getParameter("recipeFileUri");
         String userId = String.valueOf(request.getSession().getAttribute("userId"));
         
@@ -77,8 +77,12 @@ public class SshIslandoraDataController {
         
         if ((null != file && !file.isEmpty()) || (null != recipeFileUri && !"".equals(recipeFileUri))) {
             try {
-                int jobTypeIndex = DataUtil.getJobTypeIndex(jobType, "islandora");                                
+                int jobTypeIndex = DataUtil.getJobTypeIndex(jobTypeStr, "islandora");   
+                handler.setJobType(jobTypeIndex);
                 RedisJob job = jobHandler.execute(Long.valueOf(userId), handler, file, recipeFileUri);
+                
+                int statusIndex = job.getStatus();
+                String isFinished = (statusIndex == 2 || statusIndex == 6) ? "true" : "false";
                 
                 ModelAndView model = new ModelAndView();
                 model = WebUtil.getServerList(model, serverService);
@@ -86,6 +90,7 @@ public class SshIslandoraDataController {
                 model.addObject("host", handler.getSshExec().getServer().getHost());
                 model.addObject("collection", handler.getParentPid());
                 model.addObject("status", RedisUtil.REDIS_JOB_STATUS[job.getStatus()]);
+                model.addObject("isFinished", isFinished);
                 model.addObject("reportPath", "/webserv/download/report/"+DataUtil.JOB_TYPES[jobTypeIndex]+"/"+String.valueOf(job.getJobId()));  
                 WebUtil.outputJobInfoToModel(model, job);                
                 return model;

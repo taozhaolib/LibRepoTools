@@ -16,6 +16,7 @@ import java.io.OutputStream;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
@@ -77,12 +78,13 @@ public class WebUtil {
     
     public static void outputJobInfoToModel(ModelAndView model, RedisJob job){
         
+        Date startTime = job.getStartTime();
+        Date endTime = job.getEndTime();
         model.addObject("jobId", job.getJobId());      
         model.addObject("status", RedisUtil.REDIS_JOB_STATUS[job.getStatus()]);
-        model.addObject("startTime", ShareokdataManager.getSimpleDateFormat().format(job.getStartTime()));
-        model.addObject("endTime", ShareokdataManager.getSimpleDateFormat().format(job.getEndTime()));
+        model.addObject("startTime", (null == startTime) ? "" : ShareokdataManager.getSimpleDateFormat().format(startTime));
+        model.addObject("endTime", (null == endTime) ? "" : ShareokdataManager.getSimpleDateFormat().format(endTime));
         model.addObject("jobType", DataUtil.JOB_TYPES[job.getType()]);
-        model.addObject("repoType", DataUtil.REPO_TYPES[job.getRepoType()]);
     }
     
     public static String getReportDownloadLink(String jobType, String jobId){

@@ -10,14 +10,18 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.DataHandler;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.kernel.api.exceptions.EmptyUploadedPackagePathOfSshUploadJobException;
 import org.shareok.data.kernel.api.services.DataService;
 import org.shareok.data.kernel.api.services.ServiceUtil;
+import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,27 +34,34 @@ public class JobHandlerImpl implements JobHandler {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(JobHandlerImpl.class);
     
+    private JobQueueService jobQueueService;
+
+    @Autowired
+    public void setJobQueueService(JobQueueService jobQueueService) {
+        this.jobQueueService = jobQueueService;
+    }
+    
     /**
      * 
      * @param uid : user ID
-     * @param repoType : type of the repository
-     * @param jobType : job type. Refer to the job type definitions
      * @param handler : handler of job execution
      * @param localFile : uploaded file from local computer
      * @param remoteFilePath : remote resource of the file
      * @return : path to the report file
      */
     @Override
-    public RedisJob execute(long uid, int jobType, int repoType, DataHandler handler, MultipartFile localFile, String remoteFilePath){
+    public RedisJob execute(long uid, DataHandler handler, MultipartFile localFile, String remoteFilePath){
         try{
             ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
 
             RedisJobService redisJobServ = (RedisJobService) context.getBean("redisJobServiceImpl");
-            long jobId = redisJobServ.startJob(uid, jobType, repoType);
 
-            String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.REPO_TYPES[repoType], DataUtil.JOB_TYPES[jobType], jobId);
+            RedisJob newJob = redisJobServ.createJob(uid, handler.getJobType(), handler.outputJobDataByJobType());
+            long jobId = newJob.getJobId();
 
-            DataService ds = ServiceUtil.getDataService(context, jobType);
+            String jobFilePath = ShareokdataManager.getJobReportPath(handler.getRepoType(), DataUtil.JOB_TYPES[handler.getJobType()], jobId);
+
+            DataService ds = ServiceUtil.getDataService(context, handler.getJobType());
 
             String filePath = "";
             String reportFilePath = jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt";
@@ -59,31 +70,82 @@ public class JobHandlerImpl implements JobHandler {
                 filePath = ServiceUtil.saveUploadedFile(localFile, jobFilePath);
             }
             else if(null != remoteFilePath && !"".equals(remoteFilePath)){
-                filePath = processRemoteFileByJobType(jobType, redisJobServ, jobFilePath, remoteFilePath);
+                filePath = processRemoteFileByJobType(handler.getJobType(), redisJobServ, jobFilePath, remoteFilePath);
             }
 
-            handler.setUploadFile(filePath);
+            handler.setFilePath(filePath);
             handler.setReportFilePath(reportFilePath);
+            ds.setUserId(uid);
             ds.setHandler(handler);
             
-            redisJobServ.updateJob(jobId, "status", "1"); 
+            redisJobServ.updateJob(jobId, "status", "0"); 
+            redisJobServ.updateJob(jobId, "filePath", filePath); 
             
-            String jobReturnValue = ds.executeTask(DataUtil.JOB_TYPES[jobType]);
-            processJobReturnValue(jobReturnValue, redisJobServ, jobId, jobType, remoteFilePath);
-            
-            redisJobServ.updateJob(jobId, "endTime", ShareokdataManager.getSimpleDateFormat().format(new Date()));
+            //Handle the job queue stuff:
+            String queueName = RedisUtil.getJobQueueName(uid, DataUtil.JOB_TYPES[handler.getJobType()], handler.getServerName());    
+            Thread thread = ServiceUtil.getThreadByName(queueName);
+            if(jobQueueService.isJobQueueEmpty(queueName)){                
+                if(null != thread && !thread.isInterrupted()){
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
+                        logger.debug("Current thread is interrupted while sleeping", ex);
+                    }
+                    if(!thread.isInterrupted()){
+                        jobQueueService.addJobIntoQueue(jobId, queueName);
+                        redisJobServ.updateJob(jobId, "status", "7"); 
+                    }
+                    else{
+//                        try {
+//                            thread.join();
+//                        } catch (InterruptedException ex) {
+//                            logger.debug("Current thread is interrupted while sleeping", ex);
+//                        }
+                        jobQueueService.addJobIntoQueue(jobId, queueName);
+                        redisJobServ.updateJob(jobId, "status", "7"); 
+                        Thread newThread = new Thread(ds, queueName);
+                        newThread.start();
+                    }
+                }
+                else{
+//                    if(null != thread && thread.isInterrupted()){
+//                        while(thread.isAlive()){
+//                            try {
+//                                Thread.sleep(50L);
+//                            } catch (InterruptedException ex) {
+//                                Logger.getLogger(JobHandlerImpl.class.getName()).log(Level.SEVERE, null, ex);
+//                            }
+//                        }
+//
+//                    }
+                    jobQueueService.addJobIntoQueue(jobId, queueName);
+                    redisJobServ.updateJob(jobId, "status", "7"); 
+                    Thread newThread = new Thread(ds, queueName);
+                    newThread.start();
+                }
+            }
+            else{
+                jobQueueService.addJobIntoQueue(jobId, queueName);
+                redisJobServ.updateJob(jobId, "status", "7"); 
+                if(null == thread){
+                    Thread newThread = new Thread(ds, queueName);
+                    newThread.start();
+                }                
+            }
+         
             return redisJobServ.findJobByJobId(jobId);
         }
         catch(BeansException | NumberFormatException | EmptyUploadedPackagePathOfSshUploadJobException ex){
-            logger.error("Cannot exectue the job with type "+DataUtil.JOB_TYPES[jobType]+" for repository "+DataUtil.REPO_TYPES[repoType], ex);
+//            logger.error("Cannot exectue the job with type "+DataUtil.JOB_TYPES[handler.get]+" for repository "+DataUtil.REPO_TYPES[repoType], ex);
+            logger.error("Cannot exectue the job with type.", ex);
         }
         return null;
     }
     
-    @Override
-    public RedisJob execute(long uid, String jobType, String repoType, DataHandler handler, MultipartFile localFile, String remoteFilePath){
-        return execute(uid, Arrays.asList(DataUtil.JOB_TYPES).indexOf(jobType), Arrays.asList(DataUtil.REPO_TYPES).indexOf(repoType), handler, localFile, remoteFilePath);
-    }
+//    @Override
+//    public RedisJob execute(long uid, String jobType, String repoType, DataHandler handler, MultipartFile localFile, String remoteFilePath){
+//        return execute(uid, Arrays.asList(DataUtil.JOB_TYPES).indexOf(jobType), Arrays.asList(DataUtil.REPO_TYPES).indexOf(repoType), handler, localFile, remoteFilePath);
+//    }
     
     private String processRemoteFileByJobType(int jobType, RedisJobService redisJobServ, String jobFilePath, String remoteFilePath) throws EmptyUploadedPackagePathOfSshUploadJobException{
         String filePath = "";

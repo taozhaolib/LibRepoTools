@@ -13,10 +13,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 import org.shareok.data.config.DataUtil;
 import java.util.HashMap;
 import java.util.Map;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.kernel.api.services.job.RedisJobService;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -136,5 +138,54 @@ public class ServiceUtil {
         return ShareokdataManager.getShareokdataPath() + File.separator + DataUtil.REPO_TYPES[job.getRepoType()] 
                 + File.separator + DataUtil.JOB_TYPES[job.getType()] + File.separator + String.valueOf(job.getJobId()) 
                 + File.separator + String.valueOf(job.getJobId()) + "-report.txt";
+    }
+    
+    public static Thread getThreadByName(String name){
+        for(Thread th : Thread.getAllStackTraces().keySet()){
+            String threadName = th.getName();
+            if(null != threadName && threadName.equals(name)){
+                return th;
+            }
+        }
+        return null;
+    }
+    
+    public static RedisJobService getJobService(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
+        return (RedisJobService) context.getBean("redisJobServiceImpl");
+    }
+    
+    public static void processJobReturnValue(String jobReturnValue, RedisJob job){
+        RedisJobService redisJobServ = ServiceUtil.getJobService();
+        long jobId = job.getJobId();
+        int jobType = job.getType();
+        if(null != jobReturnValue && !jobReturnValue.equals("")){
+                redisJobServ.updateJob(jobId, "status", "2");  
+                Map values = new HashMap();
+                switch(jobType){
+                    case 1:
+                    case 3:
+                        values.put("uploadedPackagePath", jobReturnValue);
+                        redisJobServ.updateJobInfoByJobType(jobId, DataUtil.JOB_TYPES[jobType], values);
+                        if(jobType == 3){
+                            redisJobServ.updateJob(jobId, "uploadedPackagePath", jobReturnValue);
+                            redisJobServ.updateJob(jobId, "status", "6");
+                        }
+                        else if(jobType == 1){
+                            redisJobServ.updateJob(jobId, "status", "2");
+                        }
+                        break;
+                    case 4:
+                    case 5:
+                        redisJobServ.updateJob(jobId, "status", "2");
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else{
+                redisJobServ.updateJob(jobId, "status", "3");
+            }
+        redisJobServ.updateJob(jobId, "endTime", ShareokdataManager.getSimpleDateFormat().format(new Date()));
     }
 }

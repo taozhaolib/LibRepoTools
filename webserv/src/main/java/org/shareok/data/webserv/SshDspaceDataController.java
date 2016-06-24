@@ -84,10 +84,10 @@ public class SshDspaceDataController {
         
         if (null != handler) {
             try {
-                String uploadFilePath = DspaceJournalDataUtil.getJournalImportFilePath(handler.getUploadFile(), publisher);
+                String uploadFilePath = DspaceJournalDataUtil.getJournalImportFilePath(handler.getFilePath(), publisher);
                 int jobTypeIndex = DataUtil.getJobTypeIndex(action, "dspace"); 
                 //RedisJob job = jobHandler.execute(Long.valueOf(userId), "dspace", "ssh-import", handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
-                RedisJob job = jobHandler.execute(Long.valueOf(userId), jobTypeIndex, DataUtil.getRepoTypeIndex("dspace"), handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
+                RedisJob job = jobHandler.execute(Long.valueOf(userId), handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
                 ModelAndView model = new ModelAndView();
                 model.setViewName("jobReport");
                 model.addObject("host", handler.getSshExec().getServer().getHost());
@@ -121,8 +121,8 @@ public class SshDspaceDataController {
         return model;
     }
     
-    @RequestMapping(value="/ssh/dspace/saf/job/{jobType}", method=RequestMethod.POST)
-    public ModelAndView sshDspaceSafImport(HttpServletRequest request, @ModelAttribute("SpringWeb")DspaceSshHandler handler, @RequestParam(value = "saf", required=false) MultipartFile file, @PathVariable("jobType") String jobType) {
+    @RequestMapping(value="/ssh/dspace/saf/job/{jobTypeStr}", method=RequestMethod.POST)
+    public ModelAndView sshDspaceSafImport(HttpServletRequest request, @ModelAttribute("SpringWeb")DspaceSshHandler handler, @RequestParam(value = "saf", required=false) MultipartFile file, @PathVariable("jobTypeStr") String jobTypeStr) {
         String safLink = (String)request.getParameter("saf-online");
         String oldJobId = (String)request.getParameter("old-jobId");
         String userId = String.valueOf(request.getSession().getAttribute("userId"));
@@ -141,13 +141,19 @@ public class SshDspaceDataController {
         
         if ((null != file && !file.isEmpty()) || (null != safLink && !"".equals(safLink))) {
             try {
-                int jobTypeIndex = DataUtil.getJobTypeIndex(jobType, "dspace");                                
-                RedisJob job = jobHandler.execute(Long.valueOf(userId), jobTypeIndex, DataUtil.getRepoTypeIndex("dspace"), handler, file, safLink);
+                int jobTypeIndex = DataUtil.getJobTypeIndex(jobTypeStr, "dspace");   
+                handler.setJobType(jobTypeIndex);
+                RedisJob job = jobHandler.execute(Long.valueOf(userId), handler, file, safLink);
+                
+                int statusIndex = job.getStatus();
+                String isFinished = (statusIndex == 2 || statusIndex == 6) ? "true" : "false";
                 
                 ModelAndView model = new ModelAndView();
                 model.setViewName("jobReport");
                 model.addObject("host", handler.getSshExec().getServer().getHost());
                 model.addObject("collection", handler.getCollectionId());
+                model.addObject("repoType", "DSpace");
+                model.addObject("isFinished", isFinished);
                 model.addObject("reportPath", "/webserv/download/report/"+DataUtil.JOB_TYPES[jobTypeIndex]+"/"+String.valueOf(job.getJobId()));  
                 WebUtil.outputJobInfoToModel(model, job);
                 

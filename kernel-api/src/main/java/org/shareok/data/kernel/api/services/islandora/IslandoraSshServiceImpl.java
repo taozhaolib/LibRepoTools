@@ -45,5 +45,15 @@ public class IslandoraSshServiceImpl implements IslandoraSshService {
                 return null;
         }
     }
+
+    @Override
+    public void setUserId(long userId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void run() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }

@@ -25,6 +25,27 @@ public class DataUtil {
     public static String[] REPO_TYPES = {"unknown", "dspace", "islandora", "fedora", "hydra"};
     public static String[] JOB_TYPES = {"unknown", "ssh-import-dspace", "rest-import-dspace", "ssh-upload-dspace", "ssh-importloaded-dspace",
                                         "ssh-import-islandora"};
+    public static Map<String, String> JOB_TYPE_DATA_SCHEMA = new HashMap<>();
+    static {
+        for(String job : DataUtil.JOB_TYPES){
+            switch(job){
+                case "ssh-import-dspace":
+                case "ssh-importloaded-dspace":
+                    String schema = "serverId,uploadDst,dspaceUser,dspaceDirectory,collectionId";
+                    JOB_TYPE_DATA_SCHEMA.put("ssh-import-dspace", schema);
+                    JOB_TYPE_DATA_SCHEMA.put("ssh-importloaded-dspace", schema);
+                    break;
+                case "ssh-upload-dspace":
+                    JOB_TYPE_DATA_SCHEMA.put("ssh-upload-dspace", "serverId,uploadDst");
+                    break;
+                case "ssh-import-islandora":
+                    JOB_TYPE_DATA_SCHEMA.put("ssh-import-islandora", "serverId,drupalDirectory,uploadDst,tmpPath,parentPid,localRecipeFilePath,recipeFileUri");
+                    break;
+                default:
+                    break; 
+            }
+        }
+    }
     
     public static int getJobTypeIndex(String jobType, String repoType){
         String key = jobType + "-" + repoType;

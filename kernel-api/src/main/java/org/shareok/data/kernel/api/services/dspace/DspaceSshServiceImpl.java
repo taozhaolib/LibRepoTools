@@ -5,11 +5,25 @@
  */
 package org.shareok.data.kernel.api.services.dspace;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.shareok.data.config.DataHandler;
+import org.shareok.data.config.DataUtil;
+import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.dspacemanager.DspaceSshDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
+import org.shareok.data.kernel.api.services.ServiceUtil;
+import org.shareok.data.kernel.api.services.job.JobQueueService;
+import org.shareok.data.kernel.api.services.job.RedisJobService;
+import org.shareok.data.redis.RedisUtil;
+import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,9 +33,35 @@ import org.springframework.stereotype.Service;
 @Service
 public class DspaceSshServiceImpl implements DspaceSshService {
     private DspaceSshHandler handler;
+    private JobQueueService jobQueueService;
+    private RedisJobService jobService;
+    private long userId;
 
     public DspaceSshHandler getHandler() {
         return handler;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public JobQueueService getJobQueueService() {
+        return jobQueueService;
+    }
+
+    @Autowired
+    public void setJobService(RedisJobService jobService) {
+        this.jobService = jobService;
+    }
+
+    @Autowired
+    public void setJobQueueService(JobQueueService jobQueueService) {
+        this.jobQueueService = jobQueueService;
+    }
+
+    @Override
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 
     @Override
@@ -56,6 +96,29 @@ public class DspaceSshServiceImpl implements DspaceSshService {
             default:
                 return null;
         }
+    }
+
+    @Override
+    public void run() {
+        String jobTypeStr = DataUtil.JOB_TYPES[handler.getJobType()];
+        String queueName = RedisUtil.getJobQueueName(getUserId(), jobTypeStr, handler.getServerName());    
+
+        while(!Thread.currentThread().isInterrupted() && !jobQueueService.isJobQueueEmpty(queueName)){
+            long jobId = jobQueueService.removeJobFromQueue(queueName);
+            RedisJob job = jobService.findJobByJobId(jobId);
+            jobService.updateJob(jobId, "status", "1");
+            if(null == handler){
+                ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
+                handler = (DspaceSshHandler)context.getBean("dspaceSshHandler");
+            }
+            handler.loadJobInfoByJobId(jobId);
+//            handler.setFilePath(job.getFilePath());
+            //executeTask(jobTypeStr);
+            String jobReturnValue = executeTask(jobTypeStr);
+            ServiceUtil.processJobReturnValue(jobReturnValue, job);
+            System.out.println(" The job "+String.valueOf(jobId)+" has been processed! filePath = "+job.getFilePath());
+        }
+        Thread.currentThread().interrupt();
     }
     
 }

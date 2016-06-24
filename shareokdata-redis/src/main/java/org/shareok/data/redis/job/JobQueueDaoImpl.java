@@ -98,5 +98,17 @@ public class JobQueueDaoImpl implements JobQueueDao {
 //                }
 //            });
 //    }
+
+    @Override
+    public boolean isJobQueueEmpty(String queueName) {
+        try{
+            BoundListOperations<String, String> jobQueueOps = (BoundListOperations<String, String>) redisTemplate.boundListOps(queueName);
+            return jobQueueOps.range(0, ShareokdataManager.getRedisJobQueueMaxJobs()).isEmpty();                     
+        }
+        catch(Exception ex){
+            logger.error("Cannot determine if the job queue " + queueName + " is empty!", ex);
+        }        
+        return false;
+    }
     
 }

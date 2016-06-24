@@ -7,11 +7,18 @@ package org.shareok.data.dspacemanager;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import org.shareok.data.config.DataHandler;
+import org.shareok.data.config.DataUtil;
+import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.redis.RedisUtil;
+import org.shareok.data.redis.job.JobDao;
+import org.shareok.data.redis.job.RedisJob;
 import org.shareok.data.ssh.SshExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,15 +32,25 @@ public class DspaceSshHandler implements DataHandler {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DspaceSshHandler.class);
     
+    private int jobType;
     private String serverId;
     private String reportFilePath;
     private String uploadDst;
-    private String uploadFile; // *** suppose the uploaded file is a ZIP file ***
+    private String filePath; // *** suppose the uploaded file is a ZIP file ***
     private String dspaceUser;
     private String dspaceDirectory; // the DSpace installation directory
     private String collectionId;
     private SshExecutor sshExec;
-    //private String mapfilePath;
+
+    @Override
+    public int getJobType() {
+        return jobType;
+    }
+    
+    @Override
+    public String getRepoType(){
+        return "dspace";
+    }
     
     public String getReportFilePath(){
         return reportFilePath;
@@ -43,8 +60,8 @@ public class DspaceSshHandler implements DataHandler {
         return uploadDst;
     }
 
-    public String getUploadFile() {
-        return uploadFile;
+    public String getFilePath() {
+        return filePath;
     }
 
     public String getDspaceUser() {
@@ -62,6 +79,10 @@ public class DspaceSshHandler implements DataHandler {
     public String getServerId() {
         return serverId;
     }
+
+    public void setJobType(int jobType) {
+        this.jobType = jobType;
+    }
     
     @Override
     public void setReportFilePath(String reportFilePath){
@@ -73,8 +94,8 @@ public class DspaceSshHandler implements DataHandler {
     }
 
     @Override
-    public void setUploadFile(String uploadFile) {
-        this.uploadFile = uploadFile;
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
     public void setDspaceUser(String dspaceUser) {
@@ -105,10 +126,60 @@ public class DspaceSshHandler implements DataHandler {
         }
     }
     
+    @Override
+    public String getServerName(){
+        if(null != sshExec && null != sshExec.getServer()){
+            return sshExec.getServer().getServerName();
+        }
+        else{
+            return RedisUtil.getServerDaoInstance().findServerById(Integer.parseInt(serverId)).getServerName();
+        }
+    }
+    
+    @Override
+    public void loadJobInfoByJobId(long jobId){
+        JobDao jobDao = RedisUtil.getJobDao();
+        RedisJob job = jobDao.findJobByJobId(jobId);
+        setJobType(job.getType());
+        String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.REPO_TYPES[job.getRepoType()], DataUtil.JOB_TYPES[jobType], jobId);
+        setReportFilePath(jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt");
+        setServerId(String.valueOf(job.getServerId()));
+        String schema = (String)DataUtil.JOB_TYPE_DATA_SCHEMA.get(DataUtil.JOB_TYPES[job.getType()]);
+        Map data = RedisUtil.getJobDao().getJobInfoByAttributes(jobId, schema.split(","));
+        for(Field f : DspaceSshHandler.class.getDeclaredFields()){
+            try {
+                String fieldName = f.getName();
+                if(data.containsKey(fieldName)){
+                    f.set(this, (String)data.get(fieldName));
+                }
+            } catch (SecurityException ex) {
+            } catch (IllegalArgumentException | IllegalAccessException ex) {
+            }            
+        }
+        
+    }
+    
+    @Override
+    public Map<String, String> outputJobDataByJobType(){
+        Map<String, String> data = new HashMap<>();
+        String entries = (String)DataUtil.JOB_TYPE_DATA_SCHEMA.get(DataUtil.JOB_TYPES[jobType]);
+        for(String entry : entries.split(",")){
+            try {
+                Field f = DspaceSshHandler.class.getDeclaredField(entry);
+                if(null != f){
+                    data.put(f.getName(), (String)f.get(this));
+                }
+            } catch (NoSuchFieldException | SecurityException ex) {
+            } catch (IllegalArgumentException | IllegalAccessException ex) {
+            }            
+        }
+        return data;
+    }
+    
     public String importDspace(){
         try{     
             String time = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-            String uploadFileName = new File(uploadFile).getName();
+            String uploadFileName = new File(filePath).getName();
             String uploadFileNameWithoutExtension = uploadFileName.split("\\.")[0];
             
             String dspaceTargetFilePath = uploadDst + File.separator + time + File.separator + uploadFileName;
@@ -126,7 +197,7 @@ public class DspaceSshHandler implements DataHandler {
             sshExec.addReporter("Unzip the uploaded SAF package: "+unzipCommand);
             sshExec.addReporter("Import the SAF package into DSpace: "+importCommand);
             sshExec.execCmd(newDirCommand);
-            sshExec.upload(uploadDst + File.separator + time, uploadFile);  
+            sshExec.upload(uploadDst + File.separator + time, filePath);  
             sshExec.addReporter("The SAF package has been uploaded to the DSpace server: " + dspaceTargetFilePath + "\n");
             String[] commands = {unzipCommand, importCommand};
             sshExec.execCmd(commands);
@@ -147,7 +218,7 @@ public class DspaceSshHandler implements DataHandler {
     public String uploadSafDspace(){
         try{     
             String time = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
-            String uploadFileName = new File(uploadFile).getName();
+            String uploadFileName = new File(filePath).getName();
             String uploadFileNameWithoutExtension = uploadFileName.split("\\.")[0];
             
             String dspaceTargetFilePath = uploadDst + File.separator + time + File.separator + uploadFileName;
@@ -160,7 +231,7 @@ public class DspaceSshHandler implements DataHandler {
             sshExec.addReporter("Upload the SAF package zip file to the DSpace server at  "+uploadDst);
    
             sshExec.execCmd(newDirCommand);
-            sshExec.upload(uploadDst + File.separator + time, uploadFile);  System.out.println(" ****** ");
+            sshExec.upload(uploadDst + File.separator + time, filePath);  System.out.println(" ****** ");
             sshExec.addReporter("The SAF package has been uploaded to the DSpace server: " + dspaceTargetFilePath + "\n");
             
             String savedReportFilePath =  saveLoggerToFile();
@@ -176,11 +247,11 @@ public class DspaceSshHandler implements DataHandler {
     
     public String importUploadedSafDspace(){
         try{                
-            String mapFilePath = FileUtil.getFileContainerPath(uploadFile) + "mapfile";
-            File uploadFileObj = new File(uploadFile);
+            String mapFilePath = FileUtil.getFileContainerPath(filePath) + "mapfile";
+            File uploadFileObj = new File(filePath);
             String uploadFileName = uploadFileObj.getName();
-            String upzippedFilePath = FileUtil.getFileContainerPath(uploadFile) + FileUtil.getFileNameWithoutExtension(uploadFileName);//.getFileNameWithoutExtension(uploadFile);
-            String unzipCommand = " bash -c \"unzip -o " + uploadFile + " -d " + FileUtil.getFileContainerPath(uploadFile) + "\"";
+            String upzippedFilePath = FileUtil.getFileContainerPath(filePath) + FileUtil.getFileNameWithoutExtension(uploadFileName);//.getFileNameWithoutExtension(filePath);
+            String unzipCommand = " bash -c \"unzip -o " + filePath + " -d " + FileUtil.getFileContainerPath(filePath) + "\"";
             String importCommand = "sudo " + dspaceDirectory + File.separator + "bin" + File.separator +
                                    "dspace import --add " + "--eperson=" + dspaceUser + " --collection=" + collectionId +
                                    " --source=" + upzippedFilePath + " --mapfile=" + mapFilePath;
@@ -196,7 +267,7 @@ public class DspaceSshHandler implements DataHandler {
             String savedReportFilePath =  saveLoggerToFile();
             sshExec.addReporter("The importing logging information has been saved to file : " + reportFilePath);
             
-            return uploadFile;
+            return filePath;
         }
         catch(Exception ex){
             logger.error("Cannot import the SAF package into DSapce", ex);

@@ -13,6 +13,7 @@ import org.shareok.data.config.DataUtil;
 import org.shareok.data.islandoramanager.IslandoraSshHandler;
 import org.shareok.data.kernel.api.services.job.JobHandler;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
+import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -77,17 +78,20 @@ public class SshIslandoraDataController {
         if ((null != file && !file.isEmpty()) || (null != recipeFileUri && !"".equals(recipeFileUri))) {
             try {
                 int jobTypeIndex = DataUtil.getJobTypeIndex(jobType, "islandora");                                
-                RedisJob job = jobHandler.execute(Long.valueOf(userId), jobTypeIndex, DataUtil.getRepoTypeIndex("islandora"), handler, file, recipeFileUri);
+                RedisJob job = jobHandler.execute(Long.valueOf(userId), handler, file, recipeFileUri);
                 
                 ModelAndView model = new ModelAndView();
                 model = WebUtil.getServerList(model, serverService);
                 model.setViewName("jobReport");
                 model.addObject("host", handler.getSshExec().getServer().getHost());
                 model.addObject("collection", handler.getParentPid());
+                model.addObject("status", RedisUtil.REDIS_JOB_STATUS[job.getStatus()]);
                 model.addObject("reportPath", "/webserv/download/report/"+DataUtil.JOB_TYPES[jobTypeIndex]+"/"+String.valueOf(job.getJobId()));  
                 WebUtil.outputJobInfoToModel(model, job);                
                 return model;
-            } catch (Exception e) {
+            } catch (NumberFormatException e) {
+                logger.error("Cannot import into the Islandora repository.", e);
+            } catch (JsonProcessingException e) {
                 logger.error("Cannot import into the Islandora repository.", e);
             }
         } else {

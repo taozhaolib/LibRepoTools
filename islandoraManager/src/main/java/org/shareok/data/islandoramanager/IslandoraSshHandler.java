@@ -7,9 +7,13 @@ package org.shareok.data.islandoramanager;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import org.shareok.data.config.DataHandler;
+import org.shareok.data.config.DataUtil;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.ssh.SshExecutor;
@@ -25,6 +29,7 @@ public class IslandoraSshHandler implements DataHandler {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(IslandoraSshHandler.class);
     
+    private int jobType;
     private SshExecutor sshExec;
     private String reportFilePath;
     private String drupalDirectory; // the Drupal installation directory
@@ -34,6 +39,16 @@ public class IslandoraSshHandler implements DataHandler {
     private String recipeFileUri;
     private String uploadDst;
     private String serverId;
+
+    @Override
+    public int getJobType() {
+        return jobType;
+    }
+    
+    @Override
+    public String getRepoType(){
+        return "islandora";
+    }
     
     public SshExecutor getSshExec() {
         return sshExec;
@@ -69,6 +84,10 @@ public class IslandoraSshHandler implements DataHandler {
 
     public String getServerId() {
         return serverId;
+    }
+
+    public void setJobType(int jobType) {
+        this.jobType = jobType;
     }
 
     @Autowired
@@ -109,6 +128,33 @@ public class IslandoraSshHandler implements DataHandler {
 
     public void setServerId(String serverId) {
         this.serverId = serverId;
+    }
+    
+    @Override
+    public String getServerName(){
+        if(null != sshExec && null != sshExec.getServer()){
+            return sshExec.getServer().getServerName();
+        }
+        else{
+            return RedisUtil.getServerDaoInstance().findServerById(Integer.parseInt(serverId)).getServerName();
+        }
+    }
+    
+    @Override
+    public Map<String, String> outputJobDataByJobType(){
+        Map<String, String> data = new HashMap<>();
+        String entries = (String)DataUtil.JOB_TYPE_DATA_SCHEMA.get(DataUtil.JOB_TYPES[jobType]);
+        for(String entry : entries.split(",")){
+            try {
+                Field f = IslandoraSshHandler.class.getField(entry);
+                if(null != f){
+                    data.put(f.getName(), (String)f.get(this));
+                }
+            } catch (NoSuchFieldException | SecurityException ex) {
+            } catch (IllegalArgumentException | IllegalAccessException ex) {
+            }
+        }
+        return data;
     }
 
     public String uploadFileToRepository(){
@@ -176,7 +222,7 @@ public class IslandoraSshHandler implements DataHandler {
     }
     
     @Override
-    public void setUploadFile(String uploadFile) {
+    public void setFilePath(String uploadFile) {
         try{
             if(uploadFile.startsWith("uri--")){
                 String uri = uploadFile.split("uri--")[1];
@@ -189,5 +235,10 @@ public class IslandoraSshHandler implements DataHandler {
         catch(ArrayIndexOutOfBoundsException ex){
             logger.error("Cannot set up the upload file due to array out of bound!", ex);
         }
+    }
+
+    @Override
+    public void loadJobInfoByJobId(long jobId) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

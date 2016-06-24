@@ -29,24 +29,24 @@
                         <form role="form" action="/webserv/ssh/dspace/saf/job/${jobType}" method="post" enctype="multipart/form-data">
                         <c:if test="${jobType == 'ssh-import' || jobType == 'ssh-upload'}">
                             <div class="form-group">
-                                <label class="control-label col-lg-2 col-sm-4 text-left" for="saf">Upload the simple archive format:</label>
-                                <div class="col-lg-3 col-sm-8">
+                                <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="saf">Upload the simple archive format:</label>
+                                <div class="col-lg-3 col-md-8 col-sm-8">
                                     <input type="file" class="file-input" name="saf" />
                                 </div>
-                                <label class="control-label col-lg-3 col-sm-3 text-left" for="saf-online">Remote online simple archive format package (ZIP file):</label>
-                                <div class="col-lg-4 col-sm-8">
+                                <label class="control-label col-lg-3 col-md-4 col-sm-4 text-left" for="saf-online">Remote online simple archive format package (ZIP file):</label>
+                                <div class="col-lg-4 col-md-8 col-sm-8">
                                     <input type="text" class="form-control" name="saf-online" />
                                 </div>
                             </div>
                         </c:if>
                         <c:if test="${jobType == 'ssh-importloaded'}">
-                            <label class="control-label col-lg-2 col-sm-4 text-left" for="saf-online">Path to the Uploaded Package on the Server:</label>
-                                <div class="col-lg-4 col-sm-8">
+                            <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="saf-online">Path to the Uploaded Package on the Server:</label>
+                                <div class="col-lg-4 col-md-8 col-sm-8">
                                     <input type="text" class="file-input" name="saf-online" />
                                 </div>
                             <div class="form-group">
-                                <label class="control-label col-lg-2 col-sm-4 text-left" for="old-jobId">ID of the Uploading Job:</label>
-                                <div class="col-lg-4 col-sm-8">
+                                <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="old-jobId">ID of the Uploading Job:</label>
+                                <div class="col-lg-4 col-md-8 col-sm-8">
                                   <input type="text" class="form-control" name="old-jobId">
                                 </div>
                             </div>
@@ -58,36 +58,36 @@
                     </c:if>
          
                         <div class="form-group">
-                            <label class="control-label col-lg-2 col-sm-4 text-left" for="serverName">Dspace server name:</label>
-                            <div class="col-lg-6 col-sm-8">
+                            <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="serverName">Dspace server name:</label>
+                            <div class="col-lg-6 col-md-8 col-sm-8">
                               <input type="text" class="form-control" name="serverName">
                             </div>
-                            <label class="control-label col-lg-2 col-sm-4 text-left" for="serverId">Dspace server ID:</label>
-                            <div class="col-lg-2 col-sm-8">
+                            <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="serverId">Dspace server ID:</label>
+                            <div class="col-lg-2 col-md-8 col-sm-8">
                               <input type="text" class="form-control" name="serverId">
                             </div>
                         </div>
                             <br><br>
                         <div class="form-group">
-                            <label class="control-label col-lg-2 col-sm-4 text-left" for="dspaceDirectory">DSpace Installation Directory:</label>
-                            <div class="col-lg-4 col-sm-8">
+                            <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="dspaceDirectory">DSpace Installation Directory:</label>
+                            <div class="col-lg-4 col-md-8 col-sm-8">
                               <input type="text" class="form-control" name="dspaceDirectory" placeholder="">
                             </div>
                             <div class="form-group">
-                                <label class="control-label col-lg-2 col-sm-4 text-left" for="uploadDst">DSpace Upload Directory:</label>
-                                <div class="col-lg-4 col-sm-8">
+                                <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="uploadDst">DSpace Upload Directory:</label>
+                                <div class="col-lg-4 col-md-8 col-sm-8">
                                   <input type="text" class="form-control" name="uploadDst" placeholder="">
                                 </div>
                             </div>
                         </div>
                         <br/><br/><br/><br>
                         <div class="form-group">
-                            <label class="control-label col-lg-2 col-sm-4 text-left" for="dspaceUser">DSpace User Name:</label>
-                            <div class="col-lg-4 col-sm-8">
+                            <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="dspaceUser">DSpace User Name:</label>
+                            <div class="col-lg-4 col-md-8 col-sm-8">
                               <input type="text" class="form-control" name="dspaceUser" placeholder="">
                             </div>
-                            <label class="control-label col-lg-2 col-sm-4 text-left" for="collectionId">Collection Id:</label>
-                            <div class="col-lg-4 col-sm-8">
+                            <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="collectionId">Collection Id:</label>
+                            <div class="col-lg-4 col-md-8 col-sm-8">
                               <input type="text" class="form-control" name="collectionId" placeholder="">
                             </div>
                         </div>

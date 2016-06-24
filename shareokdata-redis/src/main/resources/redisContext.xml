@@ -15,8 +15,6 @@
     <import resource="classpath*:**/htmlRequestContext.xml"/>
     <import resource="classpath*:**/configContext.xml"/>
 -->
-    
-    <import resource="classpath*:**/dspaceManagerContext.xml"/>
         
     <bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory" p:host-name="127.0.0.1" p:port="6379"/>
     
@@ -34,8 +32,33 @@
     
     <bean id="jobDaoImpl" class="org.shareok.data.redis.job.JobDaoImpl"></bean>
     
+    <bean id="repoServer" class="org.shareok.data.redis.server.RepoServer">
+        <property name="timeout" value="5000" />
+        <property name="port" value="22" />
+        <property name="proxyPort" value="22" />
+        <property name="repoType" value="0" />
+        <property name="serverName" value="" />
+        <property name="host" value="" />
+        <property name="proxyHost" value="" />
+        <property name="userName" value="" />
+        <property name="proxyUserName" value="" />
+        <property name="password" value="" />
+        <property name="passPhrase" value="" />
+        <property name="rsaKey" value="" />
+    </bean>
+    
+    <bean id="repoServerDaoImpl" class="org.shareok.data.redis.server.RepoServerDaoImpl"></bean>
+    
     <bean id="job" class="org.shareok.data.redis.job.RedisJob">
         <property name="repoType" value="0" />
+    </bean>
+    
+    <bean id="jobQueue" class="org.shareok.data.redis.job.JobQueue">
+        
+    </bean>
+    
+    <bean id="jobQueueDaoImpl" class="org.shareok.data.redis.job.JobQueueDaoImpl">
+        
     </bean>
     
 <!--    

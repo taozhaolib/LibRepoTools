@@ -14,6 +14,11 @@
             <artifactId>jsch</artifactId>
             <version>0.1.51</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>shareokdata-redis</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     
     <properties>

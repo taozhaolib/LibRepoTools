@@ -13,9 +13,9 @@
             <ul class="dropdown-menu">
                 <li class="mainMenuDrop" id="plosDs"><a href="/webserv/dspace/journal/plos">Import PLOS Publications</a></li>
                 <li class="mainMenuDrop" id="sageDs"><a href="/webserv/dspace/journal/sage">Import SAGE Publications</a></li>
-                <li class="mainMenuDrop" id="dsSafImport"><a href="/webserv/ssh/dspace/saf/page/upload">Upload Simple Archive Format Package</a></li>
-                <li class="mainMenuDrop" id="dsSafImport"><a href="/webserv/ssh/dspace/saf/page/import">Import Simple Archive Format Package</a></li>
-                <li class="mainMenuDrop" id="dsSafImport"><a href="/webserv/ssh/dspace/saf/page/import-uploaded">Import Uploaded Simple Archive Format Package</a></li>
+                <li class="mainMenuDrop" id="dsSafImport"><a href="/webserv/ssh/dspace/saf/page/ssh-upload">Upload Simple Archive Format Package</a></li>
+                <li class="mainMenuDrop" id="dsSafImport"><a href="/webserv/ssh/dspace/saf/page/ssh-import">Import Simple Archive Format Package</a></li>
+                <li class="mainMenuDrop" id="dsSafImport"><a href="/webserv/ssh/dspace/saf/page/ssh-importloaded">Import Uploaded Simple Archive Format Package</a></li>
                 <li class="mainMenuDrop" id="dataDs"><a href="#">DSpace Data Manipulation</a></li>
             </ul>
         </li>
@@ -28,7 +28,7 @@
         <li><a class="dropdown-toggle" data-toggle="dropdown" href="#">Islandora Data Service
            <span class="caret"></span></a>
            <ul class="dropdown-menu">
-             <li class="mainMenuDrop" id="dataIs"><a href="#">Islandora Data Manipulation</a></li>
+             <li class="mainMenuDrop" id="dataIs"><a href="/webserv/ssh/islandora/book/import/page/ssh-import">Islandora Book Import</a></li>
            </ul>
         </li>
         <c:if test="${not empty loggedin }">
@@ -36,6 +36,7 @@
                 <span class="caret"></span></a>
                 <ul class="dropdown-menu">
                   <li class="mainMenuDrop" id="userJobHistory"><a href="/webserv/user/${loggedin}/jobHistory">Job History</a></li>
+                  <li class="mainMenuDrop" id="userJobHistory"><a href="/webserv/server/config">Server Configuration</a></li>
                   <li class="mainMenuDrop" id="userProfile"><a href="#">Change Profile</a></li>
                 </ul>
              </li>

@@ -11,7 +11,8 @@ import org.shareok.data.config.DataHandler;
  *
  * @author Tao Zhao
  */
-public interface DataService {
+public interface DataService extends Runnable {
+    public void setUserId(long userId);
     public void setHandler(DataHandler handler);
     public String executeTask(String jobType);
 }

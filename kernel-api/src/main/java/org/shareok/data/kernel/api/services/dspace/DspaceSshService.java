@@ -5,7 +5,6 @@
  */
 package org.shareok.data.kernel.api.services.dspace;
 
-import org.shareok.data.dspacemanager.DspaceSshHandler;
 import org.shareok.data.kernel.api.services.DataService;
 
 /**

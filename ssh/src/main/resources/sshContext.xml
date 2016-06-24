@@ -13,8 +13,8 @@
  <!--   
     <import resource="classpath*:**/documentProcessorContext.xml"/>
     <import resource="classpath*:**/htmlRequestContext.xml"/>
-    <import resource="classpath*:**/configContext.xml"/>
 -->
+    <import resource="classpath*:**/redisContext.xml"/>
         
     <bean id="fileProgressMonitor" class="org.shareok.data.ssh.FileProgressMonitor">
         <constructor-arg type="long" value="0"/>

@@ -8,6 +8,7 @@ package org.shareok.data.webserv;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,13 +114,15 @@ public class UserController{
                     RedisJob job = jobList.get(i);
                     if(null != job){
                         parsedJob = new HashMap<String, String>();
+                        Date startTime = job.getStartTime();
+                        Date endTime = job.getEndTime();
                         parsedJob.put("jobId", String.valueOf(job.getJobId()));
                         parsedJob.put("jobType", DataUtil.JOB_TYPES[job.getType()]);
                         parsedJob.put("repoType", DataUtil.REPO_TYPES[job.getRepoType()]);
                         parsedJob.put("status", RedisUtil.REDIS_JOB_STATUS[job.getStatus()]);
                         parsedJob.put("userId", String.valueOf(job.getUserId()));
-                        parsedJob.put("startTime", ShareokdataManager.getSimpleDateFormat().format(job.getStartTime()));
-                        parsedJob.put("endTime", ShareokdataManager.getSimpleDateFormat().format(job.getEndTime()));
+                        parsedJob.put("startTime", (null == startTime) ? "" : ShareokdataManager.getSimpleDateFormat().format(startTime));
+                        parsedJob.put("endTime", (null == endTime) ? "" : ShareokdataManager.getSimpleDateFormat().format(endTime));
                         parsedJobList.add(parsedJob);
                     }
                 }

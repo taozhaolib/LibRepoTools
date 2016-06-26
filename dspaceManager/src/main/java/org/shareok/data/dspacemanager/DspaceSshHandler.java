@@ -137,29 +137,6 @@ public class DspaceSshHandler implements DataHandler {
     }
     
     @Override
-    public void loadJobInfoByJobId(long jobId){
-        JobDao jobDao = RedisUtil.getJobDao();
-        RedisJob job = jobDao.findJobByJobId(jobId);
-        setJobType(job.getType());
-        String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.JOB_TYPES[jobType], jobId);
-        setReportFilePath(jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt");
-        setServerId(String.valueOf(job.getServerId()));
-        String schema = (String)DataUtil.JOB_TYPE_DATA_SCHEMA.get(DataUtil.JOB_TYPES[job.getType()]);
-        Map data = RedisUtil.getJobDao().getJobInfoByAttributes(jobId, schema.split(","));
-        for(Field f : DspaceSshHandler.class.getDeclaredFields()){
-            try {
-                String fieldName = f.getName();
-                if(data.containsKey(fieldName)){
-                    f.set(this, (String)data.get(fieldName));
-                }
-            } catch (SecurityException ex) {
-            } catch (IllegalArgumentException | IllegalAccessException ex) {
-            }            
-        }
-        
-    }
-    
-    @Override
     public Map<String, String> outputJobDataByJobType(){
         Map<String, String> data = new HashMap<>();
         String entries = (String)DataUtil.JOB_TYPE_DATA_SCHEMA.get(DataUtil.JOB_TYPES[jobType]);

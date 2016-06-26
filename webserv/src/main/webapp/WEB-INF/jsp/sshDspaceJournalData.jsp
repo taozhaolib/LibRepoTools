@@ -96,7 +96,9 @@
                             <input type="button"  class="btn btn-form" onclick="location.href='/webserv/home'" value="Back to home page"><BR>
                             <%@ include file="spining.jsp" %> 
                         <br>
-                        <input type="hidden" value="${uploadFile}" name="uploadFile">
+                        <c:if test="${not empty uploadFile}">
+                            <input type="hidden" value="${uploadFile}" name="filePath">
+                        </c:if>
                         
                      </form>
                     

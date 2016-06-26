@@ -140,6 +140,25 @@ public class ServiceUtil {
                 + File.separator + String.valueOf(job.getJobId()) + "-report.txt";
     }
     
+    public static String getRepoTypeByJob(RedisJob job){
+        String jobType = DataUtil.JOB_TYPES[job.getType()];
+        if(null != jobType && !"unknown".equals(jobType)){
+            String repoTypeStr = jobType.split("-")[2];
+            if(null != repoTypeStr){
+                if(repoTypeStr.equals("dspace")){
+                    return "DSpace";
+                }
+                if(repoTypeStr.equals("islandora")){
+                    return "Islandora";
+                }
+                if(repoTypeStr.equals("hydra")){
+                    return "Hydra";
+                }
+            }
+        }
+        return "";
+    }
+    
     public static Thread getThreadByName(String name){
         for(Thread th : Thread.getAllStackTraces().keySet()){
             String threadName = th.getName();

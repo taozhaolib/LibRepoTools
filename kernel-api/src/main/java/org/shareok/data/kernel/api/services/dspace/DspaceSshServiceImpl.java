@@ -5,8 +5,12 @@
  */
 package org.shareok.data.kernel.api.services.dspace;
 
+import java.io.File;
+import java.lang.reflect.Field;
+import java.util.Map;
 import org.shareok.data.config.DataHandler;
 import org.shareok.data.config.DataUtil;
+import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.dspacemanager.DspaceSshDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
 import org.shareok.data.kernel.api.services.ServiceUtil;
@@ -105,12 +109,34 @@ public class DspaceSshServiceImpl implements DspaceSshService {
                 ApplicationContext context = new ClassPathXmlApplicationContext("dspaceManagerContext.xml");
                 handler = (DspaceSshHandler)context.getBean("dspaceSshHandler");
             }
-            handler.loadJobInfoByJobId(jobId);
+            loadJobInfoByJob(job);
             String jobReturnValue = executeTask(jobTypeStr);
             ServiceUtil.processJobReturnValue(jobReturnValue, job);
 //            System.out.println(" The job "+String.valueOf(jobId)+" has been processed! filePath = "+job.getFilePath());
         }
         Thread.currentThread().interrupt();
+    }
+
+    @Override
+    public void loadJobInfoByJob(RedisJob job) {
+        int jobType = job.getType();
+        long jobId = job.getJobId();
+        handler.setJobType(job.getType());
+        String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.JOB_TYPES[jobType], jobId);
+        handler.setReportFilePath(jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt");
+        handler.setServerId(String.valueOf(job.getServerId()));
+        String schema = (String)DataUtil.JOB_TYPE_DATA_SCHEMA.get(DataUtil.JOB_TYPES[job.getType()]);
+        Map data = RedisUtil.getJobDao().getJobInfoByAttributes(jobId, schema.split(","));
+        for(Field f : DspaceSshHandler.class.getDeclaredFields()){
+            try {
+                String fieldName = f.getName();
+                if(data.containsKey(fieldName)){
+                    f.set(this, (String)data.get(fieldName));
+                }
+            } catch (SecurityException ex) {
+            } catch (IllegalArgumentException | IllegalAccessException ex) {
+            }            
+        }
     }
     
 }

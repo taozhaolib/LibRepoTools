@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.kernel.api.services.ServiceUtil;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
 import org.shareok.data.kernel.api.services.user.RedisUserService;
 import org.shareok.data.redis.RedisUtil;
@@ -118,7 +119,7 @@ public class UserController{
                         Date endTime = job.getEndTime();
                         parsedJob.put("jobId", String.valueOf(job.getJobId()));
                         parsedJob.put("jobType", DataUtil.JOB_TYPES[job.getType()]);
-                        parsedJob.put("repoType", DataUtil.REPO_TYPES[job.getRepoType()]);
+//                        parsedJob.put("repoType", DataUtil.REPO_TYPES[job.getRepoType()]);
                         parsedJob.put("status", RedisUtil.REDIS_JOB_STATUS[job.getStatus()]);
                         parsedJob.put("userId", String.valueOf(job.getUserId()));
                         parsedJob.put("startTime", (null == startTime) ? "" : ShareokdataManager.getSimpleDateFormat().format(startTime));
@@ -137,5 +138,39 @@ public class UserController{
             logger.error("Cannot process the job list of user "+ userId + " into JSON data.", ex);
         }
         return null;
+    }
+    
+    @RequestMapping("/report/job/{jobId}")
+    public ModelAndView userJobSummary(HttpServletRequest request, @PathVariable("jobId") String jobId){
+        
+        ModelAndView model = new ModelAndView();
+        RedisJob job = jobService.findJobByJobId(Long.parseLong(jobId));
+        Map data = job.getData();        
+                
+        if(null != job){
+            int statusIndex = job.getStatus();
+            String isFinished = (statusIndex == 2 || statusIndex == 6) ? "true" : "false";
+
+            model.setViewName("jobReport");
+            if(null != data){
+                if(null != data.get("collectionId")){
+                    model.addObject("host", (String)job.getData().get("serverId"));
+                }
+                if(null != data.get("collectionId")){
+                    model.addObject("collection", (String)data.get("collectionId"));
+                }
+            }
+            
+            model.addObject("repoType", ServiceUtil.getRepoTypeByJob(job));
+            model.addObject("isFinished", isFinished);
+            model.addObject("reportPath", ServiceUtil.getReportFilePathByJob(job));  
+            WebUtil.outputJobInfoToModel(model, job);
+        }
+        else{
+            model.setViewName("jobError");
+            model.addObject("errorMessage", "Cannot retrieve the job information.");
+        }
+
+        return model;
     }
 }

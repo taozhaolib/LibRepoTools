@@ -14,7 +14,6 @@ import java.util.Map;
 public interface DataHandler {
     public void setFilePath(String filePath);
     public void setReportFilePath(String reportFilePath);
-    public void loadJobInfoByJobId(long jobId);
     public int getJobType();    
     public Map<String, String> outputJobDataByJobType();
     public String getServerName();

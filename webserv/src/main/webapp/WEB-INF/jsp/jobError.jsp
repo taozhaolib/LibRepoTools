@@ -4,8 +4,14 @@
     Author     : Tao Zhao
 --%>
 
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+    
     <%@ include file="header.jsp" %>   
-    <%@ include file="navTab.jsp" %>  
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>User Information Error</title>
+    </head>
     
     <%
         String errorMessage = (String)request.getAttribute("errorMessage");
@@ -15,7 +21,7 @@
     <body>
         <div class="container">
         <div class="jumbotron">
-        <h4>The job information cannot be found!</h4>
+        <h4>Your user information does not match the records!</h4>
         <h5>Error message: <%= errorMessage %> </h5>
         <br>
         <input type="button"  class="btn btn-form" onclick="location.href='/webserv/home'" value="Back to Home">

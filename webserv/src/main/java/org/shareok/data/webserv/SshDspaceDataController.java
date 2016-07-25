@@ -86,12 +86,19 @@ public class SshDspaceDataController {
             try {
                 String uploadFilePath = DspaceJournalDataUtil.getJournalImportFilePath(handler.getFilePath(), publisher);
                 int jobTypeIndex = DataUtil.getJobTypeIndex(action, "dspace"); 
+                handler.setJobType(jobTypeIndex);
                 //RedisJob job = jobHandler.execute(Long.valueOf(userId), "dspace", "ssh-import", handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
                 RedisJob job = jobHandler.execute(Long.valueOf(userId), handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
+                
+                int statusIndex = job.getStatus();
+                String isFinished = (statusIndex == 2 || statusIndex == 6) ? "true" : "false";
+                
                 ModelAndView model = new ModelAndView();
                 model.setViewName("jobReport");
                 model.addObject("host", handler.getSshExec().getServer().getHost());
                 model.addObject("collection", handler.getCollectionId()); 
+                model.addObject("repoType", "DSpace");
+                model.addObject("isFinished", isFinished);
                 model.addObject("reportPath", "/webserv/download/report/"+DataUtil.JOB_TYPES[jobTypeIndex]+"/"+String.valueOf(job.getJobId())); 
                 WebUtil.outputJobInfoToModel(model, job);
                 

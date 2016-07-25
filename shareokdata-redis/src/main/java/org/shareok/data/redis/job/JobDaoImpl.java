@@ -150,7 +150,7 @@ public class JobDaoImpl implements JobDao {
         catch(Exception ex){
             logger.error("Cannot get the list of the jobs conducted by user " + uid, ex);
         }
-        RedisUtil.sortJobList(jobs);
+//        RedisUtil.sortJobList(jobs);
         return jobs;
     }
     

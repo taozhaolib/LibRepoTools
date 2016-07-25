@@ -109,7 +109,7 @@ public class WebUtil {
             model.addObject("serverObjList", mapper.writeValueAsString(serverObjList));
         }
         else{
-            model.addObject("emptyServerList", "There are NO servers set up.");
+//            model.addObject("emptyServerList", "There are NO servers set up.");
         }
         
         return model;

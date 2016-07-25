@@ -52,15 +52,14 @@
 
                 var trText = "<tr>";
                 trText += "<td>" + trObj.jobId + "</td>";
-                trText += "<td>" + trObj.repoType + "</td>";
                 trText += "<td>" + trObj.jobType + "</td>";
                 trText += "<td>" + trObj.userId + "</td>";
                 trText += "<td>" + trObj.status + "</td>";
                 trText += "<td>" + trObj.startTime + "</td>";
                 trText += "<td>" + trObj.endTime + "</td>";
+                trText += "<td><a href='/webserv/report/job/" + trObj.jobId + "'>Summary</a></td>";
                 trText += "</tr>";
                 trObj.jobId = "";
-                trObj.repoType = "";
                 trObj.jobType = "";
                 trObj.userId = "";
                 trObj.status = "";
@@ -82,12 +81,12 @@
                             <thead>
                               <tr>
                                 <th>Job ID</th>
-                                <th>Repository</th>
                                 <th>Job Type</th>
                                 <th>User ID</th>
                                 <th>Job Status</th>
                                 <th>Start Time</th>
                                 <th>End Time</th>
+                                <th>Summary</th>
                               </tr>
                             </thead>
                             <tbody>

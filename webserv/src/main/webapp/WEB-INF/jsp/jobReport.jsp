@@ -25,7 +25,7 @@
                     <h5>Job Ended at : ${endTime}</h5>       
                     <br>
                     <c:if test="${not empty isFinished && isFinished == 'true'}">
-                        <a href="${reportPath}" class="btn btn-info btn-sm" role="button">Download Job Report</a>
+                        <a href="/webserv/download/report/${jobType}/${jobId}" class="btn btn-info btn-sm" role="button">Download Job Report</a>
                     </c:if>                        
                     <input type="button"  class="btn btn-form" onclick="location.href='/webserv/home'" value="Back to home page"><BR>
                 </div>

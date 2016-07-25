@@ -24,10 +24,6 @@ public class DspaceSshDataUtil {
         SshExecutor sshExecutor = (SshExecutor) context.getBean("sshExecutor");
         return sshExecutor;
     }
-    
-    public static String getSafDownloadLink(String jobType, String jobId){
-        return ShareokdataManager.getShareokdataPath()+ File.separator + "dspace" + File.separator + jobType + File.separator + jobId + File.separator + jobId + "-report.txt";
-    }
 
     /**
      * Save the uploaded SAF file at specified path

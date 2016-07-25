@@ -6,6 +6,7 @@
 package org.shareok.data.redis.job;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  *
@@ -16,9 +17,12 @@ public class RedisJob {
     private Date endTime;
     private long jobId;
     private long userId;
+    private int serverId;
     private int type;
     private int repoType;
     private int status;
+    private String filePath;
+    private Map<String, String> data;
 
     public Date getStartTime() {
         return startTime;
@@ -36,6 +40,10 @@ public class RedisJob {
         return userId;
     }
 
+    public int getServerId() {
+        return serverId;
+    }
+
     public int getType() {
         return type;
     }
@@ -48,6 +56,14 @@ public class RedisJob {
         return status;
     }
 
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public Map<String, String> getData() {
+        return data;
+    }
+
     public void setStartTime(Date startTime) {
         this.startTime = startTime;
     }
@@ -58,6 +74,10 @@ public class RedisJob {
 
     public void setJobId(long jobId) {
         this.jobId = jobId;
+    }
+
+    public void setServerId(int serverId) {
+        this.serverId = serverId;
     }
 
     /**
@@ -78,6 +98,14 @@ public class RedisJob {
 
     public void setRepoType(int repoType) {
         this.repoType = repoType;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public void setData(Map<String, String> data) {
+        this.data = data;
     }
     
 }

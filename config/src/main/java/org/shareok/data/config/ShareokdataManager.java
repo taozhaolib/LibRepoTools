@@ -65,7 +65,7 @@ public class ShareokdataManager {
         if(null == prop){
             loadProperties();
         }
-        String sageUploadPath = prop.getProperty("shareokdataPath");
+        String sageUploadPath = prop.getProperty("sageUploadPath");
         File sageUploadPathFile = new File(sageUploadPath);
         if(!sageUploadPathFile.exists()){
             sageUploadPathFile.mkdir();
@@ -77,7 +77,7 @@ public class ShareokdataManager {
         if(null == prop){
             loadProperties();
         }
-        String plosUploadPath = prop.getProperty("shareokdataPath");
+        String plosUploadPath = prop.getProperty("plosUploadPath");
         File plosUploadPathFile = new File(plosUploadPath);
         if(!plosUploadPathFile.exists()){
             plosUploadPathFile.mkdir();
@@ -184,6 +184,13 @@ public class ShareokdataManager {
         return prop.getProperty("redisJobUserIdMatchingTable");
     }
     
+    public static String getRedisServerNameIdMatchingTable(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("redisServerNameIdMatchingTable");
+    }
+    
     public static int getRedisJobTypeImport(){
         if(null == prop){
             loadProperties();
@@ -197,6 +204,13 @@ public class ShareokdataManager {
         }
         return Integer.valueOf(prop.getProperty("redisJobTypeExport"));
     }
+       
+    public static String getRedisServerQueryPrefix(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("redisServerQueryPrefix");
+    }
     
     public static String getDateFormat(){
         if(null == prop){
@@ -209,8 +223,9 @@ public class ShareokdataManager {
         return new SimpleDateFormat(ShareokdataManager.getDateFormat());
     }
     
-    public static String getJobReportPath(String repoType, String jobType, long jobId){
+    public static String getJobReportPath(String jobType, long jobId){
         String shareokdataPath = getShareokdataPath();
+        String repoType = jobType.split("-")[2];
         String filePath = shareokdataPath + File.separator + repoType;
         File file = new File(filePath);
         if(!file.exists()){
@@ -227,5 +242,12 @@ public class ShareokdataManager {
             file.mkdir();
         }
         return filePath;
+    }
+    
+    public static int getRedisJobQueueMaxJobs(){
+        if(null == prop){
+            loadProperties();
+        }
+        return Integer.valueOf(prop.getProperty("redisJobQueueMaxJobs"));
     }
 }

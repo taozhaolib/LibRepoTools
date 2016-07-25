@@ -5,11 +5,17 @@
  */
 package org.shareok.data.config;
 
+import java.util.Map;
+
 /**
  *
  * @author Tao Zhao
  */
 public interface DataHandler {
-    public void setUploadFile(String uploadFile);
+    public void setFilePath(String filePath);
     public void setReportFilePath(String reportFilePath);
+    public int getJobType();    
+    public Map<String, String> outputJobDataByJobType();
+    public String getServerName();
+    public String getRepoType();
 }

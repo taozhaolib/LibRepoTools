@@ -5,6 +5,7 @@
  */
 package org.shareok.data.webserv;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,6 +31,11 @@ import org.springframework.web.servlet.ModelAndView;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.shareok.data.kernel.api.services.dspace.DspaceJournalServiceManager;
+import org.shareok.data.kernel.api.services.server.RepoServerService;
+import org.shareok.data.kernel.api.services.server.RepoServerServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
@@ -39,14 +45,31 @@ import org.shareok.data.kernel.api.services.dspace.DspaceJournalServiceManager;
 @Controller
 public class JournalDataController {
     
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(JournalDataController.class);
+    
+    private RepoServerService serverService;
+
+    @Autowired
+    public void setServerService(RepoServerService serverService) {
+        this.serverService = serverService;
+    }
+    
     @RequestMapping("/dspace/journal/{publisher}")
     public ModelAndView journalHello(HttpServletRequest req, @PathVariable("publisher") String publisher) {
-        String sampleDublinCoreLink = DspaceJournalDataUtil.getJournalSampleDublinCoreLink();
-         ModelAndView model = new ModelAndView();
-         model.setViewName("journalDataUpload");
-         model.addObject("publisher", publisher);
-         model.addObject("sampleDublinCore", sampleDublinCoreLink);
-         return model;
+        ModelAndView model = new ModelAndView();
+        try {
+            String sampleDublinCoreLink = DspaceJournalDataUtil.getJournalSampleDublinCoreLink();          
+            model = WebUtil.getServerList(model, serverService);
+            model.setViewName("journalDataUpload");
+            model.addObject("publisher", publisher);
+            model.addObject("sampleDublinCore", sampleDublinCoreLink);
+            return model;
+        } catch (JsonProcessingException ex) {
+            logger.error("Cannot get the list of the servers", ex);
+            model.addObject("errorMessage", "Cannot get the list of the servers");
+            model.setViewName("serverError");
+            return model;
+        }
     }
     
     @RequestMapping(value="/download/dspace/journal/{publisher}/{folderName}/{fileName}/")
@@ -105,6 +128,7 @@ public class JournalDataController {
                 String uploadFileLink = downloadLink.split("/journal/"+publisher+"/")[1];
                 uploadFileLink = uploadFileLink.substring(0, uploadFileLink.length()-1);
                 ModelAndView model = new ModelAndView();
+                model = WebUtil.getServerList(model, serverService);
                 model.setViewName("journalDataUpload");
                 model.addObject("oldFile", (String)downloadLinks.get("oldFile"));
                 model.addObject("loadingFile", downloadLink);

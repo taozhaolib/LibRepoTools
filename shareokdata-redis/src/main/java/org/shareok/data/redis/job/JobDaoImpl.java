@@ -8,6 +8,7 @@ package org.shareok.data.redis.job;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,13 +44,13 @@ public class JobDaoImpl implements JobDao {
     private StringRedisTemplate redisTemplate;
     
     @Override    
-    public long startJob(long uid, int jobType, int repoType){
-        return startJob(uid, jobType, repoType, null);
+    public long startJob(long uid, int jobType, int repoType, int serverId){
+        return startJob(uid, jobType, repoType, serverId, null);
     }
     
     @Override
     @Transactional
-    public long startJob(long uid, int jobType, int repoType, Date startTime){
+    public long startJob(long uid, int jobType, int repoType, int serverId, Date startTime){
         
         long jobIdCount = -1;
         
@@ -63,6 +64,7 @@ public class JobDaoImpl implements JobDao {
             final String uidStr = String.valueOf(uid);
             final String jobTypeStr = String.valueOf(jobType);
             final String repoTypeStr = String.valueOf(repoType);
+            final String serverIdStr = String.valueOf(serverId);
             final Date startTimeStr = startTime;
             
             List<Object> results = redisTemplate.execute(new SessionCallback<List<Object>>() {
@@ -77,6 +79,7 @@ public class JobDaoImpl implements JobDao {
                     operations.opsForHash().put("job:"+jobId, "repoType", repoTypeStr);
                     operations.opsForHash().put("job:"+jobId, "startTime", (null != startTimeStr ? ShareokdataManager.getSimpleDateFormat().format(startTimeStr) : ShareokdataManager.getSimpleDateFormat().format(new Date())));
                     operations.opsForHash().put("job:"+jobId, "endTime", "");
+                    operations.opsForHash().put("job:"+jobId, "serverId", serverIdStr);
                     
                     operations.boundSetOps("user_"+uidStr+"_job_set").add(jobId);
                     
@@ -147,7 +150,7 @@ public class JobDaoImpl implements JobDao {
         catch(Exception ex){
             logger.error("Cannot get the list of the jobs conducted by user " + uid, ex);
         }
-        RedisUtil.sortJobList(jobs);
+//        RedisUtil.sortJobList(jobs);
         return jobs;
     }
     
@@ -174,13 +177,15 @@ public class JobDaoImpl implements JobDao {
             RedisJob job = RedisUtil.getJobInstance();
             job.setJobId(jobId);
             String startTime = (String)jobOps.get("startTime");
-            job.setStartTime(ShareokdataManager.getSimpleDateFormat().parse(startTime));
+            job.setStartTime((null == startTime || "".equals(startTime)) ? null : ShareokdataManager.getSimpleDateFormat().parse(startTime));
             String endTime = (String)jobOps.get("endTime");
-            job.setEndTime(ShareokdataManager.getSimpleDateFormat().parse(endTime));
+            job.setEndTime((null == endTime || "".equals(endTime)) ? null : ShareokdataManager.getSimpleDateFormat().parse(endTime));
             job.setUserId(Long.valueOf(jobOps.get("userId")));
+            job.setServerId(Integer.valueOf(jobOps.get("serverId")));
             job.setStatus(Integer.valueOf(jobOps.get("status")));
             job.setType(Integer.valueOf(jobOps.get("type")));
-            job.setRepoType(Integer.valueOf(jobOps.get("repoType")));
+//            job.setRepoType(Integer.valueOf(jobOps.get("repoType")));
+            job.setFilePath(jobOps.get("filePath"));
             return job;
         }
         else{
@@ -247,4 +252,61 @@ public class JobDaoImpl implements JobDao {
         }
         return jobInfo;
     }
+
+    @Override
+    public RedisJob createJob(final long uid, final int jobType, final Map<String, String> values) {
+        long jobIdCount = -1;
+        final RedisJob newJob = new RedisJob();
+        
+        try{
+            redisTemplate.setConnectionFactory(connectionFactory);
+            
+            RedisAtomicLong jobIdIndex = new RedisAtomicLong(ShareokdataManager.getRedisGlobalJobIdSchema(), redisTemplate.getConnectionFactory());
+               
+            jobIdCount = jobIdIndex.incrementAndGet();
+            final String jobId = String.valueOf(jobIdCount);
+            final String uidStr = String.valueOf(uid);
+            final String jobTypeStr = String.valueOf(jobType);
+            final Date startTime = new Date();
+            
+            List<Object> results = redisTemplate.execute(new SessionCallback<List<Object>>() {
+                @Override
+                public List<Object> execute(RedisOperations operations) throws DataAccessException {
+                    operations.multi();
+                    operations.boundHashOps("job:"+jobId);
+                    operations.opsForHash().put("job:"+jobId, "userId", uidStr);
+                    operations.opsForHash().put("job:"+jobId, "jobId", jobId);
+                    operations.opsForHash().put("job:"+jobId, "status", "4");
+                    operations.opsForHash().put("job:"+jobId, "type", jobTypeStr);
+                    operations.opsForHash().put("job:"+jobId, "startTime", ShareokdataManager.getSimpleDateFormat().format(startTime));
+                    operations.opsForHash().put("job:"+jobId, "endTime", "");
+                    if(null != values && values.size() > 0){
+                        for (String key : values.keySet()) {
+                            String value = (null != values.get(key)) ? (String)values.get(key) : "";
+                            operations.opsForHash().put("job:"+jobId, key, value);
+                        }
+                    }
+                    
+                    operations.boundSetOps("user_"+uidStr+"_job_set").add(jobId);
+                    
+                    List<Object> jobList= operations.exec();
+                    if(!jobList.get(0).equals(true)){
+                        operations.discard();
+                    }
+                    return jobList;
+                }
+
+            });
+            newJob.setJobId(jobIdCount);
+            newJob.setType(jobType);
+            newJob.setStartTime(startTime);
+            newJob.setUserId(uid);
+            newJob.setData(values);
+        }
+        catch(Exception ex){
+            logger.error("Cannot start a new job.", ex);
+        }
+        return newJob;
+    }
+    
 }

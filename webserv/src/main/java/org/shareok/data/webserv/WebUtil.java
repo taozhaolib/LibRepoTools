@@ -5,6 +5,8 @@
  */
 package org.shareok.data.webserv;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,11 +15,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
+import org.shareok.data.redis.server.RepoServer;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -70,12 +78,41 @@ public class WebUtil {
     
     public static void outputJobInfoToModel(ModelAndView model, RedisJob job){
         
+        Date startTime = job.getStartTime();
+        Date endTime = job.getEndTime();
         model.addObject("jobId", job.getJobId());      
         model.addObject("status", RedisUtil.REDIS_JOB_STATUS[job.getStatus()]);
-        model.addObject("startTime", ShareokdataManager.getSimpleDateFormat().format(job.getStartTime()));
-        model.addObject("endTime", ShareokdataManager.getSimpleDateFormat().format(job.getEndTime()));
+        model.addObject("startTime", (null == startTime) ? "" : ShareokdataManager.getSimpleDateFormat().format(startTime));
+        model.addObject("endTime", (null == endTime) ? "" : ShareokdataManager.getSimpleDateFormat().format(endTime));
         model.addObject("jobType", DataUtil.JOB_TYPES[job.getType()]);
-        model.addObject("repoType", DataUtil.REPO_TYPES[job.getRepoType()]);
+    }
+    
+    public static String getReportDownloadLink(String jobType, String jobId){
+        String[] jobInfo = jobType.split("-");
+        String repoType = jobInfo[jobInfo.length-1];
+        return ShareokdataManager.getShareokdataPath()+ File.separator + repoType + File.separator + jobType + File.separator + jobId + File.separator + jobId + "-report.txt";
+    }
+    
+    public static ModelAndView getServerList(ModelAndView model, RepoServerService serverService) throws JsonProcessingException{
+        
+        Map<String, String> serverList = serverService.getServerNameIdList();
+
+        if(null != serverList && serverList.size() > 0){
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            Collection<String> ids = serverList.values();
+            List<RepoServer> serverObjList = serverService.getServerObjList(ids);                
+
+            String serverListJson = mapper.writeValueAsString(serverList);
+            model.addObject("serverList", serverListJson);
+            model.addObject("serverObjList", mapper.writeValueAsString(serverObjList));
+        }
+        else{
+//            model.addObject("emptyServerList", "There are NO servers set up.");
+        }
+        
+        return model;
     }
     
 }

@@ -14,6 +14,8 @@ import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.JobDaoImpl;
 import org.shareok.data.redis.job.RedisJob;
+import org.shareok.data.redis.server.RepoServer;
+import org.shareok.data.redis.server.RepoServerDaoImpl;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -27,7 +29,7 @@ public class RedisUtil {
     
     private static final Logger logger = Logger.getLogger(UserDaoImpl.class);
     
-    public static String[] REDIS_JOB_STATUS= {"undecided", "running", "completed", "failed", "built", "imported"};
+    public static String[] REDIS_JOB_STATUS= {"undecided", "running", "completed", "failed", "built", "imported", "uploaded", "queued"};
     
 
     /**
@@ -90,5 +92,23 @@ public class RedisUtil {
                 return result;
             }
         });
+    }
+    
+    public static String getJobQueueName(long userId, String jobType, String serverName){
+        return String.valueOf(userId)+"--"+serverName+"--"+jobType;
+    }
+    
+    public static String getServerQueryKey(int serverId){
+        return ShareokdataManager.getRedisServerQueryPrefix() + String.valueOf(serverId);
+    }
+    
+    public static RepoServer getServerInstance(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
+        return (RepoServer) context.getBean("repoServer");
+    }
+    
+    public static RepoServerDaoImpl getServerDaoInstance(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
+        return (RepoServerDaoImpl) context.getBean("repoServerDaoImpl");
     }
 }

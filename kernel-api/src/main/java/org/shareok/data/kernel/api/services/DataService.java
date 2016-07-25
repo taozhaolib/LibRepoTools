@@ -6,12 +6,15 @@
 package org.shareok.data.kernel.api.services;
 
 import org.shareok.data.config.DataHandler;
+import org.shareok.data.redis.job.RedisJob;
 
 /**
  *
  * @author Tao Zhao
  */
-public interface DataService {
+public interface DataService extends Runnable {
+    public void setUserId(long userId);
     public void setHandler(DataHandler handler);
+    public void loadJobInfoByJob(RedisJob job);
     public String executeTask(String jobType);
 }

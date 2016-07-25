@@ -22,13 +22,13 @@ public class RedisJobServiceImpl implements RedisJobService {
     private JobDao jobDao;
 
     @Override
-    public long startJob(long uid, int jobType, int repoType) {
-        return jobDao.startJob(uid, jobType, repoType);
+    public long startJob(long uid, int jobType, int repoType, int serverId) {
+        return jobDao.startJob(uid, jobType, repoType, serverId);
     }
 
     @Override
-    public long startJob(long uid, int jobType, int repoType, Date startTime) {
-        return jobDao.startJob(uid, jobType, repoType, startTime);
+    public long startJob(long uid, int jobType, int repoType, int serverId, Date startTime) {
+        return jobDao.startJob(uid, jobType, repoType, serverId, startTime);
     }
     
     @Override
@@ -64,6 +64,11 @@ public class RedisJobServiceImpl implements RedisJobService {
     @Override
     public Map<String, String> getJobInfoByAttributes(long jobId, String[] jobAttributes) {
         return jobDao.getJobInfoByAttributes(jobId, jobAttributes);
+    }
+    
+    @Override
+    public RedisJob createJob(final long uid, final int jobType, final Map<String, String> values){
+        return jobDao.createJob(uid, jobType, values);
     }
     
 }

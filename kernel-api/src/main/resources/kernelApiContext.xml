@@ -12,6 +12,8 @@
     <import resource="classpath*:**/sageDataContext.xml"/>
     <import resource="classpath*:**/plosContext.xml"/>
     <import resource="classpath*:**/redisContext.xml"/>
+    <import resource="classpath*:**/dspaceManagerContext.xml"/>
+    <import resource="classpath*:**/islandoraManagerContext.xml"/>
     
     <bean id="plosDspaceServiceImpl" class="org.shareok.data.kernel.api.services.dspace.DspacePlosServiceImpl">
 
@@ -27,6 +29,9 @@
     
     <bean id="dspaceSshServiceImpl" class="org.shareok.data.kernel.api.services.dspace.DspaceSshServiceImpl">
     </bean>
+    
+    <bean id="islandoraSshServiceImpl" class="org.shareok.data.kernel.api.services.islandora.IslandoraSshServiceImpl">
+    </bean>
         
     <bean id="redisJobServiceImpl" class="org.shareok.data.kernel.api.services.job.RedisJobServiceImpl">
         
@@ -35,6 +40,10 @@
     <bean id="jobHandlerImpl" class="org.shareok.data.kernel.api.services.job.JobHandlerImpl">
         
     </bean>
+    
+    <bean id="repoServerService" class="org.shareok.data.kernel.api.services.server.RepoServerServiceImpl"></bean>
+    
+    <bean id="jobQueueServiceImpl" class="org.shareok.data.kernel.api.services.job.JobQueueServiceImpl"></bean>
     
 </beans>
 

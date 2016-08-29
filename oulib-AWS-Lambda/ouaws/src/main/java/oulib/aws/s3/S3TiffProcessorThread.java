@@ -131,7 +131,7 @@ public class S3TiffProcessorThread implements Runnable {
      //                   S3Util.copyS3ObjectTiffMetadata(s3client, object, s3client.getObject(new GetObjectRequest(targetBucketName, key)), targetBucketName, key+".tif");
                         System.out.println("Finished to generate smaller tif image for the object "+key);
                         output += "Finished to generate smaller tif image for the object "+key;
-     //                   break;
+                        break;
                     }
                 }
 //                output += "Next Continuation Token : " + result.getNextContinuationToken();
@@ -164,7 +164,11 @@ public class S3TiffProcessorThread implements Runnable {
     
     public void outputToFile(String filePath){
         try{
-            File file = new File(filePath);            
+            File file = new File(filePath);  
+            File parentDir = new File(file.getParent());
+            if(!parentDir.exists()){
+                parentDir.mkdirs();
+            }
             if(!file.exists()){
                 file.createNewFile();                
             }

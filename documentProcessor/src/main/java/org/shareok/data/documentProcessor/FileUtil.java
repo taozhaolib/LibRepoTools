@@ -368,4 +368,13 @@ public class FileUtil {
             os.close();
         }
     }
+    
+    /**
+     * Used to tell if a string is null or empty
+     * @param str
+     * @return 
+     */
+    public static boolean isEmptyString(String str){
+        return (null == str || str.isEmpty());
+    }
 }

@@ -167,6 +167,12 @@ public class S3Util {
         return bucket;
     }
     
+    public static PutObjectResult generateSmallTiff(AmazonS3 s3client, String sourceBucketName, String sourceKey, String targetBucketName, String targetKey, double compressionRate){
+        
+        S3Object s3Object= s3client.getObject(new GetObjectRequest(sourceBucketName, sourceKey));
+        return generateSmallTiff(s3client, s3Object, targetBucketName, targetKey, compressionRate);
+    }
+    
     /**
      * Generate a small tiff file from large Tiff S3 bucket object <br>
      * Note: the small tiff file will have the same key path as the original one
@@ -174,10 +180,11 @@ public class S3Util {
      * @param s3client : S3 client
      * @param s3 : S3 object that con
      * @param targetBucketName : the bucket that stores the small tiff file
+     * @param targetKey : key of the object in the target bucket
      * @param compressionRate : compression rate
      * @return : PutObjectResult
      */
-    public static PutObjectResult generateSmallTiff(AmazonS3 s3client, S3Object s3, String targetBucketName, double compressionRate){
+    public static PutObjectResult generateSmallTiff(AmazonS3 s3client, S3Object s3, String targetBucketName, String targetKey, double compressionRate){
         
         PutObjectResult result = null;
         ByteArrayOutputStream bos = null;
@@ -218,7 +225,7 @@ public class S3Util {
             
             imagenew.flush();
             
-            result = s3client.putObject(new PutObjectRequest(targetBucketName, s3.getKey(), is, metadata));
+            result = s3client.putObject(new PutObjectRequest(targetBucketName, targetKey, is, metadata));
         } catch (IOException | AmazonClientException ex) {
             Logger.getLogger(S3Util.class.getName()).log(Level.SEVERE, null, ex);
         } finally{
@@ -258,7 +265,7 @@ public class S3Util {
 	    	long objSize = s3.getObjectMetadata().getContentLength();
 	    	double compressionRate = Math.sqrt(Double.valueOf(compressionSize)/Double.valueOf(objSize));
 //	    	System.out.println("The compressoin rate is "+String.valueOf(compressionRate)+" with original size = "+String.valueOf(objSize)+" and target size = "+String.valueOf(compressionSize));
-	    	return generateSmallTiff(s3client, s3, targetBucketName, compressionRate);
+	    	return generateSmallTiff(s3client, s3, targetBucketName, s3.getKey(), compressionRate);
     	}
     	catch(Exception ex){
     		ex.printStackTrace();
@@ -272,14 +279,31 @@ public class S3Util {
      * Generate the new output S3 object that has the metadata from input object.
      * 
      * @param s3client : S3 client
-     * @param obj1 : input object that provides metadata
-     * @param obj2 : target object that receives metadata
-     * @param targetBucketName : bucket name for output object
-     * @param key : key of the output S3 object
+     * @param sourceBucketName : Input bucket name
+     * @param targetBucketName : Output bucket name
+     * @param sourceKey : Input object key
+     * @param targetKey : Output object key
      * 
      * @return PutObjectResult
      */
-    public static PutObjectResult copyS3ObjectTiffMetadata(AmazonS3 s3client, S3Object obj1, S3Object obj2, String targetBucketName, String key){
+    public static PutObjectResult copyS3ObjectTiffMetadata(AmazonS3 s3client, String sourceBucketName, String targetBucketName, String sourceKey, String targetKey){
+        S3Object obj1 = s3client.getObject(new GetObjectRequest(sourceBucketName, sourceKey));
+        S3Object obj2 = s3client.getObject(new GetObjectRequest(targetBucketName, targetKey));
+        return copyS3ObjectTiffMetadata(s3client, obj1, obj2);
+    }
+    
+    /**
+     * Pull out Tiff metadata from input S3 object and inject into the 
+     * content of target S3 Object;<br>
+     * Generate the new output S3 object that has the metadata from input object.
+     * 
+     * @param s3client : S3 client
+     * @param obj1 : input object that provides metadata
+     * @param obj2 : target object that receives metadata
+     * 
+     * @return PutObjectResult
+     */
+    public static PutObjectResult copyS3ObjectTiffMetadata(AmazonS3 s3client, S3Object obj1, S3Object obj2){
     	
     	PutObjectResult result = null;
     	
@@ -289,6 +313,8 @@ public class S3Util {
     	ByteArrayInputStream bis = null;
     	S3ObjectInputStream content1 = null;
     	S3ObjectInputStream content2 = null;
+        String targetBucketName = obj2.getBucketName();
+        String outputKey = obj2.getKey();
     	
     	ImageMetadata metadata1, metadata2;
     	TiffImageMetadata tiffMetadata1, tiffMetadata2;
@@ -347,7 +373,7 @@ public class S3Util {
                 metadata.setContentType("image/tiff");
                 metadata.setLastModified(new Date());
 
-                result = s3client.putObject(new PutObjectRequest(targetBucketName, key, byteArrayInputStream, metadata));
+                result = s3client.putObject(new PutObjectRequest(targetBucketName, outputKey, byteArrayInputStream, metadata));
 			
             } catch (ImageReadException | IOException | ImageWriteException ex) {
                     Logger.getLogger(S3Util.class.getName()).log(Level.SEVERE, null, ex);

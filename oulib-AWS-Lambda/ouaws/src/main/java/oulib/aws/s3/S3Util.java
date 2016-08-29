@@ -23,6 +23,7 @@ import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.util.IOUtils;
 import com.sun.media.jai.codec.ImageCodec;
 import com.sun.media.jai.codec.ImageDecoder;
 import com.sun.media.jai.codec.TIFFDecodeParam;
@@ -323,9 +324,12 @@ public class S3Util {
         try {
                 content1 = obj1.getObjectContent(); 
                 content2 = obj2.getObjectContent(); 
+                
+                byte[] bytes1 = IOUtils.toByteArray(content1);
+                byte[] bytes2 = IOUtils.toByteArray(content2);
 
-                metadata1 = Imaging.getMetadata(content1, obj1.getKey());
-                metadata2 = Imaging.getMetadata(content2, obj2.getKey());
+                metadata1 = Imaging.getMetadata(bytes1);
+                metadata2 = Imaging.getMetadata(bytes2);
 
                 tiffMetadata1 = (TiffImageMetadata)metadata1;
                 tiffMetadata2 = (TiffImageMetadata)metadata2;

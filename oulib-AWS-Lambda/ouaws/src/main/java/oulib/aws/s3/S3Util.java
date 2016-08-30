@@ -192,14 +192,18 @@ public class S3Util {
         ByteArrayOutputStream os = null;
         ByteArrayInputStream is = null;
         S3ObjectInputStream s = null;
+        ByteArrayInputStream byteInputStream = null;
         
         try{
             System.setProperty("com.sun.media.jai.disableMediaLib", "true");
 
             bos = new ByteArrayOutputStream();
             s = s3.getObjectContent();
+            byte[] bytes = IOUtils.toByteArray(s);
+            byteInputStream = new ByteArrayInputStream(bytes);
+            
             TIFFDecodeParam param = new TIFFDecodeParam();
-            ImageDecoder dec = ImageCodec.createImageDecoder("TIFF", s, param);
+            ImageDecoder dec = ImageCodec.createImageDecoder("TIFF", byteInputStream, param);
             
             RenderedImage image = dec.decodeAsRenderedImage();
 
@@ -231,18 +235,21 @@ public class S3Util {
             Logger.getLogger(S3Util.class.getName()).log(Level.SEVERE, null, ex);
         } finally{
         	try{
-        		if(bos != null){
-        			bos.close();
-        		}
-        		if(os != null){
-        			os.close();
-        		}
-                if(is != null){
-                	is.close();
-                }
-                if(s != null){
-                	s.close();
-                }
+                    if(bos != null){
+                        bos.close();
+                    }
+                    if(os != null){
+                        os.close();
+                    }
+                    if(is != null){
+                        is.close();
+                    }
+                    if(s != null){
+                        s.close();
+                    }
+                    if(byteInputStream != null){
+                        byteInputStream.close();
+                    }
         	}
         	catch(IOException ex){
         		Logger.getLogger(S3Util.class.getName()).log(Level.SEVERE, null, ex);

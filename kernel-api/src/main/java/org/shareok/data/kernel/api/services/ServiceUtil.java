@@ -44,6 +44,9 @@ public class ServiceUtil {
                 case "ssh-import-islandora":
                     serviceBeanMap.put(job, "islandoraSshServiceImpl");
                     break;
+                case "rest-import-dspace":
+                    serviceBeanMap.put(job, "dspaceRestServiceImpl");
+                    break;
                 default:
                     break; 
             }

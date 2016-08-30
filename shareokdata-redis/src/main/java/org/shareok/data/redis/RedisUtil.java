@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.redis.job.DspaceApiJob;
 import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.JobDaoImpl;
 import org.shareok.data.redis.job.RedisJob;
@@ -29,7 +30,7 @@ public class RedisUtil {
     
     private static final Logger logger = Logger.getLogger(UserDaoImpl.class);
     
-    public static String[] REDIS_JOB_STATUS= {"undecided", "running", "completed", "failed", "built", "imported", "uploaded", "queued"};
+    public static String[] REDIS_JOB_STATUS= {"undecided", "running", "completed", "failed", "built", "imported", "uploaded", "queued", "created"};
     
 
     /**
@@ -74,6 +75,11 @@ public class RedisUtil {
     public static RedisJob getJobInstance(){
         ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
         return (RedisJob) context.getBean("job");
+    }
+    
+    public static DspaceApiJob getDspaceApiJobInstance(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
+        return (DspaceApiJob) context.getBean("dspaceApiJob");
     }
     
     public static void sortJobList(List<RedisJob> jobList){

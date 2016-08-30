@@ -65,6 +65,7 @@ public class RepoServerDaoImpl implements RepoServerDao {
             final String proxyPassword = server.getProxyPassword();
             final String passphrase = server.getPassPhrase();
             final String rsaKey = server.getRsaKey();
+            final String address = server.getAddress();
             
             RepoServer existingServer = findServerByName(serverName);
             if(null != existingServer){
@@ -91,6 +92,7 @@ public class RepoServerDaoImpl implements RepoServerDao {
                     operations.opsForHash().put("server:"+serverId, "passphrase", passphrase);
                     operations.opsForHash().put("server:"+serverId, "rsaKey", rsaKey);
                     operations.opsForHash().put("server:"+serverId, "repoType", repoTypeStr);
+                    operations.opsForHash().put("server:"+serverId, "address", address);
                     
                     operations.boundHashOps(ShareokdataManager.getRedisServerNameIdMatchingTable());
                     operations.opsForHash().put(ShareokdataManager.getRedisServerNameIdMatchingTable(), serverName, serverId);
@@ -111,7 +113,7 @@ public class RepoServerDaoImpl implements RepoServerDao {
     
     @Override
     public RepoServer addServer(int port, int proxyPort, int timeout, int repoType, final String serverName, final String host, final String proxyHost, final String userName, 
-            final String proxyUserName, final String password, final String proxyPassword, final String passphrase, final String rsaKey) {
+            final String proxyUserName, final String password, final String proxyPassword, final String passphrase, final String rsaKey, final String address) {
         
         RepoServer server = new RepoServer();
         server.setPort(port);
@@ -127,6 +129,7 @@ public class RepoServerDaoImpl implements RepoServerDao {
         server.setPassPhrase(passphrase);
         server.setRsaKey(rsaKey);
         server.setRepoType(repoType);
+        server.setAddress(address);
         
         return addServer(server);
     }
@@ -233,6 +236,7 @@ public class RepoServerDaoImpl implements RepoServerDao {
             final String proxyPassword = server.getProxyPassword();
             final String passPhrase = server.getPassPhrase();
             final String rsaKey = server.getRsaKey();
+            final String address = server.getAddress();
             
             List<Object> results = redisTemplate.execute(new SessionCallback<List<Object>>() {
                 @Override
@@ -254,6 +258,7 @@ public class RepoServerDaoImpl implements RepoServerDao {
                     operations.opsForHash().put("server:"+serverId, "passPhrase", passPhrase);
                     operations.opsForHash().put("server:"+serverId, "rsaKey", rsaKey);
                     operations.opsForHash().put("server:"+serverId, "repoType", repoTypeStr);
+                    operations.opsForHash().put("server:"+serverId, "address", address);
                     
                     operations.boundHashOps(ShareokdataManager.getRedisServerNameIdMatchingTable());
                     if(!oldServerName.equals(serverName)){
@@ -295,6 +300,7 @@ public class RepoServerDaoImpl implements RepoServerDao {
                 server.setProxyPassword(serverOps.get("proxyPassword"));
                 server.setPassPhrase(serverOps.get("passPhrase"));
                 server.setRsaKey(serverOps.get("rsaKey"));
+                server.setAddress(serverOps.get("address"));
                 return server;
             }
             else{
@@ -387,6 +393,7 @@ public class RepoServerDaoImpl implements RepoServerDao {
                             server.setPassPhrase(serverOps.get("passPhrase"));
                             server.setRsaKey(serverOps.get("rsaKey"));
                             server.setRepoType(Integer.parseInt(serverOps.get("repoType")));
+                            server.setAddress(serverOps.get("address"));
                             serverList.add(server);
                         }
                     }

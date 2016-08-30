@@ -27,4 +27,5 @@ public interface RedisJobService extends RepositoryJobService {
     public List<RedisJob> getJobListByUserEmail(String email);
     public RedisJob findJobByJobId(long jobId);
     public RedisJob createJob(final long uid, final int jobType, final Map<String, String> values);
+    public RedisJob saveJob(RedisJob job);
 }

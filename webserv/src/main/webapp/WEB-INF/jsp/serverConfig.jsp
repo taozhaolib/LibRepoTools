@@ -55,9 +55,15 @@
                     </div>
                     <br/><br/>
                     <div class="form-group">
-                                                 
-                        &nbsp;&nbsp;&nbsp;<input type="button"  class="btn btn-click col-lg-3" value="Click to Set up Proxy">
+                        <label class="control-label col-lg-2 col-sm-4 text-left" for="address">Web address:</label>
+                        <div class="col-lg-4 col-sm-8">
+                          <input type="text" class="form-control" name="address" placeholder="">
+                        </div>   
+                        <div class="col-lg-6 col-sm-12">
+                            <input type="button"  class="btn btn-click col-lg-6 col-sm-6" value="Click to Set up Proxy">
+                        </div>
                     </div>
+                    <br/><br/>
                     <br/>
                     <div class="form-group click-show-slow">
                         <label class="control-label col-lg-2 col-sm-4 text-left" for="proxyHost">Proxy Host:</label>

@@ -19,6 +19,8 @@
         <module>lawLibrary</module>
         <module>SAFBuilder</module>
         <module>islandoraManager</module>
+        <module>oulib-AWS-Lambda/ouaws</module>
+        <module>commons</module>
     </modules>
     <properties>
        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -111,7 +113,17 @@
 		<artifactId>jackson-databind</artifactId>
 		<version>2.6.3</version>
 	</dependency>
-       
-     </dependencies>
+        
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.4</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
+        </dependency>
+   </dependencies>
      
 </project>

@@ -15,5 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public interface JobHandler {
     public RedisJob execute(long uid, DataHandler handler, MultipartFile localFile, String remoteFilePath);
+    public RedisJob execute(RedisJob job);
 //    public RedisJob execute(long uid, String jobType, String repoType, DataHandler handler, MultipartFile localFile, String remoteFilePath);
 }

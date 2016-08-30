@@ -45,5 +45,7 @@
     
     <bean id="jobQueueServiceImpl" class="org.shareok.data.kernel.api.services.job.JobQueueServiceImpl"></bean>
     
+    <bean id="dspaceRestServiceImpl" class="org.shareok.data.kernel.api.services.dspace.DspaceRestServiceImpl"></bean>
+    
 </beans>
 

@@ -16,6 +16,7 @@ public class RepoServer {
     private int port;
     private int proxyPort;
     private int repoType;
+    private String address;
     private String serverName;
     private String host;    
     private String proxyHost;
@@ -44,6 +45,10 @@ public class RepoServer {
 
     public int getRepoType() {
         return repoType;
+    }
+
+    public String getAddress() {
+        return address;
     }
 
     public String getServerName() {
@@ -116,6 +121,10 @@ public class RepoServer {
 
     public void setRepoType(int repoType) {
         this.repoType = repoType;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public void setProxyUserName(String proxyUserName) {

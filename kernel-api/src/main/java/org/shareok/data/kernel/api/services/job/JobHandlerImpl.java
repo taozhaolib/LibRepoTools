@@ -6,12 +6,8 @@
 package org.shareok.data.kernel.api.services.job;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.DataHandler;
 import org.shareok.data.config.ShareokdataManager;
@@ -175,6 +171,30 @@ public class JobHandlerImpl implements JobHandler {
                 break;
         }
         return filePath;
+    }
+    
+    /**
+     * 
+     * @param job : job to be processed.
+     * @return : RedisJob job
+     */
+    @Override
+    public RedisJob execute(RedisJob job){
+        ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
+
+        RedisJobService redisJobServ = (RedisJobService) context.getBean("redisJobServiceImpl");
+
+        RedisJob newJob = redisJobServ.saveJob(job);
+        
+        long jobId = newJob.getJobId();
+
+        String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.JOB_TYPES[job.getType()], jobId);
+        DataService ds = ServiceUtil.getDataService(context, job.getType());
+
+        String filePath = "";
+        String reportFilePath = jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt";
+        
+        return job;
     }
     
     private void processJobReturnValue(String jobReturnValue, RedisJobService redisJobServ, long jobId, int jobType, String remoteFilePath){

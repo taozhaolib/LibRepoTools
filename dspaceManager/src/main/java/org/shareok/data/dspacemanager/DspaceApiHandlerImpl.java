@@ -12,9 +12,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.FileZipper;
+import org.shareok.data.documentProcessor.exceptions.EmptyFilePathException;
+import org.shareok.data.documentProcessor.exceptions.FileTypeException;
 import org.shareok.data.dspacemanager.exceptions.EmptyDspaceCredentialInfoException;
 import org.shareok.data.dspacemanager.exceptions.ErrorDspaceApiResponseException;
 import org.shareok.data.dspacemanager.exceptions.SafPackageMissingFileException;
@@ -585,7 +590,9 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         try{            
             File safFile = new File(safPath);
             if(safPath.endsWith(".zip")){
-
+                FileZipper.unzipToDirectory(safPath);
+                // Change the path to be the unzipped folder
+                safPath = FileUtil.getFileNameWithoutExtension(safPath);
             }
             if(safFile.isDirectory()){
                 for(File file : safFile.listFiles()){
@@ -760,6 +767,8 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         }
         catch(SafPackagePathErrorException | SafPackageMissingFileException ex){
             logger.error("Cannot create new items with saf package path: " + safPath, ex);
+        } catch (FileTypeException | EmptyFilePathException ex) {
+            logger.error("Cannot unzip the saf package with path: " + safPath, ex);
         }
         finally{
 //            System.out.println(output);

@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.kernel.api.services.ServiceUtil;
-import org.shareok.data.kernel.api.services.job.JobHandler;
+import org.shareok.data.kernel.api.services.job.TaskManager;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.DspaceApiJob;
@@ -41,13 +41,13 @@ public class RestDspaceDataController {
     
     private RepoServerService serverService;
     
-    private JobHandler jobHandler;
+    private TaskManager jobHandler;
     
     public RepoServerService getServerService() {
         return serverService;
     }
 
-    public JobHandler getJobHandler() {
+    public TaskManager getJobHandler() {
         return jobHandler;
     }
     
@@ -57,7 +57,7 @@ public class RestDspaceDataController {
     }
 
     @Autowired
-    public void setJobHandler(JobHandler jobHandler) {
+    public void setJobHandler(TaskManager jobHandler) {
         this.jobHandler = jobHandler;
     }
     

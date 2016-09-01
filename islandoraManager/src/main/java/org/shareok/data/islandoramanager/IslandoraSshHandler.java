@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.shareok.data.config.DataHandler;
+import org.shareok.data.config.JobHandler;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.documentProcessor.FileUtil;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
  * @author Tao Zhao
  */
 @Service
-public class IslandoraSshHandler implements DataHandler {
+public class IslandoraSshHandler implements JobHandler {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(IslandoraSshHandler.class);
     

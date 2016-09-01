@@ -15,7 +15,7 @@ import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
 import org.shareok.data.kernel.api.services.dspace.DspaceSshService;
-import org.shareok.data.kernel.api.services.job.JobHandler;
+import org.shareok.data.kernel.api.services.job.TaskManager;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class SshDspaceDataController {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(SshDspaceDataController.class);
     
-    private JobHandler jobHandler;
+    private TaskManager taskManager;
     
     private DspaceSshService dsSshService;
     
@@ -64,8 +64,8 @@ public class SshDspaceDataController {
     }
     
     @Autowired
-    public void setJobHandler(JobHandler jobHandler) {
-        this.jobHandler = jobHandler;
+    public void setJobHandler(TaskManager taskManager) {
+        this.taskManager = taskManager;
     }
     
     @RequestMapping(value="/ssh/dspace/journal/{publisher}/{action}", method=RequestMethod.POST)
@@ -88,7 +88,7 @@ public class SshDspaceDataController {
                 int jobTypeIndex = DataUtil.getJobTypeIndex(action, "dspace"); 
                 handler.setJobType(jobTypeIndex);
                 //RedisJob job = jobHandler.execute(Long.valueOf(userId), "dspace", "ssh-import", handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
-                RedisJob job = jobHandler.execute(Long.valueOf(userId), handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
+                RedisJob job = taskManager.execute(Long.valueOf(userId), handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
                 
                 int statusIndex = job.getStatus();
                 String isFinished = (statusIndex == 2 || statusIndex == 6) ? "true" : "false";
@@ -150,7 +150,7 @@ public class SshDspaceDataController {
             try {
                 int jobTypeIndex = DataUtil.getJobTypeIndex(jobTypeStr, "dspace");   
                 handler.setJobType(jobTypeIndex);
-                RedisJob job = jobHandler.execute(Long.valueOf(userId), handler, file, safLink);
+                RedisJob job = taskManager.execute(Long.valueOf(userId), handler, file, safLink);
                 
                 int statusIndex = job.getStatus();
                 String isFinished = (statusIndex == 2 || statusIndex == 6) ? "true" : "false";

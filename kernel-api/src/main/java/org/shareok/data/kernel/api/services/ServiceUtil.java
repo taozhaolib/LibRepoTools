@@ -210,4 +210,12 @@ public class ServiceUtil {
             }
         redisJobServ.updateJob(jobId, "endTime", ShareokdataManager.getSimpleDateFormat().format(new Date()));
     }
+    
+    public static String getThreadNameByJob(RedisJob job){
+        long uid = job.getUserId();
+        String jobType = DataUtil.JOB_TYPES[job.getType()];
+        int serverId = job.getServerId();
+        long jobId = job.getJobId();
+        return String.valueOf(uid)+"--"+jobType+"--"+String.valueOf(serverId)+"--"+String.valueOf(jobId);
+    }
 }

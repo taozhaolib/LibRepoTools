@@ -8,7 +8,7 @@ package org.shareok.data.kernel.api.services.dspace;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Map;
-import org.shareok.data.config.DataHandler;
+import org.shareok.data.config.JobHandler;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.dspacemanager.DspaceSshDataUtil;
@@ -35,6 +35,7 @@ public class DspaceSshServiceImpl implements DspaceSshService {
     private RedisJobService jobService;
     private long userId;
 
+    @Override
     public DspaceSshHandler getHandler() {
         return handler;
     }
@@ -65,7 +66,7 @@ public class DspaceSshServiceImpl implements DspaceSshService {
     @Override
     @Autowired
     @Qualifier("dspaceSshHandler")
-    public void setHandler(DataHandler handler) {
+    public void setHandler(JobHandler handler) {
         this.handler = (DspaceSshHandler)handler;
         if(null == this.handler.getSshExec()){
             this.handler.setSshExec(DspaceSshDataUtil.getSshExecForDspace());

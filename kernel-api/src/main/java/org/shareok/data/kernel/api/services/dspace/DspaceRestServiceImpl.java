@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.shareok.data.config.DataHandler;
+import org.shareok.data.config.JobHandler;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.dspacemanager.DspaceApiHandler;
 import org.shareok.data.kernel.api.exceptions.IncompleteHandlerInfoException;
@@ -36,6 +36,7 @@ public class DspaceRestServiceImpl implements DspaceRestService {
     private long jobId;
     private long userId;
 
+    @Override
     public DspaceApiHandler getHandler() {
         return handler;
     }
@@ -81,7 +82,7 @@ public class DspaceRestServiceImpl implements DspaceRestService {
     @Override
     @Autowired
     @Qualifier("dspaceApiHandlerImpl")
-    public void setHandler(DataHandler handler) {
+    public void setHandler(JobHandler handler) {
         this.handler = (DspaceApiHandler)handler;
     }
 
@@ -108,12 +109,16 @@ public class DspaceRestServiceImpl implements DspaceRestService {
                 throw new IncompleteHandlerInfoException("Handler or Job is null!");
             }
             jobService.updateJob(jobId, "status", "1");
+            loadJobInfoByJob(job);
+            // Start executing:
             String jobReturnValue = executeTask(DataUtil.JOB_TYPES[job.getType()]);
+            
             ServiceUtil.processJobReturnValue(jobReturnValue, job);
             Thread.currentThread().interrupt();
+            jobService.updateJob(jobId, "status", "2");
         }
         catch(IncompleteHandlerInfoException ex){
-            
+            jobService.updateJob(jobId, "status", "3");
         }
     }
     

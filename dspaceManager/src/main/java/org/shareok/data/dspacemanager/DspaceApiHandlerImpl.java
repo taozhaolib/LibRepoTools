@@ -25,6 +25,7 @@ import org.shareok.data.htmlrequest.exceptions.ErrorHandlingResponseException;
 import org.shareok.data.htmlrequest.exceptions.ErrorOpenConnectionException;
 import org.shareok.data.htmlrequest.exceptions.ErrorResponseCodeException;
 import org.shareok.data.htmlrequest.exceptions.ReadResponseInputStreamException;
+import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.DspaceApiJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.w3c.dom.Document;
@@ -85,9 +86,6 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     }
     
     private String token;
-    private String dspaceUserName;
-    private String dspacePassword;
-    private String dspaceApiUrl;
     private DspaceApiJob job;
     private String reportFilePath;
     private String output;
@@ -104,18 +102,6 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
 
     public String getToken() {
         return token;
-    }
-
-    public String getDspaceUserName() {
-        return dspaceUserName;
-    }
-
-    public String getDspacePassword() {
-        return dspacePassword;
-    }
-
-    public String getDspaceApiUrl() {
-        return dspaceApiUrl;
     }
 
     public HttpRequestHandler getHttpRequestHandler() {
@@ -136,18 +122,6 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         this.token = token;
     }
 
-    public void setDspaceUserName(String dspaceUserName) {
-        this.dspaceUserName = dspaceUserName;
-    }
-
-    public void setDspacePassword(String dspacePassword) {
-        this.dspacePassword = dspacePassword;
-    }
-
-    public void setDspaceApiUrl(String dspaceApiUrl) {
-        this.dspaceApiUrl = dspaceApiUrl;
-    }
-
     public void setOutput(String output) {
         this.output = output;
     }
@@ -159,6 +133,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     
     @Override
     public String getTokenFromServer(){
+        
+        String dspaceUserName = job.getDspaceUserName();
+        String dspacePassword = job.getDspaceUserPw();
+        String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
         try{
             if(null == dspaceUserName || "".equals(dspaceUserName) || null == dspacePassword || "".equals(dspacePassword)){
                 throw new EmptyDspaceCredentialInfoException("The DSpace username or DSpace password information is missing!");
@@ -213,6 +191,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         header.put("rest-dspace-token", token);
         
         try{
+            String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
             String response = httpRequestHandler.requestWithHeaderInfo(dspaceApiUrl + "/status", "GET", header, null).toString();
             String[] userInfoResponseArr = response.split("\\n");
             if(null != userInfoResponseArr[0] && userInfoResponseArr[0].equals("code:200")){
@@ -254,6 +233,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     @Override
     public String getObjectInfoByHandler(String handle){
         try{
+            String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
             String objectInfo = httpRequestHandler.sendGet(dspaceApiUrl + "/handle/" + handle);
             String[] objectInfoArr = objectInfo.split("\\n");
             if(null != objectInfoArr[0] && objectInfoArr[0].equals("200")){
@@ -272,6 +252,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     @Override
     public String[] getItemIdsByCollectionId(String id) {
         try{
+            String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
             String itemCount = String.valueOf(getItemCountByCollectionId(id));
             String itemsInfo = httpRequestHandler.sendGet(dspaceApiUrl + "/collections/" + id + "/items?limit="+itemCount);
             String[] itemsInfoArr = itemsInfo.split("\\n");
@@ -313,6 +294,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     public List<Map<String, Object>> getItemMetadataById(String id){
         String metadataInfo;
         try{
+            String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
             String url = dspaceApiUrl + "/items/" + id + "/metadata";
             String metadataJson = httpRequestHandler.sendGet(url);
             String[] metadataJsonArr = metadataJson.split("\\n");
@@ -356,6 +338,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     @Override
     public int getItemCountByCollectionId(String id){
         try{
+            String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
             String itemsInfo = httpRequestHandler.sendGet(dspaceApiUrl + "/collections/" + id);
             String[] itemsInfoArr = itemsInfo.split("\\n");
             if(null != itemsInfoArr[0] && itemsInfoArr[0].equals("200")){
@@ -399,7 +382,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         header.put("Content-Type", "application/json");
         header.put("Accept", "application/json");
         header.put("rest-dspace-token", token);
-        
+        String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
         httpRequestHandler.requestWithHeaderInfo(dspaceApiUrl + "/items/" + id +"/metadata", "PUT", header, json);
     }
     
@@ -414,6 +397,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         header.put("Accept", "application/json");
         header.put("rest-dspace-token", token);
         
+        String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
         String response = httpRequestHandler.requestWithHeaderInfo(dspaceApiUrl + "/collections/" + collectionId +"/items", "POST", header, json).toString();
         String[] userInfoResponseArr = response.split("\\n");
         if(null != userInfoResponseArr[0] && userInfoResponseArr[0].equals("code:200")){
@@ -435,6 +419,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         header.put("Content-Type", "application/json");
         header.put("Accept", "application/json");
         header.put("rest-dspace-token", token);
+        String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
         httpRequestHandler.requestWithHeaderInfo(dspaceApiUrl + "/items/" + id, "DELETE", header, null).toString();
     }
     
@@ -446,6 +431,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         header.put("Accept", "application/json");
         header.put("rest-dspace-token", token);
         
+        String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
         String response = httpRequestHandler.requestWithHeaderInfo(dspaceApiUrl + "/items/" + id +"/metadata", "POST", header, data).toString();
         String[] userInfoResponseArr = response.split("\\n");
         if(null != userInfoResponseArr[0] && userInfoResponseArr[0].equals("code:200")){
@@ -552,6 +538,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         
         String response = null;
         try {
+            String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
             response = httpRequestHandler.uploadFileByHttpClient(dspaceApiUrl + "/items/" + id +"/bitstreams?name="
                     +fileName+"&description="+description, filePath, header).toString();
         } catch (ErrorOpenConnectionException | ErrorConnectionOutputStreamException | ErrorResponseCodeException | ErrorHandlingResponseException | ReadResponseInputStreamException ex) {

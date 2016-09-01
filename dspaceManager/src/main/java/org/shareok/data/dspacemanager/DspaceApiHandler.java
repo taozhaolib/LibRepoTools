@@ -7,14 +7,14 @@ package org.shareok.data.dspacemanager;
 
 import java.util.List;
 import java.util.Map;
-import org.shareok.data.config.DataHandler;
+import org.shareok.data.config.JobHandler;
 import org.shareok.data.redis.job.DspaceApiJob;
 
 /**
  *
  * @author Tao Zhao
  */
-public interface DspaceApiHandler extends DataHandler {
+public interface DspaceApiHandler extends JobHandler {
     public boolean isAuthorizedUser();
     
     public Map<String, Object> getUserInfoByToken(); 

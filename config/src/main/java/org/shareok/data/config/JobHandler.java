@@ -11,11 +11,11 @@ import java.util.Map;
  *
  * @author Tao Zhao
  */
-public interface DataHandler {
+public interface JobHandler {
     public void setFilePath(String filePath);
     public void setReportFilePath(String reportFilePath);
-    public int getJobType();    
-    public Map<String, String> outputJobDataByJobType();
+    public int getJobType();   
     public String getServerName();
     public String getRepoType();
+    public Map<String, String> outputJobDataByJobType();    
 }

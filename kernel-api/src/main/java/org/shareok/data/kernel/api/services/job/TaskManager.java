@@ -5,7 +5,7 @@
  */
 package org.shareok.data.kernel.api.services.job;
 
-import org.shareok.data.config.DataHandler;
+import org.shareok.data.config.JobHandler;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,8 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
  *
  * @author Tao Zhao
  */
-public interface JobHandler {
-    public RedisJob execute(long uid, DataHandler handler, MultipartFile localFile, String remoteFilePath);
+public interface TaskManager {
+    public RedisJob execute(long uid, JobHandler handler, MultipartFile localFile, String remoteFilePath);
     public RedisJob execute(RedisJob job);
-//    public RedisJob execute(long uid, String jobType, String repoType, DataHandler handler, MultipartFile localFile, String remoteFilePath);
+//    public RedisJob execute(long uid, String jobType, String repoType, TaskManager handler, MultipartFile localFile, String remoteFilePath);
 }

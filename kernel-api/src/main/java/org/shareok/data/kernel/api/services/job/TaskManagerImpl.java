@@ -9,7 +9,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import org.shareok.data.config.DataUtil;
-import org.shareok.data.config.DataHandler;
+import org.shareok.data.config.JobHandler;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.kernel.api.exceptions.EmptyUploadedPackagePathOfSshUploadJobException;
 import org.shareok.data.kernel.api.services.DataService;
@@ -26,9 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
  *
  * @author Tao Zhao
  */
-public class JobHandlerImpl implements JobHandler {
+public class TaskManagerImpl implements TaskManager {
     
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(JobHandlerImpl.class);
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TaskManagerImpl.class);
     
     private JobQueueService jobQueueService;
 
@@ -46,7 +46,7 @@ public class JobHandlerImpl implements JobHandler {
      * @return : path to the report file
      */
     @Override
-    public RedisJob execute(long uid, DataHandler handler, MultipartFile localFile, String remoteFilePath){
+    public RedisJob execute(long uid, JobHandler handler, MultipartFile localFile, String remoteFilePath){
         try{
             ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
 
@@ -109,7 +109,7 @@ public class JobHandlerImpl implements JobHandler {
 //                            try {
 //                                Thread.sleep(50L);
 //                            } catch (InterruptedException ex) {
-//                                Logger.getLogger(JobHandlerImpl.class.getName()).log(Level.SEVERE, null, ex);
+//                                Logger.getLogger(TaskManagerImpl.class.getName()).log(Level.SEVERE, null, ex);
 //                            }
 //                        }
 //
@@ -139,7 +139,7 @@ public class JobHandlerImpl implements JobHandler {
     }
     
 //    @Override
-//    public RedisJob execute(long uid, String jobType, String repoType, DataHandler handler, MultipartFile localFile, String remoteFilePath){
+//    public RedisJob execute(long uid, String jobType, String repoType, JobHandler handler, MultipartFile localFile, String remoteFilePath){
 //        return execute(uid, Arrays.asList(DataUtil.JOB_TYPES).indexOf(jobType), Arrays.asList(DataUtil.REPO_TYPES).indexOf(repoType), handler, localFile, remoteFilePath);
 //    }
     
@@ -188,13 +188,16 @@ public class JobHandlerImpl implements JobHandler {
         
         long jobId = newJob.getJobId();
 
-        String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.JOB_TYPES[job.getType()], jobId);
-        DataService ds = ServiceUtil.getDataService(context, job.getType());
+        String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.JOB_TYPES[newJob.getType()], jobId);
+        DataService ds = ServiceUtil.getDataService(context, newJob.getType());
+        String threadName = ServiceUtil.getThreadNameByJob(newJob);
+        Thread newThread = new Thread(ds, threadName);
+        newThread.start();
 
         String filePath = "";
         String reportFilePath = jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt";
         
-        return job;
+        return newJob;
     }
     
     private void processJobReturnValue(String jobReturnValue, RedisJobService redisJobServ, long jobId, int jobType, String remoteFilePath){

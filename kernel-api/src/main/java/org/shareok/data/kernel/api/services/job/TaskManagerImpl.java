@@ -11,6 +11,7 @@ import java.util.Map;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.kernel.api.exceptions.EmptyUploadedPackagePathOfSshUploadJobException;
 import org.shareok.data.kernel.api.services.DataService;
 import org.shareok.data.kernel.api.services.ServiceUtil;
@@ -55,7 +56,7 @@ public class TaskManagerImpl implements TaskManager {
             RedisJob newJob = redisJobServ.createJob(uid, handler.getJobType(), handler.outputJobDataByJobType());
             long jobId = newJob.getJobId();
 
-            String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.JOB_TYPES[handler.getJobType()], jobId);
+            String jobFilePath = DataHandlersUtil.getJobReportPath(DataUtil.JOB_TYPES[handler.getJobType()], jobId);
 
             DataService ds = ServiceUtil.getDataService(context, handler.getJobType());
 
@@ -188,10 +189,9 @@ public class TaskManagerImpl implements TaskManager {
         
         long jobId = newJob.getJobId();
 
-        String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.JOB_TYPES[newJob.getType()], jobId);
         DataService ds = ServiceUtil.getDataService(context, newJob.getType());
         ds.getHandler().setJob(newJob);
-        ds.getHandler().setReportFilePath(jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt");
+        ds.getHandler().setReportFilePath(DataHandlersUtil.getJobReportFilePath(DataUtil.JOB_TYPES[newJob.getType()], jobId));
         String threadName = ServiceUtil.getThreadNameByJob(newJob);
         Thread newThread = new Thread(ds, threadName);
         newThread.start();

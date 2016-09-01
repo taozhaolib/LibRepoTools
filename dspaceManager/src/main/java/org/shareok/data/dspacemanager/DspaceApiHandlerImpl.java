@@ -12,8 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.documentProcessor.FileUtil;
@@ -95,6 +93,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     private String token;
     private DspaceApiJob job;
     private String reportFilePath;
+    private String mapping;
     private String output;
     private HttpRequestHandler httpRequestHandler;
 
@@ -115,6 +114,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         return httpRequestHandler;
     }
 
+    public String getMapping() {
+        return mapping;
+    }
+
     public String getOutput() {
         return output;
     }
@@ -127,6 +130,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public void setMapping(String mapping) {
+        this.mapping = mapping;
     }
 
     public void setOutput(String output) {
@@ -551,6 +558,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         } catch (ErrorOpenConnectionException | ErrorConnectionOutputStreamException | ErrorResponseCodeException | ErrorHandlingResponseException | ReadResponseInputStreamException ex) {
             ex.printStackTrace();
             logger.error("Cannot create a new bitstream "+ filePath +" for item " + id, ex);
+            return null;
         }
         
         if(null != response){
@@ -576,9 +584,9 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     }
     
     /**
+     * Load saf package information and import it into DSpace repository
      * 
-     * @param safPath : path of the saf package
-     * @param collectionHandle : handle of the collection
+     * @return : the mapping of the imported information to DSpace items
      */
     @Override
     public Map<String, List<String>> loadItemsFromSafPackage(){
@@ -593,6 +601,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                 FileZipper.unzipToDirectory(safPath);
                 // Change the path to be the unzipped folder
                 safPath = FileUtil.getFileNameWithoutExtension(safPath);
+                safFile = new File(safPath);
             }
             if(safFile.isDirectory()){
                 for(File file : safFile.listFiles()){
@@ -626,7 +635,9 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                             Map newItemInfo = createEmptyItem(getObjectIdByHandler(collectionHandle));
                             String newItemId = String.valueOf(newItemInfo.get("id"));
                             String newItemHandle = (String)newItemInfo.get("handle");
-                            System.out.println( "A new item with handle = "+newItemHandle+" has been added to collection "+collectionHandle+".\n");
+                            //System.out.println( "A new item with handle = "+newItemHandle+" has been added to collection "+collectionHandle+".\n");
+                            output += "A new item with handle = "+newItemHandle+" has been added to collection "+collectionHandle+".\n";
+                            mapping += file.getName() + "   " + newItemHandle;
                             
                             // Add the metadata to the new item:
                             String[] paths = new String[metadataFileList.size()];
@@ -638,7 +649,8 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                             Map<String, String> metadataStrings = getMetadataFromXmlFiles(paths);
                             for(String path : metadataStrings.keySet()){
                                 String metadata = metadataStrings.get(path);                                
-                                System.out.println(" adding metadata file " + metadata +" now with file name : "+file.getName());
+                                //System.out.println(" adding metadata file " + metadata +" now with file name : "+file.getName());
+                                output += " adding metadata file " + metadata +" now with file name : "+file.getName()+"\n";
                                 try{
                                 String metadataInfo = addItemMetadata(newItemId, metadata);
                                 if(null == metadataInfo || metadataInfo.equals("")){
@@ -647,7 +659,8 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                     }
                                     List metadataUnimportedList = (ArrayList)importResults.get("metadata-imported");
                                     metadataUnimportedList.add(newItemId + "---" + path);
-                                    System.out.println( "Failed to add the metadata into item "+newItemHandle+".\n");                                    
+                                    //System.out.println( "Failed to add the metadata into item "+newItemHandle+".\n");
+                                    output += "Failed to add the metadata into item "+newItemHandle+".\n";
                                 }
                                 else{
                                     if(null == importResults.get("metadata-imported")){
@@ -655,7 +668,8 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                     }
                                     List metadataImportedList = (ArrayList)importResults.get("metadata-imported");
                                     metadataImportedList.add(newItemId + "---" + path);
-                                    System.out.println( "A new set of metadata entries have been added to the item "+newItemHandle+". \n");
+                                    //System.out.println( "A new set of metadata entries have been added to the item "+newItemHandle+". \n");
+                                    output += "A new set of metadata entries have been added to the item "+newItemHandle+". \n";
                                 }
                                 }
                                 catch(Exception ex){
@@ -664,7 +678,8 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                     }
                                     List metadataUnimportedList = (ArrayList)importResults.get("metadata-imported");
                                     metadataUnimportedList.add(newItemId + "---" + path);
-                                    System.out.println("Failed to add metadata into item "+newItemHandle+"\n"+ex.getMessage());
+                                    //System.out.println("Failed to add metadata into item "+newItemHandle+"\n"+ex.getMessage());
+                                    output += "Failed to add metadata into item "+newItemHandle+"\n"+ex.getMessage();
                                 }
                             }
                             
@@ -674,7 +689,8 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                 String bitstreamFileName = (String)it.next();
                                 File bitstreamFile = new File(file.getAbsoluteFile() + File.separator + bitstreamFileName);
                                 if(!bitstreamFile.exists()){
-                                    System.out.println( "The bitstream file "+bitstreamFileName+" does not exist in the saf package "+safPath+"!\n");
+                                    //System.out.println( "The bitstream file "+bitstreamFileName+" does not exist in the saf package "+safPath+"!\n");
+                                    output += "The bitstream file "+bitstreamFileName+" does not exist in the saf package "+safPath+"!\n";
                                 }
                                 else{
                                     String newName = bitstreamFile.getName().replace(" ", "_");
@@ -686,7 +702,8 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                             }
                                             List bitstreamImportedList = (ArrayList)importResults.get("bitstream-imported");
                                             bitstreamImportedList.add(newItemId + "---" + bitstreamFile.getAbsoluteFile());
-                                            System.out.println( "A new bitstream file "+bitstreamFileName+" with link "+((String)bitstreamInfo.get("retrieveLink"))+" has been added to the item "+newItemHandle+". \n");
+                                            //System.out.println( "A new bitstream file "+bitstreamFileName+" with link "+((String)bitstreamInfo.get("retrieveLink"))+" has been added to the item "+newItemHandle+". \n");
+                                            output += "A new bitstream file "+bitstreamFileName+" with link "+((String)bitstreamInfo.get("retrieveLink"))+" has been added to the item "+newItemHandle+". \n";
                                         }
                                         else{
                                             if(null == importResults.get("bitstream-unimported")){
@@ -694,7 +711,8 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                             }
                                             List bitstreamUnimportedList = (ArrayList)importResults.get("bitstream-unimported");
                                             bitstreamUnimportedList.add(newItemId + "---" + bitstreamFile.getAbsoluteFile());
-                                            System.out.println( "Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n");
+                                            //System.out.println( "Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n");
+                                            output += "Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n";
                                         }
                                     }
                                     catch(Exception ex){
@@ -703,13 +721,15 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                         }
                                         List bitstreamUnimportedList = (ArrayList)importResults.get("bitstream-unimported");
                                         bitstreamUnimportedList.add(newItemId + "---" + bitstreamFile.getAbsoluteFile());
-                                        System.out.println( "Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n"+ex.getMessage());
+                                        //System.out.println( "Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n"+ex.getMessage());
+                                        output += "Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n"+ex.getMessage();
                                     }
                                 }
                             }                            
                         }
                         else{
-                            System.out.println( "This saf package is missing either the contents file or the metadata files.\n");
+                            //System.out.println( "This saf package is missing either the contents file or the metadata files.\n");
+                            output += "This saf package is missing either the contents file or the metadata files.\n";
                             throw new SafPackageMissingFileException("Saf package at " + safPath + " either the contents file or the metadata files are missing!");
                         }
                     }
@@ -724,19 +744,23 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
             if(null != metadataUnimportedList && metadataUnimportedList.size() > 0){
                 for (Iterator<String> iterator = metadataUnimportedList.iterator(); iterator.hasNext();) {
                     String[] values = ((String) iterator.next()).split("---");
-                    System.out.println("Second try to add metadata into "+values[0]+" with data "+values[1]);
+                    //System.out.println("Second try to add metadata into "+values[0]+" with data "+values[1]);
+                    output += "Second try to add metadata into "+values[0]+" with data "+values[1]+"\n";
                     try{
                         String metadataInfo = addItemMetadata(values[0], values[1]);
                         if(null != metadataInfo){
                             iterator.remove();
-                            System.out.println("Second try: sucessfully added metadata into item "+values[0]+" with data "+values[1]);
+                            //System.out.println("Second try: sucessfully added metadata into item "+values[0]+" with data "+values[1]);
+                            output += "Second try: sucessfully added metadata into item "+values[0]+" with data "+values[1]+"\n";
                         }
                         else{
-                            System.out.println("Second try: failed to add metadata into item "+values[0]+" with data "+values[1]);
+                            //System.out.println("Second try: failed to add metadata into item "+values[0]+" with data "+values[1]);
+                            output += "Second try: failed to add metadata into item "+values[0]+" with data "+values[1]+"\n";
                         }
                     }
                     catch(Exception ex){
-                        System.out.println("Second try: failed to add metadata into item "+values[0]+" with data "+values[1]+"\n"+ex.getMessage());
+                        //System.out.println("Second try: failed to add metadata into item "+values[0]+" with data "+values[1]+"\n"+ex.getMessage());
+                        output += "Second try: failed to add metadata into item "+values[0]+" with data "+values[1]+"\n"+ex.getMessage();
                     }
                 }
             }
@@ -747,31 +771,38 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                 for (Iterator<String> iterator = metadataUnimportedList.iterator(); iterator.hasNext();) {
                     String[] values = ((String) iterator.next()).split("---");
                     String name = new File(values[1]).getName().replace(" ", "_");
-                    System.out.println("Second try to add bitstream into "+values[0]+" with path "+values[1]);
+                    //System.out.println("Second try to add bitstream into "+values[0]+" with path "+values[1]);
+                    output += "Second try to add bitstream into "+values[0]+" with path "+values[1]+"\n";
                     try{
                         Map bitstreamInfo = addItemBitstream(values[0], values[1], name, name);
                         if(null != bitstreamInfo){
                             iterator.remove();
-                            System.out.println("Second try: sucessfully added bitstream into item "+values[0]+" with path "+values[1]);
+                            //System.out.println("Second try: sucessfully added bitstream into item "+values[0]+" with path "+values[1]);
+                            output += "Second try: sucessfully added bitstream into item "+values[0]+" with path "+values[1]+"\n";
                         }
                         else{
-                            System.out.println("Second try: failed to add bitstream into item "+values[0]+" with path "+values[1]);
+                            //System.out.println("Second try: failed to add bitstream into item "+values[0]+" with path "+values[1]);
+                            output += "Second try: failed to add bitstream into item "+values[0]+" with path "+values[1]+"\n";
                         }
                     }
                     catch(Exception ex){
-                        System.out.println("Second try: failed to add bitstream into item "+values[0]+" with path "+values[1]+"\n"+ex.getMessage());
+                        //System.out.println("Second try: failed to add bitstream into item "+values[0]+" with path "+values[1]+"\n"+ex.getMessage());
+                        output += "Second try: failed to add bitstream into item "+values[0]+" with path "+values[1]+"\n"+ex.getMessage();
                     }
                 }
             }
             
         }
         catch(SafPackagePathErrorException | SafPackageMissingFileException ex){
+            output += "Saf package is not valid!\n"+ex.getMessage();
             logger.error("Cannot create new items with saf package path: " + safPath, ex);
         } catch (FileTypeException | EmptyFilePathException ex) {
+            output += "Saf package cannot be unzipped!\n"+ex.getMessage();
             logger.error("Cannot unzip the saf package with path: " + safPath, ex);
         }
         finally{
-//            System.out.println(output);
+            FileUtil.outputStringToFile(mapping, FileUtil.getFileContainerPath(reportFilePath)+File.separator+"mapfile");
+            FileUtil.outputStringToFile(output, reportFilePath);
         }
         return importResults;
     }

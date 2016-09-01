@@ -11,6 +11,7 @@ import java.util.Map;
 import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.dspacemanager.DspaceSshDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
 import org.shareok.data.kernel.api.services.ServiceUtil;
@@ -124,7 +125,7 @@ public class DspaceSshServiceImpl implements DspaceSshService {
         int jobType = job.getType();
         long jobId = job.getJobId();
         handler.setJobType(job.getType());
-        String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.JOB_TYPES[jobType], jobId);
+        String jobFilePath = DataHandlersUtil.getJobReportPath(DataUtil.JOB_TYPES[jobType], jobId);
         handler.setReportFilePath(jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt");
         handler.setServerId(String.valueOf(job.getServerId()));
         String schema = (String)DataUtil.JOB_TYPE_DATA_SCHEMA.get(DataUtil.JOB_TYPES[job.getType()]);

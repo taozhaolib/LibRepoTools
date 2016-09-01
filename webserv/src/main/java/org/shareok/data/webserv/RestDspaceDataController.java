@@ -6,17 +6,18 @@
 package org.shareok.data.webserv;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.kernel.api.services.ServiceUtil;
 import org.shareok.data.kernel.api.services.job.TaskManager;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.DspaceApiJob;
-import org.shareok.data.redis.job.DspaceApiJobDaoImpl;
 import org.shareok.data.redis.job.RedisJob;
 import org.shareok.data.webserv.exceptions.JobProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,14 +42,14 @@ public class RestDspaceDataController {
     
     private RepoServerService serverService;
     
-    private TaskManager jobHandler;
+    private TaskManager taskManager;
     
     public RepoServerService getServerService() {
         return serverService;
     }
 
-    public TaskManager getJobHandler() {
-        return jobHandler;
+    public TaskManager getTaskManager() {
+        return taskManager;
     }
     
     @Autowired
@@ -57,8 +58,8 @@ public class RestDspaceDataController {
     }
 
     @Autowired
-    public void setJobHandler(TaskManager jobHandler) {
-        this.jobHandler = jobHandler;
+    public void setTaskManager(TaskManager taskManager) {
+        this.taskManager = taskManager;
     }
     
     @RequestMapping(value="/rest/dspace/saf/page/{jobType}", method=RequestMethod.GET)
@@ -114,7 +115,7 @@ public class RestDspaceDataController {
         job.setEndTime(null);
 
         try{
-            RedisJob returnedJob = jobHandler.execute(job);
+            RedisJob returnedJob = taskManager.execute(job);
             
             if(null == returnedJob){
                 throw new JobProcessingException("Null job object returned after processing!");
@@ -128,7 +129,7 @@ public class RestDspaceDataController {
             model.addObject("collection", job.getCollectionId()); 
             model.addObject("repoType", repoTypeStr.toUpperCase());
             model.addObject("isFinished", isFinished);
-            model.addObject("reportPath", ""); 
+            model.addObject("reportPath", DataHandlersUtil.getJobReportFilePath(DataUtil.JOB_TYPES[returnedJob.getType()], returnedJob.getJobId())); 
             WebUtil.outputJobInfoToModel(model, returnedJob);
         }
         catch(Exception ex){

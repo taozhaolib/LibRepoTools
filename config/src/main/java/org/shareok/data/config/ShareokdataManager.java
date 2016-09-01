@@ -224,27 +224,6 @@ public class ShareokdataManager {
         return new SimpleDateFormat(ShareokdataManager.getDateFormat());
     }
     
-    public static String getJobReportPath(String jobType, long jobId){
-        String shareokdataPath = getShareokdataPath();
-        String repoType = jobType.split("-")[2];
-        String filePath = shareokdataPath + File.separator + repoType;
-        File file = new File(filePath);
-        if(!file.exists()){
-            file.mkdir();
-        }
-        filePath += File.separator + jobType;
-        file = new File(filePath);
-        if(!file.exists()){
-            file.mkdir();
-        }
-        filePath += File.separator + String.valueOf(jobId);
-        file = new File(filePath);
-        if(!file.exists()){
-            file.mkdir();
-        }
-        return filePath;
-    }
-    
     public static int getRedisJobQueueMaxJobs(){
         if(null == prop){
             loadProperties();

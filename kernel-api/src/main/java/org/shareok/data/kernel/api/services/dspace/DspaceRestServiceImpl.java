@@ -9,16 +9,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.dspacemanager.DspaceApiHandler;
 import org.shareok.data.kernel.api.exceptions.IncompleteHandlerInfoException;
 import org.shareok.data.kernel.api.services.ServiceUtil;
+import org.shareok.data.kernel.api.services.job.DspaceApiJobServiceImpl;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
 import org.shareok.data.redis.job.DspaceApiJob;
-import org.shareok.data.redis.job.JobDaoImpl;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -75,8 +73,9 @@ public class DspaceRestServiceImpl implements DspaceRestService {
     }
 
     @Autowired
+    @Qualifier("dspaceApiJobServiceImpl")
     public void setJobService(RedisJobService jobService) {
-        this.jobService = jobService;
+        this.jobService = (DspaceApiJobServiceImpl)jobService;
     }
 
     @Override
@@ -104,9 +103,12 @@ public class DspaceRestServiceImpl implements DspaceRestService {
     @Override
     public void run() {
         try{
-            DspaceApiJob job = handler.getJob();
-            if(null == handler || null == job){
-                throw new IncompleteHandlerInfoException("Handler or Job is null!");
+            if(null == handler){
+                throw new IncompleteHandlerInfoException("Handler is null!");
+            }
+            DspaceApiJob job = (DspaceApiJob)handler.getJob();
+            if(null == job){
+                throw new IncompleteHandlerInfoException("Handler hasd a null Job!");
             }
             jobService.updateJob(jobId, "status", "1");
             loadJobInfoByJob(job);
@@ -114,8 +116,8 @@ public class DspaceRestServiceImpl implements DspaceRestService {
             String jobReturnValue = executeTask(DataUtil.JOB_TYPES[job.getType()]);
             
             ServiceUtil.processJobReturnValue(jobReturnValue, job);
-            Thread.currentThread().interrupt();
             jobService.updateJob(jobId, "status", "2");
+            Thread.currentThread().interrupt();            
         }
         catch(IncompleteHandlerInfoException ex){
             jobService.updateJob(jobId, "status", "3");

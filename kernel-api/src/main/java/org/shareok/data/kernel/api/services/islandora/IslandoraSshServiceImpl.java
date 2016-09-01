@@ -57,6 +57,7 @@ public class IslandoraSshServiceImpl implements IslandoraSshService {
     }
 
     @Autowired
+    @Qualifier("redisJobServiceImpl")
     public void setJobService(RedisJobService jobService) {
         this.jobService = jobService;
     }

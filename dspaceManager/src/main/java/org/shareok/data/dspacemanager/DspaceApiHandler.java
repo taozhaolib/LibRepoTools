@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.redis.job.DspaceApiJob;
+import org.shareok.data.redis.job.RedisJob;
 
 /**
  *
@@ -42,7 +43,9 @@ public interface DspaceApiHandler extends JobHandler {
     public void deleteItemById(String id);
     public void deleteItemsByCollectionId(String id);
     
-    public void setJob(DspaceApiJob job);
+    @Override
+    public void setJob(RedisJob job);
+    @Override
     public DspaceApiJob getJob();
     public Map<String, List<String>> loadItemsFromSafPackage();
 }

@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.log4j.Logger;
 import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
@@ -21,6 +22,7 @@ import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.RedisJob;
 import org.shareok.data.ssh.SshExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -42,10 +44,16 @@ public class IslandoraSshHandler implements JobHandler {
     private String recipeFileUri;
     private String uploadDst;
     private String serverId;
+    private RedisJob job;
 
     @Override
     public int getJobType() {
         return jobType;
+    }
+
+    @Override
+    public RedisJob getJob() {
+        return job;
     }
     
     @Override
@@ -93,6 +101,10 @@ public class IslandoraSshHandler implements JobHandler {
         this.jobType = jobType;
     }
 
+    public static Logger getLogger() {
+        return logger;
+    }
+
     @Autowired
     public void setSshExec(SshExecutor sshExec) {
         this.sshExec = sshExec;
@@ -131,6 +143,13 @@ public class IslandoraSshHandler implements JobHandler {
 
     public void setServerId(String serverId) {
         this.serverId = serverId;
+    }
+
+    @Override
+    @Autowired
+    @Qualifier("job")
+    public void setJob(RedisJob job) {
+        this.job = job;
     }
     
     @Override

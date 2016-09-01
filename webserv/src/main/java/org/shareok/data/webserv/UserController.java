@@ -22,6 +22,7 @@ import org.shareok.data.kernel.api.services.user.RedisUserService;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Controller;
@@ -52,6 +53,7 @@ public class UserController{
     }
 
     @Autowired
+    @Qualifier("redisJobServiceImpl")
     public void setJobService(RedisJobService jobService) {
         this.jobService = jobService;
     }

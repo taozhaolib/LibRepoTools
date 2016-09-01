@@ -190,12 +190,11 @@ public class TaskManagerImpl implements TaskManager {
 
         String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.JOB_TYPES[newJob.getType()], jobId);
         DataService ds = ServiceUtil.getDataService(context, newJob.getType());
+        ds.getHandler().setJob(newJob);
+        ds.getHandler().setReportFilePath(jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt");
         String threadName = ServiceUtil.getThreadNameByJob(newJob);
         Thread newThread = new Thread(ds, threadName);
         newThread.start();
-
-        String filePath = "";
-        String reportFilePath = jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt";
         
         return newJob;
     }

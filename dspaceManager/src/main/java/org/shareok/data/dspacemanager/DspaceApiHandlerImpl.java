@@ -27,7 +27,9 @@ import org.shareok.data.htmlrequest.exceptions.ErrorResponseCodeException;
 import org.shareok.data.htmlrequest.exceptions.ReadResponseInputStreamException;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.DspaceApiJob;
+import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -113,9 +115,9 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     }
 
     @Autowired
-    @Override
-    public void setJob(DspaceApiJob job) {
-        this.job = job;
+    @Qualifier("dspaceApiJob")
+    public void setJob(RedisJob job) {
+        this.job = (DspaceApiJob)job;
     }
 
     public void setToken(String token) {
@@ -582,6 +584,9 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         
         try{            
             File safFile = new File(safPath);
+            if(safPath.endsWith(".zip")){
+
+            }
             if(safFile.isDirectory()){
                 for(File file : safFile.listFiles()){
                     if(null != file && file.isDirectory()){

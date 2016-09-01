@@ -49,6 +49,7 @@ public class DspaceSshServiceImpl implements DspaceSshService {
     }
 
     @Autowired
+    @Qualifier("redisJobServiceImpl")
     public void setJobService(RedisJobService jobService) {
         this.jobService = jobService;
     }

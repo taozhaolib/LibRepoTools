@@ -8,7 +8,7 @@ package org.shareok.data.kernel.api.services.islandora;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Map;
-import org.shareok.data.config.JobHandler;
+import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.dspacemanager.DspaceSshHandler;

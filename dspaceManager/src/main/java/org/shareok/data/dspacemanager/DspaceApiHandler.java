@@ -7,7 +7,7 @@ package org.shareok.data.dspacemanager;
 
 import java.util.List;
 import java.util.Map;
-import org.shareok.data.config.JobHandler;
+import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.redis.job.DspaceApiJob;
 
 /**

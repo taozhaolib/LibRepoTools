@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.shareok.data.config.JobHandler;
+import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.documentProcessor.FileUtil;

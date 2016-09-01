@@ -9,7 +9,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import org.shareok.data.config.DataUtil;
-import org.shareok.data.config.JobHandler;
+import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.kernel.api.exceptions.EmptyUploadedPackagePathOfSshUploadJobException;
 import org.shareok.data.kernel.api.services.DataService;

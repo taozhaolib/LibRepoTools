@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.shareok.data.config;
+package org.shareok.data.datahandlers;
 
 import java.util.Map;
 

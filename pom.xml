@@ -19,8 +19,7 @@
         <module>lawLibrary</module>
         <module>SAFBuilder</module>
         <module>islandoraManager</module>
-        <module>oulib-AWS-Lambda/ouaws</module>
-        <module>commons</module>
+        <module>dataHandlers</module>
     </modules>
     <properties>
        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

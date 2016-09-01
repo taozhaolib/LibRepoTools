@@ -5,7 +5,7 @@
  */
 package org.shareok.data.kernel.api.services.job;
 
-import org.shareok.data.config.JobHandler;
+import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.web.multipart.MultipartFile;
 

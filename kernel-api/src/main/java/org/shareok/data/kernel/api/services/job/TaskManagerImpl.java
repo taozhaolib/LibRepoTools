@@ -32,10 +32,16 @@ public class TaskManagerImpl implements TaskManager {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TaskManagerImpl.class);
     
     private JobQueueService jobQueueService;
+    private RedisJobService redisJobService;
 
     @Autowired
     public void setJobQueueService(JobQueueService jobQueueService) {
         this.jobQueueService = jobQueueService;
+    }
+    
+    @Autowired
+    public void setRedisJobService(RedisJobService redisJobService){
+        this.redisJobService = redisJobService;
     }
     
     /**
@@ -49,16 +55,13 @@ public class TaskManagerImpl implements TaskManager {
     @Override
     public RedisJob execute(long uid, JobHandler handler, MultipartFile localFile, String remoteFilePath){
         try{
-            ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
 
-            RedisJobService redisJobServ = (RedisJobService) context.getBean("redisJobServiceImpl");
-
-            RedisJob newJob = redisJobServ.createJob(uid, handler.getJobType(), handler.outputJobDataByJobType());
+            RedisJob newJob = redisJobService.createJob(uid, handler.getJobType(), handler.outputJobDataByJobType());
             long jobId = newJob.getJobId();
 
             String jobFilePath = DataHandlersUtil.getJobReportPath(DataUtil.JOB_TYPES[handler.getJobType()], jobId);
 
-            DataService ds = ServiceUtil.getDataService(context, handler.getJobType());
+            DataService ds = ServiceUtil.getDataService(handler.getJobType());
 
             String filePath = "";
             String reportFilePath = jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt";
@@ -67,7 +70,7 @@ public class TaskManagerImpl implements TaskManager {
                 filePath = ServiceUtil.saveUploadedFile(localFile, jobFilePath);
             }
             else if(null != remoteFilePath && !"".equals(remoteFilePath)){
-                filePath = processRemoteFileByJobType(handler.getJobType(), redisJobServ, jobFilePath, remoteFilePath);
+                filePath = processRemoteFileByJobType(handler.getJobType(), redisJobService, jobFilePath, remoteFilePath);
             }
 
             handler.setFilePath(filePath);
@@ -75,8 +78,8 @@ public class TaskManagerImpl implements TaskManager {
             ds.setUserId(uid);
             ds.setHandler(handler);
             
-            redisJobServ.updateJob(jobId, "status", "0"); 
-            redisJobServ.updateJob(jobId, "filePath", filePath); 
+            redisJobService.updateJob(jobId, "status", "0"); 
+            redisJobService.updateJob(jobId, "filePath", filePath); 
             
             //Handle the job queue stuff:
             String queueName = RedisUtil.getJobQueueName(uid, DataUtil.JOB_TYPES[handler.getJobType()], handler.getServerName());    
@@ -90,7 +93,7 @@ public class TaskManagerImpl implements TaskManager {
                     }
                     if(!thread.isInterrupted()){
                         jobQueueService.addJobIntoQueue(jobId, queueName);
-                        redisJobServ.updateJob(jobId, "status", "7"); 
+                        redisJobService.updateJob(jobId, "status", "7"); 
                     }
                     else{
 //                        try {
@@ -99,7 +102,7 @@ public class TaskManagerImpl implements TaskManager {
 //                            logger.debug("Current thread is interrupted while sleeping", ex);
 //                        }
                         jobQueueService.addJobIntoQueue(jobId, queueName);
-                        redisJobServ.updateJob(jobId, "status", "7"); 
+                        redisJobService.updateJob(jobId, "status", "7"); 
                         Thread newThread = new Thread(ds, queueName);
                         newThread.start();
                     }
@@ -116,21 +119,21 @@ public class TaskManagerImpl implements TaskManager {
 //
 //                    }
                     jobQueueService.addJobIntoQueue(jobId, queueName);
-                    redisJobServ.updateJob(jobId, "status", "7"); 
+                    redisJobService.updateJob(jobId, "status", "7"); 
                     Thread newThread = new Thread(ds, queueName);
                     newThread.start();
                 }
             }
             else{
                 jobQueueService.addJobIntoQueue(jobId, queueName);
-                redisJobServ.updateJob(jobId, "status", "7"); 
+                redisJobService.updateJob(jobId, "status", "7"); 
                 if(null == thread){
                     Thread newThread = new Thread(ds, queueName);
                     newThread.start();
                 }                
             }
          
-            return redisJobServ.findJobByJobId(jobId);
+            return redisJobService.findJobByJobId(jobId);
         }
         catch(BeansException | NumberFormatException | EmptyUploadedPackagePathOfSshUploadJobException ex){
 //            logger.error("Cannot exectue the job with type "+DataUtil.JOB_TYPES[handler.get]+" for repository "+DataUtil.REPO_TYPES[repoType], ex);
@@ -181,15 +184,11 @@ public class TaskManagerImpl implements TaskManager {
      */
     @Override
     public RedisJob execute(RedisJob job){
-        ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
-
-        RedisJobService redisJobServ = (RedisJobService) context.getBean("redisJobServiceImpl");
-
-        RedisJob newJob = redisJobServ.saveJob(job);
         
+        RedisJob newJob = redisJobService.saveJob(job);        
         long jobId = newJob.getJobId();
 
-        DataService ds = ServiceUtil.getDataService(context, newJob.getType());
+        DataService ds = ServiceUtil.getDataService(newJob.getType());
         ds.getHandler().setJob(newJob);
         ds.getHandler().setReportFilePath(DataHandlersUtil.getJobReportFilePath(DataUtil.JOB_TYPES[newJob.getType()], jobId));
         String threadName = ServiceUtil.getThreadNameByJob(newJob);

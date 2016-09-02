@@ -67,17 +67,15 @@ public class ServiceUtil {
         return serviceBeanMap.get(repoType + "-" + jobType);
     }
     
-    public static DataService getDataService(ApplicationContext context, String jobType){
+    public static DataService getDataService(String jobType){
         String bean = serviceBeanMap.get(jobType);  
-        if(null == context){
-            context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
-        }
+        ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
         DataService ds = (DataService) context.getBean(bean);
         return ds;
     }
     
-    public static DataService getDataService(ApplicationContext context, int jobType){
-        return getDataService(context, DataUtil.JOB_TYPES[jobType]);
+    public static DataService getDataService(int jobType){
+        return getDataService(DataUtil.JOB_TYPES[jobType]);
     }
     
     public static String saveUploadedFile(MultipartFile file, String jobFilePath){
@@ -182,7 +180,7 @@ public class ServiceUtil {
         long jobId = job.getJobId();
         int jobType = job.getType();
         if(null != jobReturnValue && !jobReturnValue.equals("")){
-                redisJobServ.updateJob(jobId, "status", "2");  
+//                redisJobServ.updateJob(jobId, "status", "2");  
                 Map values = new HashMap();
                 switch(jobType){
                     case 1:
@@ -197,11 +195,11 @@ public class ServiceUtil {
                             redisJobServ.updateJob(jobId, "status", "2");
                         }
                         break;
+                    case 2:
                     case 4:
                     case 5:
-                        redisJobServ.updateJob(jobId, "status", "2");
-                        break;
                     default:
+                        redisJobServ.updateJob(jobId, "status", "2");
                         break;
                 }
             }

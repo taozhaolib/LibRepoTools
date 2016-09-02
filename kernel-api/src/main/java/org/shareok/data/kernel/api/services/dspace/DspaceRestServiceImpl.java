@@ -116,7 +116,6 @@ public class DspaceRestServiceImpl implements DspaceRestService {
             String jobReturnValue = executeTask(DataUtil.JOB_TYPES[job.getType()]);
             
             ServiceUtil.processJobReturnValue(jobReturnValue, job);
-            jobService.updateJob(jobId, "status", "2");
             Thread.currentThread().interrupt();            
         }
         catch(IncompleteHandlerInfoException ex){

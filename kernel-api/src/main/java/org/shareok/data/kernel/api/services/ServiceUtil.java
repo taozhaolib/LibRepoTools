@@ -18,6 +18,7 @@ import org.shareok.data.config.DataUtil;
 import java.util.HashMap;
 import java.util.Map;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.kernel.api.services.job.DspaceApiJobServiceImpl;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.context.ApplicationContext;
@@ -215,5 +216,15 @@ public class ServiceUtil {
         int serverId = job.getServerId();
         long jobId = job.getJobId();
         return String.valueOf(uid)+"--"+jobType+"--"+String.valueOf(serverId)+"--"+String.valueOf(jobId);
+    }
+    
+    public static RedisJobService getJobServiceByJobType(RedisJob job){
+        ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
+        switch(job.getType()){
+            case 2:
+                return (DspaceApiJobServiceImpl)context.getBean("dspaceApiJobServiceImpl");
+            default:
+                return (RedisJobService) context.getBean("redisJobServiceImpl");
+        }
     }
 }

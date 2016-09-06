@@ -5,8 +5,10 @@
  */
 package org.shareok.data.kernel.api.services.job;
 
+import java.util.Map;
 import org.shareok.data.redis.job.DspaceApiJob;
 import org.shareok.data.redis.job.DspaceApiJobDaoImpl;
+import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -23,5 +25,10 @@ public class DspaceApiJobServiceImpl extends RedisJobServiceImpl {
     @Override
     public DspaceApiJob findJobByJobId(long jobId){
         return dspaceApiJobDaoImpl.findJobByJobId(jobId);
+    }
+    
+    @Override
+    public Map<String, String> getReportData(RedisJob job){
+        return dspaceApiJobDaoImpl.getReportData((DspaceApiJob)job);
     }
 }

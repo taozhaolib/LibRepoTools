@@ -392,6 +392,8 @@ public class JobDaoImpl implements JobDao {
                         logger.error("Cannot sace a new job with illegal access to certain job field values.", ex);
                     }
                     
+                    operations.boundSetOps("user_"+String.valueOf(job.getUserId())+"_job_set").add(jobId);
+                    
                     List<Object> jobList= operations.exec();
                     if(!jobList.get(0).equals(true)){
                         operations.discard();

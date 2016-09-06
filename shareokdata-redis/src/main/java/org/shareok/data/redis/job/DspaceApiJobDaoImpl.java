@@ -6,6 +6,8 @@
 package org.shareok.data.redis.job;
 
 import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.redis.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,5 +62,19 @@ public class DspaceApiJobDaoImpl extends JobDaoImpl {
             logger.error("Cannot find the job information by job ID "+jobId, ex);
         }
         return null;
+    }
+    
+    public Map<String, String> getReportData(DspaceApiJob job){
+        Map<String, String> data = new HashMap<>();
+        if(null != job.getCollectionId()){
+            data.put("Collection", job.getCollectionId());
+        }
+        if(null != job.getCommunityId()){
+            data.put("Community", job.getCommunityId());
+        }
+        if(null != job.getSubCommunityId()){
+            data.put("Sub community", job.getSubCommunityId());
+        }
+        return data;
     }
 }

@@ -19,6 +19,7 @@ import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +41,7 @@ public class TaskManagerImpl implements TaskManager {
     }
     
     @Autowired
+    @Qualifier("redisJobServiceImpl")
     public void setRedisJobService(RedisJobService redisJobService){
         this.redisJobService = redisJobService;
     }

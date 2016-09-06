@@ -21,11 +21,13 @@ public interface RedisJobService extends RepositoryJobService {
     public void updateJobInfoByJobType(long jobId, String jobType, Map values);
 //    public void endJob(long jobId);
 //    public String getJobStatus(long jobId);
-//    public String getJobLogging(long jobId);
-    public Map<String, String> getJobInfoByAttributes(long jobId, String[] jobAttributes);
+//    public String getJobLogging(long jobId);    
     public List<RedisJob> getJobListByUser(long uid);
     public List<RedisJob> getJobListByUserEmail(String email);
     public RedisJob findJobByJobId(long jobId);
     public RedisJob createJob(final long uid, final int jobType, final Map<String, String> values);
     public RedisJob saveJob(RedisJob job);
+    public Map<String, String> getReportData(RedisJob job);
+    public Map<String, String> getJobInfoByAttributes(long jobId, String[] jobAttributes);
+    
 }

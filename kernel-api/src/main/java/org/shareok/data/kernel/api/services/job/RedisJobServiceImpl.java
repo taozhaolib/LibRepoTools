@@ -77,5 +77,10 @@ public class RedisJobServiceImpl implements RedisJobService {
     public RedisJob saveJob(RedisJob job) {
         return jobDao.saveJob(job);
     }
+
+    @Override
+    public Map<String, String> getReportData(RedisJob job) {
+        return job.getData();
+    }
     
 }

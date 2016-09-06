@@ -16,7 +16,7 @@ import java.util.Map;
 public interface RepoServerDao {
     public RepoServer addServer(RepoServer server);
     public RepoServer addServer(int port, int porxyPort, int timeout, int repoType, String serverName, String host, String proxyHost, String userName, String proxyUserName, 
-                                String password, String proxyPassword, String passphrase, String rsaKey);
+                                String password, String proxyPassword, String passphrase, String rsaKey, String address);
 //    public DspaceServer addDspaceServer(DspaceServer ds);
 //    public void addDspaceServerOnly(int serverId, String dspaceDirectory, String uploadDst, String dspaceUser, String collectionId);
 //    public DspaceServer updateDspaceServer(DspaceServer ds);

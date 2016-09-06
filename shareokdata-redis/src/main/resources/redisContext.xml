@@ -33,6 +33,7 @@
     <bean id="jobDaoImpl" class="org.shareok.data.redis.job.JobDaoImpl"></bean>
     
     <bean id="repoServer" class="org.shareok.data.redis.server.RepoServer">
+        <property name="address" value="" />
         <property name="timeout" value="5000" />
         <property name="port" value="22" />
         <property name="proxyPort" value="22" />
@@ -60,6 +61,17 @@
     <bean id="jobQueueDaoImpl" class="org.shareok.data.redis.job.JobQueueDaoImpl">
         
     </bean>
+    
+    <bean id="dspaceApiJob" class="org.shareok.data.redis.job.DspaceApiJob">
+        <property name="communityId" value="" />
+        <property name="subCommunityId" value="" />
+        <property name="collectionId" value="" />
+        <property name="itemId" value="" />
+        <property name="bitstreamId" value="" />
+        <property name="policyId" value="" />
+    </bean>
+    
+    <bean id="dspaceApiJobDaoImpl" class="org.shareok.data.redis.job.DspaceApiJobDaoImpl"></bean>
     
 <!--    
     <bean id="dateEditor" class="org.springframework.beans.propertyeditors.CustomDateEditor">

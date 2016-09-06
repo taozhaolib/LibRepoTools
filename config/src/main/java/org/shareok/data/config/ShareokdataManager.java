@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -223,31 +224,37 @@ public class ShareokdataManager {
         return new SimpleDateFormat(ShareokdataManager.getDateFormat());
     }
     
-    public static String getJobReportPath(String jobType, long jobId){
-        String shareokdataPath = getShareokdataPath();
-        String repoType = jobType.split("-")[2];
-        String filePath = shareokdataPath + File.separator + repoType;
-        File file = new File(filePath);
-        if(!file.exists()){
-            file.mkdir();
-        }
-        filePath += File.separator + jobType;
-        file = new File(filePath);
-        if(!file.exists()){
-            file.mkdir();
-        }
-        filePath += File.separator + String.valueOf(jobId);
-        file = new File(filePath);
-        if(!file.exists()){
-            file.mkdir();
-        }
-        return filePath;
-    }
-    
     public static int getRedisJobQueueMaxJobs(){
         if(null == prop){
             loadProperties();
         }
         return Integer.valueOf(prop.getProperty("redisJobQueueMaxJobs"));
+    }
+    
+    public static String getDspaceRestImportPath(String jobType){
+        String filePath = "";
+        try{
+            String shareokdataPath = getShareokdataPath();
+            String repoType = jobType.split("-")[2];
+            filePath = shareokdataPath + File.separator + repoType;
+            File file = new File(filePath);
+            if(!file.exists()){
+                file.mkdir();
+            }
+            filePath += File.separator + jobType;
+            file = new File(filePath);
+            if(!file.exists()){
+                file.mkdir();
+            }
+            filePath += File.separator + ShareokdataManager.getSimpleDateFormat().format(new Date()).replace(" ", "_").replace(":", "-");
+            file = new File(filePath);
+            if(!file.exists()){
+                file.mkdir();
+            }
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+        return filePath;
     }
 }

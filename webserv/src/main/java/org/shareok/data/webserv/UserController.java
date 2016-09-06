@@ -18,10 +18,13 @@ import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.kernel.api.services.ServiceUtil;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
+import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.kernel.api.services.user.RedisUserService;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
+import org.shareok.data.redis.server.RepoServer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Controller;
@@ -42,6 +45,7 @@ public class UserController{
     
     private RedisUserService userService;
     private RedisJobService jobService;
+    private RepoServerService serverService;
 
     public RedisUserService getUserService() {
         return userService;
@@ -52,8 +56,14 @@ public class UserController{
     }
 
     @Autowired
+    @Qualifier("redisJobServiceImpl")
     public void setJobService(RedisJobService jobService) {
         this.jobService = jobService;
+    }
+    
+    @Autowired
+    public void setServerService(RepoServerService serverService){
+        this.serverService = serverService;
     }
 
     @Autowired
@@ -145,7 +155,9 @@ public class UserController{
         
         ModelAndView model = new ModelAndView();
         RedisJob job = jobService.findJobByJobId(Long.parseLong(jobId));
-        Map data = job.getData();        
+        RepoServer server = serverService.findServerById(job.getServerId());
+        RedisJobService specificService = ServiceUtil.getJobServiceByJobType(job);
+        Map<String, String> data = specificService.getReportData(specificService.findJobByJobId(Long.parseLong(jobId)));
                 
         if(null != job){
             int statusIndex = job.getStatus();
@@ -153,17 +165,15 @@ public class UserController{
 
             model.setViewName("jobReport");
             if(null != data){
-                if(null != data.get("collectionId")){
-                    model.addObject("host", (String)job.getData().get("serverId"));
-                }
-                if(null != data.get("collectionId")){
-                    model.addObject("collection", (String)data.get("collectionId"));
+                if(null != data.get("Collection")){
+                    model.addObject("collection", (String)data.get("Collection"));
                 }
             }
             
             model.addObject("repoType", ServiceUtil.getRepoTypeByJob(job));
             model.addObject("isFinished", isFinished);
             model.addObject("reportPath", ServiceUtil.getReportFilePathByJob(job));  
+            model.addObject("host", server.getHost());
             WebUtil.outputJobInfoToModel(model, job);
         }
         else{

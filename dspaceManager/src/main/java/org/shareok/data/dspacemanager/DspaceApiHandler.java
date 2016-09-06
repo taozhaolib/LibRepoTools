@@ -7,24 +7,45 @@ package org.shareok.data.dspacemanager;
 
 import java.util.List;
 import java.util.Map;
+import org.shareok.data.datahandlers.JobHandler;
+import org.shareok.data.redis.job.DspaceApiJob;
+import org.shareok.data.redis.job.RedisJob;
 
 /**
  *
  * @author Tao Zhao
  */
-public interface DspaceApiHandler {
+public interface DspaceApiHandler extends JobHandler {
     public boolean isAuthorizedUser();
-    public Map<String, Object> getUserInfoByToken();
-    public String getTokenFromServer();
-    public int getItemCountByCollectionHandler(String handler);
-    public int getItemCountByCollectionId(String id);
-    public String getItemsInfoByCollectionId(String id);
-    public String getItemsInfoByCollectionHandler(String handler);
-    public String[] getItemIdsByCollectionId(String id);
-    public String[] getItemIdsByCollectionHandler(String handler);
-    public String getObjectInfoByHandler(String handler);
-    public String getObjectIdByHandler(String handler);
-    public List<Map<String, Object>> getItemMetadataById(String id);
     
+    public Map<String, Object> getUserInfoByToken(); 
+    public Map<String, Object> createEmptyItem(String collectionId);
+    public Map<String, String> getMetadataFromXmlFiles(String[] paths);
+    public Map<String, String> addItemBitstream(String id, String filePath, String fileName, String description);
+    
+    public int getItemCountByCollectionHandler(String handle);
+    public int getItemCountByCollectionId(String id);
+    
+    public String getTokenFromServer();
+    public String getItemsInfoByCollectionId(String id);
+    public String getItemsInfoByCollectionHandler(String handle);
+    public String getObjectInfoByHandler(String handle);
+    public String getObjectIdByHandler(String handle);    
+    public String addItemMetadata(String id, String data);
+    
+    public String[] getItemIdsByCollectionId(String id);
+    public String[] getItemIdsByCollectionHandler(String handle);
+    public String[] getMetadataValuesByKey(String itemId, String key);    
+    
+    public List<Map<String, Object>> getItemMetadataById(String id);
+            
     public void updateItemMetadata(String id, List<Map<String, String>> data);
+    public void deleteItemById(String id);
+    public void deleteItemsByCollectionId(String id);
+    
+    @Override
+    public void setJob(RedisJob job);
+    @Override
+    public DspaceApiJob getJob();
+    public Map<String, List<String>> loadItemsFromSafPackage();
 }

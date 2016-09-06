@@ -3,19 +3,22 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.shareok.data.config;
+package org.shareok.data.datahandlers;
 
 import java.util.Map;
+import org.shareok.data.redis.job.RedisJob;
 
 /**
  *
  * @author Tao Zhao
  */
-public interface DataHandler {
+public interface JobHandler {
+    public void setJob(RedisJob job);
     public void setFilePath(String filePath);
     public void setReportFilePath(String reportFilePath);
-    public int getJobType();    
-    public Map<String, String> outputJobDataByJobType();
+    public int getJobType();   
     public String getServerName();
     public String getRepoType();
+    public RedisJob getJob();
+    public Map<String, String> outputJobDataByJobType();    
 }

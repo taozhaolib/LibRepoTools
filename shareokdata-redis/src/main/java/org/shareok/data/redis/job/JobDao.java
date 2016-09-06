@@ -26,4 +26,5 @@ public interface JobDao {
     public List<RedisJob> getJobListByUser(long uid);
     public List<RedisJob> getJobListByUserEmail(String email);
     public RedisJob findJobByJobId(long jobId);
+    public RedisJob saveJob(final RedisJob job);
 }

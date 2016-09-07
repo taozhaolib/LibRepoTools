@@ -20,6 +20,8 @@
         <module>SAFBuilder</module>
         <module>islandoraManager</module>
         <module>dataHandlers</module>
+        <module>commons</module>
+        <module>ouaws</module>
     </modules>
     <properties>
        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

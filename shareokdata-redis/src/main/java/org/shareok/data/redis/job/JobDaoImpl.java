@@ -141,7 +141,10 @@ public class JobDaoImpl implements JobDao {
             Set<String> jobIds = jobOps.members();
             if(null != jobIds){                
                 for(String jobIdStr : jobIds){
-                    jobs.add(findJobByJobId(Long.valueOf(jobIdStr)));
+                    RedisJob job = findJobByJobId(Long.valueOf(jobIdStr));
+                    if(null != job){
+                        jobs.add(job);
+                    }
                 }
             }
             else{
@@ -151,7 +154,7 @@ public class JobDaoImpl implements JobDao {
         catch(Exception ex){
             logger.error("Cannot get the list of the jobs conducted by user " + uid, ex);
         }
-//        RedisUtil.sortJobList(jobs);
+        RedisUtil.sortJobList(jobs);
         return jobs;
     }
     

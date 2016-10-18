@@ -14,6 +14,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.shareok.data.config.DataUtil;
+import org.shareok.data.datahandlers.exceptions.IncompleteServerInfoException;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.documentProcessor.FileZipper;
 import org.shareok.data.documentProcessor.exceptions.EmptyFilePathException;
@@ -151,10 +152,15 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         String dspaceUserName = job.getDspaceUserName();
         String dspacePassword = job.getDspaceUserPw();
         String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+        
         try{
             if(null == dspaceUserName || "".equals(dspaceUserName) || null == dspacePassword || "".equals(dspacePassword)){
                 throw new EmptyDspaceCredentialInfoException("The DSpace username or DSpace password information is missing!");
             }
+            if(null == dspaceApiUrl || "".equals(dspaceApiUrl)){
+                throw new IncompleteServerInfoException("empty or null url.");
+            }
+        
             Map<String, String> headerInfo = new HashMap<>();
             headerInfo.put("Content-Type", "application/json");            
             String response = httpRequestHandler.requestWithHeaderInfo(dspaceApiUrl+"/login", "POST", headerInfo, "{\"email\":\""+dspaceUserName+"\",\"password\":\""+dspacePassword+"\"}").toString();
@@ -169,6 +175,9 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                 }
             }
             //return response;
+        }
+        catch(IncompleteServerInfoException inEx){
+            logger.error("Incomplete server information.", inEx);
         }
         catch(EmptyDspaceCredentialInfoException empEx){
             logger.error("Missing DSpace log in information", empEx);

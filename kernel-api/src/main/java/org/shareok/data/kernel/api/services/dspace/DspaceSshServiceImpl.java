@@ -8,9 +8,10 @@ package org.shareok.data.kernel.api.services.dspace;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Map;
-import org.shareok.data.config.DataHandler;
+import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.dspacemanager.DspaceSshDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
 import org.shareok.data.kernel.api.services.ServiceUtil;
@@ -35,6 +36,7 @@ public class DspaceSshServiceImpl implements DspaceSshService {
     private RedisJobService jobService;
     private long userId;
 
+    @Override
     public DspaceSshHandler getHandler() {
         return handler;
     }
@@ -48,6 +50,7 @@ public class DspaceSshServiceImpl implements DspaceSshService {
     }
 
     @Autowired
+    @Qualifier("redisJobServiceImpl")
     public void setJobService(RedisJobService jobService) {
         this.jobService = jobService;
     }
@@ -65,7 +68,7 @@ public class DspaceSshServiceImpl implements DspaceSshService {
     @Override
     @Autowired
     @Qualifier("dspaceSshHandler")
-    public void setHandler(DataHandler handler) {
+    public void setHandler(JobHandler handler) {
         this.handler = (DspaceSshHandler)handler;
         if(null == this.handler.getSshExec()){
             this.handler.setSshExec(DspaceSshDataUtil.getSshExecForDspace());
@@ -122,7 +125,7 @@ public class DspaceSshServiceImpl implements DspaceSshService {
         int jobType = job.getType();
         long jobId = job.getJobId();
         handler.setJobType(job.getType());
-        String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.JOB_TYPES[jobType], jobId);
+        String jobFilePath = DataHandlersUtil.getJobReportPath(DataUtil.JOB_TYPES[jobType], jobId);
         handler.setReportFilePath(jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt");
         handler.setServerId(String.valueOf(job.getServerId()));
         String schema = (String)DataUtil.JOB_TYPE_DATA_SCHEMA.get(DataUtil.JOB_TYPES[job.getType()]);

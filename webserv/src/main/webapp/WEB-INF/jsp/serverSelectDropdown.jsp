@@ -84,6 +84,9 @@
                             case "passPhrase":
                                 $("input[name='passPhrase']").val(serverParser[id][key]);
                                 break;
+                            case "address":
+                                $("input[name='address']").val(serverParser[id][key]);
+                                break;
                             default:
                                 break;
                         }

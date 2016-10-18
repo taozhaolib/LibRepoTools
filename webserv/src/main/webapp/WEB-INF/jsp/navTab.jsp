@@ -16,7 +16,7 @@
                 <li class="mainMenuDrop" id="dsSafImport"><a href="/webserv/ssh/dspace/saf/page/ssh-upload">Upload Simple Archive Format Package</a></li>
                 <li class="mainMenuDrop" id="dsSafImport"><a href="/webserv/ssh/dspace/saf/page/ssh-import">Import Simple Archive Format Package</a></li>
                 <li class="mainMenuDrop" id="dsSafImport"><a href="/webserv/ssh/dspace/saf/page/ssh-importloaded">Import Uploaded Simple Archive Format Package</a></li>
-                <li class="mainMenuDrop" id="dataDs"><a href="#">DSpace Data Manipulation</a></li>
+                <li class="mainMenuDrop" id="dsApiSafImport"><a href="/webserv/rest/dspace/saf/page/rest-import">DSpace REST API: Import Simple Archive Format Package</a></li>
             </ul>
         </li>
         <li><a class="dropdown-toggle" data-toggle="dropdown" href="#">Fedora Data Service

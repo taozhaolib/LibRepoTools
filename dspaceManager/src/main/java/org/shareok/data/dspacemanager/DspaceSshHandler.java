@@ -12,15 +12,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.shareok.data.config.DataHandler;
+import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.config.DataUtil;
-import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.redis.RedisUtil;
-import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.RedisJob;
 import org.shareok.data.ssh.SshExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -28,7 +27,7 @@ import org.springframework.stereotype.Service;
  * @author Tao Zhao
  */
 @Service
-public class DspaceSshHandler implements DataHandler {
+public class DspaceSshHandler implements JobHandler {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DspaceSshHandler.class);
     
@@ -41,10 +40,16 @@ public class DspaceSshHandler implements DataHandler {
     private String dspaceDirectory; // the DSpace installation directory
     private String collectionId;
     private SshExecutor sshExec;
+    private RedisJob job;
 
     @Override
     public int getJobType() {
         return jobType;
+    }
+
+    @Override
+    public RedisJob getJob() {
+        return job;
     }
     
     @Override
@@ -82,6 +87,13 @@ public class DspaceSshHandler implements DataHandler {
 
     public void setJobType(int jobType) {
         this.jobType = jobType;
+    }
+
+    @Override
+    @Autowired
+    @Qualifier("job")
+    public void setJob(RedisJob job) {
+        this.job = job;
     }
     
     @Override

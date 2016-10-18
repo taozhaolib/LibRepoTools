@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.islandoramanager.IslandoraSshHandler;
-import org.shareok.data.kernel.api.services.job.JobHandler;
+import org.shareok.data.kernel.api.services.job.TaskManager;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
@@ -34,12 +34,12 @@ public class SshIslandoraDataController {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(SshDspaceDataController.class);
     
-    private JobHandler jobHandler;
+    private TaskManager jobHandler;
     
     private RepoServerService serverService;
     
     @Autowired
-    public void setJobHandler(JobHandler jobHandler) {
+    public void setJobHandler(TaskManager jobHandler) {
         this.jobHandler = jobHandler;
     }
 

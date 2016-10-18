@@ -5,6 +5,7 @@
  */
 package org.shareok.data.redis.job;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -307,6 +308,104 @@ public class JobDaoImpl implements JobDao {
             logger.error("Cannot start a new job.", ex);
         }
         return newJob;
+    }
+    
+    @Override
+    public RedisJob saveJob(final RedisJob job){
+        
+        long jobIdCount = -1;
+        
+        try{            
+            redisTemplate.setConnectionFactory(connectionFactory);
+
+            RedisAtomicLong jobIdIndex = new RedisAtomicLong(ShareokdataManager.getRedisGlobalJobIdSchema(), redisTemplate.getConnectionFactory());
+
+            jobIdCount = jobIdIndex.incrementAndGet();
+            final String jobId = String.valueOf(jobIdCount);
+            job.setJobId(jobIdCount);
+            
+            final Field[] fields = job.getClass().getDeclaredFields();            
+            final Field[] parentFields;
+            Class parent = job.getClass().getSuperclass();
+            if(null != parent){
+                parentFields = parent.getDeclaredFields();
+            }
+            else{
+                parentFields = null;
+            }
+            
+            List<Object> results = redisTemplate.execute(new SessionCallback<List<Object>>() {
+                @Override
+                public List<Object> execute(RedisOperations operations) throws DataAccessException {
+                    
+                    operations.multi();
+                    operations.boundHashOps("job:"+jobId);
+                    
+                    try{
+                        for(Field field : fields){
+                            String key = field.getName();
+                            field.setAccessible(true);
+                            Object val = field.get(job);
+                            String value = "";
+                            if(null != val){
+                                if(val instanceof Date){
+                                    value = ShareokdataManager.getSimpleDateFormat().format((Date)val);
+                                    operations.opsForHash().put("job:"+jobId, key, value);
+                                }
+                                else if(val instanceof Map){
+                                    continue;
+                                }
+                                else{
+                                    value = String.valueOf(val);
+                                    operations.opsForHash().put("job:"+jobId, key, value);
+                                }
+                            }
+                            else if(!(val instanceof Map)){
+                                operations.opsForHash().put("job:"+jobId, key, value);
+                            }
+                        }
+                        if(null != parentFields){
+                            for(Field parentField : parentFields){
+                                String key = parentField.getName();
+                                parentField.setAccessible(true);
+                                Object val = parentField.get(job);
+                                String value = "";
+                                if(null != val){
+                                    if(val instanceof Date){
+                                        value = ShareokdataManager.getSimpleDateFormat().format((Date)val);
+                                        operations.opsForHash().put("job:"+jobId, key, value);
+                                    }
+                                    else if(val instanceof Map){
+                                        continue;
+                                    }
+                                    else{
+                                        value = String.valueOf(val);
+                                        operations.opsForHash().put("job:"+jobId, key, value);
+                                    }
+                                }     
+                                else if(!(val instanceof Map)){
+                                    operations.opsForHash().put("job:"+jobId, key, value);
+                                }
+                            }
+                        }
+                    } catch (IllegalArgumentException | IllegalAccessException ex) {
+                        logger.error("Cannot sace a new job with illegal access to certain job field values.", ex);
+                    }
+                    
+                    operations.boundSetOps("user_"+String.valueOf(job.getUserId())+"_job_set").add(jobId);
+                    
+                    List<Object> jobList= operations.exec();
+                    if(!jobList.get(0).equals(true)){
+                        operations.discard();
+                    }
+                    return jobList;
+                }
+            });
+        }
+        catch(Exception ex){
+            logger.error("Cannot save a new job.", ex);
+        }
+        return job;
     }
     
 }

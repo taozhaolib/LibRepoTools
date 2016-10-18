@@ -11,6 +11,7 @@ import java.util.Map;
 import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 /**
  *
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class RedisJobServiceImpl implements RedisJobService {
     
     @Autowired
+    @Qualifier("jobDaoImpl")
     private JobDao jobDao;
 
     @Override
@@ -69,6 +71,16 @@ public class RedisJobServiceImpl implements RedisJobService {
     @Override
     public RedisJob createJob(final long uid, final int jobType, final Map<String, String> values){
         return jobDao.createJob(uid, jobType, values);
+    }
+
+    @Override
+    public RedisJob saveJob(RedisJob job) {
+        return jobDao.saveJob(job);
+    }
+
+    @Override
+    public Map<String, String> getReportData(RedisJob job) {
+        return job.getData();
     }
     
 }

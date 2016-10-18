@@ -8,17 +8,16 @@ package org.shareok.data.kernel.api.services.islandora;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Map;
-import org.shareok.data.config.DataHandler;
+import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
-import org.shareok.data.dspacemanager.DspaceSshHandler;
+import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.islandoramanager.IslandoraSshDataUtil;
 import org.shareok.data.islandoramanager.IslandoraSshHandler;
 import org.shareok.data.kernel.api.services.ServiceUtil;
 import org.shareok.data.kernel.api.services.job.JobQueueService;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
 import org.shareok.data.redis.RedisUtil;
-import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,6 +32,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class IslandoraSshServiceImpl implements IslandoraSshService {
     
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(IslandoraSshServiceImpl.class);
+    
     private IslandoraSshHandler handler; 
     private JobQueueService jobQueueService;
     private RedisJobService jobService;
@@ -46,12 +47,18 @@ public class IslandoraSshServiceImpl implements IslandoraSshService {
         return jobQueueService;
     }
 
+    @Override
+    public IslandoraSshHandler getHandler() {
+        return handler;
+    }
+
     @Autowired
     public void setJobQueueService(JobQueueService jobQueueService) {
         this.jobQueueService = jobQueueService;
     }
 
     @Autowired
+    @Qualifier("redisJobServiceImpl")
     public void setJobService(RedisJobService jobService) {
         this.jobService = jobService;
     }
@@ -64,7 +71,7 @@ public class IslandoraSshServiceImpl implements IslandoraSshService {
     @Override
     @Autowired   
     @Qualifier("islandoraSshHandler")
-    public void setHandler(DataHandler handler) {
+    public void setHandler(JobHandler handler) {
         this.handler = (IslandoraSshHandler)handler;
         if(null == this.handler.getSshExec()){
             this.handler.setSshExec(IslandoraSshDataUtil.getSshExecForIslandora());
@@ -90,7 +97,7 @@ public class IslandoraSshServiceImpl implements IslandoraSshService {
     public void run() {
         String jobTypeStr = DataUtil.JOB_TYPES[handler.getJobType()];
         String queueName = RedisUtil.getJobQueueName(getUserId(), jobTypeStr, handler.getServerName());    
-
+        logger.debug("Start to process the jobs in the queue "+queueName);
         while(!Thread.currentThread().isInterrupted() && !jobQueueService.isJobQueueEmpty(queueName)){
             long jobId = jobQueueService.removeJobFromQueue(queueName);
             RedisJob job = jobService.findJobByJobId(jobId);
@@ -102,7 +109,7 @@ public class IslandoraSshServiceImpl implements IslandoraSshService {
             loadJobInfoByJob(job);
             String jobReturnValue = executeTask(jobTypeStr);
             ServiceUtil.processJobReturnValue(jobReturnValue, job);
-//            System.out.println(" The job "+String.valueOf(jobId)+" has been processed! filePath = "+job.getFilePath());
+            logger.debug(" The job "+String.valueOf(jobId)+" has been processed! filePath = "+job.getFilePath());
         }
         Thread.currentThread().interrupt();
     }
@@ -112,7 +119,7 @@ public class IslandoraSshServiceImpl implements IslandoraSshService {
         long jobId = job.getJobId();
         int jobType = job.getType();
         handler.setJobType(job.getType());
-        String jobFilePath = ShareokdataManager.getJobReportPath(DataUtil.JOB_TYPES[jobType], jobId);
+        String jobFilePath = DataHandlersUtil.getJobReportPath(DataUtil.JOB_TYPES[jobType], jobId);
         handler.setReportFilePath(jobFilePath + File.separator + String.valueOf(jobId) + "-report.txt");
         handler.setServerId(String.valueOf(job.getServerId()));
         String schema = (String)DataUtil.JOB_TYPE_DATA_SCHEMA.get(DataUtil.JOB_TYPES[job.getType()]);

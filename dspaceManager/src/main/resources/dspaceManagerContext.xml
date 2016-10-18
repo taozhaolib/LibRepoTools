@@ -23,7 +23,8 @@
     </bean>
         
     <bean id="dspaceApiHandlerImpl" class="org.shareok.data.dspacemanager.DspaceApiHandlerImpl">
-        
+        <property name="output" value="" />
+        <property name="mapping" value="" />
     </bean>
 </beans>
 

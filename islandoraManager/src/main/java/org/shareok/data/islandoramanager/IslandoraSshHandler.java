@@ -12,7 +12,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import org.shareok.data.config.DataHandler;
+import org.apache.log4j.Logger;
+import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.documentProcessor.FileUtil;
@@ -21,6 +22,7 @@ import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.RedisJob;
 import org.shareok.data.ssh.SshExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 /**
@@ -28,7 +30,7 @@ import org.springframework.stereotype.Service;
  * @author Tao Zhao
  */
 @Service
-public class IslandoraSshHandler implements DataHandler {
+public class IslandoraSshHandler implements JobHandler {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(IslandoraSshHandler.class);
     
@@ -42,10 +44,16 @@ public class IslandoraSshHandler implements DataHandler {
     private String recipeFileUri;
     private String uploadDst;
     private String serverId;
+    private RedisJob job;
 
     @Override
     public int getJobType() {
         return jobType;
+    }
+
+    @Override
+    public RedisJob getJob() {
+        return job;
     }
     
     @Override
@@ -93,6 +101,10 @@ public class IslandoraSshHandler implements DataHandler {
         this.jobType = jobType;
     }
 
+    public static Logger getLogger() {
+        return logger;
+    }
+
     @Autowired
     public void setSshExec(SshExecutor sshExec) {
         this.sshExec = sshExec;
@@ -131,6 +143,13 @@ public class IslandoraSshHandler implements DataHandler {
 
     public void setServerId(String serverId) {
         this.serverId = serverId;
+    }
+
+    @Override
+    @Autowired
+    @Qualifier("job")
+    public void setJob(RedisJob job) {
+        this.job = job;
     }
     
     @Override
@@ -192,12 +211,14 @@ public class IslandoraSshHandler implements DataHandler {
                 recipeFileUri = uploadFileToRepository(time);
             }
 
-            String importCommand = "sudo drush -u 1 oubib --recipe_uri="+recipeFileUri+" --parent_collection="+parentPid+" --tmp_dir="+tmpPath+" --root=" + drupalDirectory;
+            String importCommand = " drush -u 1 oubib --recipe_uri="+recipeFileUri+" --parent_collection="+parentPid+" --tmp_dir="+tmpPath+" --root=" + drupalDirectory;
             sshExec.addReporter("Importing the package into Islandora: "+importCommand);
+            logger.debug("Importing the package into Islandora: "+importCommand);
 
             String[] commands = {importCommand};
             sshExec.execCmd(commands);
             sshExec.addReporter("The package has been imported into the Islandora repository.\n");
+            logger.debug("The package has been imported into the Islandora repository.\n");
 
             String savedReportFilePath =  saveLoggerToFile();
             sshExec.addReporter("The importing logging information has been saved to file : " + reportFilePath);

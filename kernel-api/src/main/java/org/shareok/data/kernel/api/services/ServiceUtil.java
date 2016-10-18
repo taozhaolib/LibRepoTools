@@ -18,6 +18,7 @@ import org.shareok.data.config.DataUtil;
 import java.util.HashMap;
 import java.util.Map;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.kernel.api.services.job.DspaceApiJobServiceImpl;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.context.ApplicationContext;
@@ -44,6 +45,9 @@ public class ServiceUtil {
                 case "ssh-import-islandora":
                     serviceBeanMap.put(job, "islandoraSshServiceImpl");
                     break;
+                case "rest-import-dspace":
+                    serviceBeanMap.put(job, "dspaceRestServiceImpl");
+                    break;
                 default:
                     break; 
             }
@@ -64,17 +68,15 @@ public class ServiceUtil {
         return serviceBeanMap.get(repoType + "-" + jobType);
     }
     
-    public static DataService getDataService(ApplicationContext context, String jobType){
+    public static DataService getDataService(String jobType){
         String bean = serviceBeanMap.get(jobType);  
-        if(null == context){
-            context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
-        }
+        ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
         DataService ds = (DataService) context.getBean(bean);
         return ds;
     }
     
-    public static DataService getDataService(ApplicationContext context, int jobType){
-        return getDataService(context, DataUtil.JOB_TYPES[jobType]);
+    public static DataService getDataService(int jobType){
+        return getDataService(DataUtil.JOB_TYPES[jobType]);
     }
     
     public static String saveUploadedFile(MultipartFile file, String jobFilePath){
@@ -179,7 +181,7 @@ public class ServiceUtil {
         long jobId = job.getJobId();
         int jobType = job.getType();
         if(null != jobReturnValue && !jobReturnValue.equals("")){
-                redisJobServ.updateJob(jobId, "status", "2");  
+//                redisJobServ.updateJob(jobId, "status", "2");  
                 Map values = new HashMap();
                 switch(jobType){
                     case 1:
@@ -194,11 +196,11 @@ public class ServiceUtil {
                             redisJobServ.updateJob(jobId, "status", "2");
                         }
                         break;
+                    case 2:
                     case 4:
                     case 5:
-                        redisJobServ.updateJob(jobId, "status", "2");
-                        break;
                     default:
+                        redisJobServ.updateJob(jobId, "status", "2");
                         break;
                 }
             }
@@ -206,5 +208,23 @@ public class ServiceUtil {
                 redisJobServ.updateJob(jobId, "status", "3");
             }
         redisJobServ.updateJob(jobId, "endTime", ShareokdataManager.getSimpleDateFormat().format(new Date()));
+    }
+    
+    public static String getThreadNameByJob(RedisJob job){
+        long uid = job.getUserId();
+        String jobType = DataUtil.JOB_TYPES[job.getType()];
+        int serverId = job.getServerId();
+        long jobId = job.getJobId();
+        return String.valueOf(uid)+"--"+jobType+"--"+String.valueOf(serverId)+"--"+String.valueOf(jobId);
+    }
+    
+    public static RedisJobService getJobServiceByJobType(RedisJob job){
+        ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
+        switch(job.getType()){
+            case 2:
+                return (DspaceApiJobServiceImpl)context.getBean("dspaceApiJobServiceImpl");
+            default:
+                return (RedisJobService) context.getBean("redisJobServiceImpl");
+        }
     }
 }

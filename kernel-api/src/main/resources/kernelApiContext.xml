@@ -37,13 +37,17 @@
         
     </bean>
     
-    <bean id="jobHandlerImpl" class="org.shareok.data.kernel.api.services.job.JobHandlerImpl">
+    <bean id="taskManagerImpl" class="org.shareok.data.kernel.api.services.job.TaskManagerImpl">
         
     </bean>
     
     <bean id="repoServerService" class="org.shareok.data.kernel.api.services.server.RepoServerServiceImpl"></bean>
     
     <bean id="jobQueueServiceImpl" class="org.shareok.data.kernel.api.services.job.JobQueueServiceImpl"></bean>
+    
+    <bean id="dspaceRestServiceImpl" class="org.shareok.data.kernel.api.services.dspace.DspaceRestServiceImpl"></bean>
+    
+    <bean id="dspaceApiJobServiceImpl" class="org.shareok.data.kernel.api.services.job.DspaceApiJobServiceImpl" />
     
 </beans>
 

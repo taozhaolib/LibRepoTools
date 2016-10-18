@@ -90,6 +90,8 @@ public class RestDspaceDataController {
         
         String filePath = "";
         
+        logger.debug("Start to process the DSpace Rest API request...");
+        
         try{
             if(null == file){
                 filePath = (String)request.getParameter("remoteFileUri");

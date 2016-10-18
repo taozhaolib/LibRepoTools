@@ -211,12 +211,14 @@ public class IslandoraSshHandler implements JobHandler {
                 recipeFileUri = uploadFileToRepository(time);
             }
 
-            String importCommand = "sudo drush -u 1 oubib --recipe_uri="+recipeFileUri+" --parent_collection="+parentPid+" --tmp_dir="+tmpPath+" --root=" + drupalDirectory;
+            String importCommand = " drush -u 1 oubib --recipe_uri="+recipeFileUri+" --parent_collection="+parentPid+" --tmp_dir="+tmpPath+" --root=" + drupalDirectory;
             sshExec.addReporter("Importing the package into Islandora: "+importCommand);
+            logger.debug("Importing the package into Islandora: "+importCommand);
 
             String[] commands = {importCommand};
             sshExec.execCmd(commands);
             sshExec.addReporter("The package has been imported into the Islandora repository.\n");
+            logger.debug("The package has been imported into the Islandora repository.\n");
 
             String savedReportFilePath =  saveLoggerToFile();
             sshExec.addReporter("The importing logging information has been saved to file : " + reportFilePath);

@@ -128,9 +128,18 @@ public class UserController{
                         Date startTime = job.getStartTime();
                         Date endTime = job.getEndTime();
                         parsedJob.put("jobId", String.valueOf(job.getJobId()));
-                        parsedJob.put("jobType", DataUtil.JOB_TYPES[job.getType()]);
-//                        parsedJob.put("repoType", DataUtil.REPO_TYPES[job.getRepoType()]);
-                        parsedJob.put("status", RedisUtil.REDIS_JOB_STATUS[job.getStatus()]);
+                        int jobType = job.getType();
+                        if(jobType < 0 || jobType >= DataUtil.JOB_TYPES.length){
+                            logger.debug("The job type " + String.valueOf(jobType) + " does not exist!");
+                            continue;
+                        }
+                        parsedJob.put("jobType", DataUtil.JOB_TYPES[jobType]);
+                        int status = job.getStatus();
+                        if(status < 0 || status >= RedisUtil.REDIS_JOB_STATUS.length){
+                            logger.debug("The job status " + String.valueOf(status) + " does not exist!");
+                            continue;
+                        }
+                        parsedJob.put("status", RedisUtil.REDIS_JOB_STATUS[status]);
                         parsedJob.put("userId", String.valueOf(job.getUserId()));
                         parsedJob.put("startTime", (null == startTime) ? "" : ShareokdataManager.getSimpleDateFormat().format(startTime));
                         parsedJob.put("endTime", (null == endTime) ? "" : ShareokdataManager.getSimpleDateFormat().format(endTime));

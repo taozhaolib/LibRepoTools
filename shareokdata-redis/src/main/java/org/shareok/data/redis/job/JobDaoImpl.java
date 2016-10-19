@@ -185,7 +185,7 @@ public class JobDaoImpl implements JobDao {
             String endTime = (String)jobOps.get("endTime");
             job.setEndTime((null == endTime || "".equals(endTime)) ? null : ShareokdataManager.getSimpleDateFormat().parse(endTime));
             job.setUserId(Long.valueOf(jobOps.get("userId")));
-            job.setServerId(Integer.valueOf(jobOps.get("serverId")));
+            job.setServerId(Integer.valueOf(null != jobOps.get("serverId") ? jobOps.get("serverId") : "-1"));
             job.setStatus(Integer.valueOf(jobOps.get("status")));
             job.setType(Integer.valueOf(jobOps.get("type")));
 //            job.setRepoType(Integer.valueOf(jobOps.get("repoType")));

@@ -16,7 +16,6 @@
         <module>dspaceManager</module>
         <module>shareokdata-redis</module>
         <module>ssh</module>
-        <module>lawLibrary</module>
         <module>SAFBuilder</module>
         <module>islandoraManager</module>
         <module>dataHandlers</module>

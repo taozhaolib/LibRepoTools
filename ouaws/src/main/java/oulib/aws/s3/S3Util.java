@@ -470,7 +470,8 @@ public class S3Util {
             exifDirectory.add((TagInfoAscii)tagInfo, String.valueOf(value));
         }
         else if(tagInfo instanceof TagInfoByte){
-            exifDirectory.add((TagInfoByte)tagInfo, String.valueOf(value).getBytes());
+            final TagInfoByte byteInfo = (TagInfoByte)tagInfo;
+            exifDirectory.add(byteInfo, String.valueOf(value).getBytes());
         }
         /**
          * Implement more taginfo types here....

@@ -186,16 +186,27 @@ public class TaskManagerImpl implements TaskManager {
      */
     @Override
     public RedisJob execute(RedisJob job){
+//        logger.debug("Start to execute the DSpace Rest API request");
+        RedisJob newJob = null;
+        try{
+            logger.debug("Create a new job for the DSpace Rest API request...");
+            newJob = redisJobService.saveJob(job);                    
+        }
+        catch(Exception ex){
+            logger.error("Cannot create a new job for the DSpace Rest API request: "+ex.getMessage());
+        }
         
-        RedisJob newJob = redisJobService.saveJob(job);        
-        long jobId = newJob.getJobId();
-
-        DataService ds = ServiceUtil.getDataService(newJob.getType());
-        ds.getHandler().setJob(newJob);
-        ds.getHandler().setReportFilePath(DataHandlersUtil.getJobReportFilePath(DataUtil.JOB_TYPES[newJob.getType()], jobId));
-        String threadName = ServiceUtil.getThreadNameByJob(newJob);
-        Thread newThread = new Thread(ds, threadName);
-        newThread.start();
+        if(null != newJob){
+            long jobId = newJob.getJobId();
+            logger.debug("The new job for the DSpace Rest API request has id="+String.valueOf(jobId));
+            DataService ds = ServiceUtil.getDataService(newJob.getType());
+            ds.getHandler().setJob(newJob);
+            ds.getHandler().setReportFilePath(DataHandlersUtil.getJobReportFilePath(DataUtil.JOB_TYPES[newJob.getType()], jobId));
+            String threadName = ServiceUtil.getThreadNameByJob(newJob);
+            Thread newThread = new Thread(ds, threadName);
+            logger.debug("Create a new thread for the DSpace Rest API request");
+            newThread.start();
+        }
         
         return newJob;
     }

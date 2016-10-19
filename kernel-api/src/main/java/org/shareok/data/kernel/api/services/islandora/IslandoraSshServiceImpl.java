@@ -32,6 +32,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class IslandoraSshServiceImpl implements IslandoraSshService {
     
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(IslandoraSshServiceImpl.class);
+    
     private IslandoraSshHandler handler; 
     private JobQueueService jobQueueService;
     private RedisJobService jobService;
@@ -95,7 +97,7 @@ public class IslandoraSshServiceImpl implements IslandoraSshService {
     public void run() {
         String jobTypeStr = DataUtil.JOB_TYPES[handler.getJobType()];
         String queueName = RedisUtil.getJobQueueName(getUserId(), jobTypeStr, handler.getServerName());    
-
+        logger.debug("Start to process the jobs in the queue "+queueName);
         while(!Thread.currentThread().isInterrupted() && !jobQueueService.isJobQueueEmpty(queueName)){
             long jobId = jobQueueService.removeJobFromQueue(queueName);
             RedisJob job = jobService.findJobByJobId(jobId);
@@ -107,7 +109,7 @@ public class IslandoraSshServiceImpl implements IslandoraSshService {
             loadJobInfoByJob(job);
             String jobReturnValue = executeTask(jobTypeStr);
             ServiceUtil.processJobReturnValue(jobReturnValue, job);
-//            System.out.println(" The job "+String.valueOf(jobId)+" has been processed! filePath = "+job.getFilePath());
+            logger.debug(" The job "+String.valueOf(jobId)+" has been processed! filePath = "+job.getFilePath());
         }
         Thread.currentThread().interrupt();
     }

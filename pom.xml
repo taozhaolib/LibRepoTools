@@ -40,13 +40,7 @@
    </repositories>
 
    <dependencies>
-      
-          <!-- log4j -->
-          <dependency>
-              <groupId>log4j</groupId>
-              <artifactId>log4j</artifactId>
-              <version>1.2.17</version>
-          </dependency>
+
           <!-- junit -->
           <dependency>
               <groupId>junit</groupId>
@@ -126,5 +120,15 @@
             <version>2.5</version>
         </dependency>
    </dependencies>
+   
+   <dependencyManagement>
+       <dependencies>
+            <dependency>
+              <groupId>log4j</groupId>
+              <artifactId>log4j</artifactId>
+              <version>1.2.17</version>
+            </dependency>
+       </dependencies>       
+   </dependencyManagement>
      
 </project>

@@ -112,14 +112,15 @@ public class DspaceRestServiceImpl implements DspaceRestService {
             }
             jobService.updateJob(jobId, "status", "1");
             loadJobInfoByJob(job);
-            // Start executing:
+            logger.debug("Start to execute the DSpace Rest API loading...");
             String jobReturnValue = executeTask(DataUtil.JOB_TYPES[job.getType()]);
-            
+            logger.debug("Process the return value of the DSpace Rest API loading...");
             ServiceUtil.processJobReturnValue(jobReturnValue, job);
             Thread.currentThread().interrupt();            
         }
         catch(IncompleteHandlerInfoException ex){
             jobService.updateJob(jobId, "status", "3");
+            logger.error("Incomplete handler information for the DSpace Rest API request");
         }
     }
     

@@ -257,4 +257,11 @@ public class ShareokdataManager {
         }
         return filePath;
     }
+    
+    public static String getAwsS3BucketUriPrefix(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("s3BucketUriPrefix");
+    }
 }

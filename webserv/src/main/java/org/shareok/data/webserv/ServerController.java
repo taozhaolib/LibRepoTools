@@ -5,10 +5,6 @@
  */
 package org.shareok.data.webserv;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
@@ -17,11 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -59,7 +53,9 @@ public class ServerController {
 //                model.setViewName("userError");
 //                return model;
 //            }
-
+            
+            
+            model = WebUtil.getRepoTypeList(model);
             model = WebUtil.getServerList(model, serverService);
             model.setViewName("serverConfig");
         }

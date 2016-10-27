@@ -43,7 +43,7 @@
                         </c:if>
                         <c:if test="${jobType == 'import-uploaded'}">
                         </c:if>
-                            <br/><br/><br/><br>
+                            <br/><br/><br/>
                     </c:if>
                         <div class="form-group">
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="serverName">Islandora server name:</label>
@@ -55,29 +55,12 @@
                               <input type="text" class="form-control" name="serverId">
                             </div>
                         </div>
-                        <br><br>
-                        <div class="form-group">
-                            <label class="control-label col-lg-2 col-sm-4 text-left" for="drupalDirectory">Islandora Drupal Directory:</label>
-                            <div class="col-lg-4 col-sm-8">
-                              <input type="text" class="form-control" name="drupalDirectory" placeholder="">
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-lg-2 col-sm-4 text-left" for="uploadDst">Islandora Upload Directory:</label>
-                                <div class="col-lg-4 col-sm-8">
-                                  <input type="text" class="form-control" name="uploadDst" placeholder="">
-                                </div>
-                            </div>
-                        </div>
-                        <br/><br/><br/><br>
+                        <br><br>                        
                         <div class="form-group">                            
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="parentPid">Parent Collection PID:</label>
                             <div class="col-lg-4 col-sm-8">
                               <input type="text" class="form-control" name="parentPid" placeholder="">
-                            </div>
-                            <label class="control-label col-lg-2 col-sm-4 text-left" for="tmpPath">Directory for Temporary Files</label>
-                            <div class="col-lg-4 col-sm-8">
-                              <input type="text" class="form-control" name="tmpPath" placeholder="">
-                            </div>
+                            </div>                            
                         </div>
                         <br/><br/><br/>
                             <input type="submit" class="btn btn-form loading-btn" value="${jobType2}">&nbsp;&nbsp;&nbsp;&nbsp;

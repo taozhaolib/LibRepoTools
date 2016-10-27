@@ -15,8 +15,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
@@ -115,4 +117,17 @@ public class WebUtil {
         return model;
     }
     
+    public static ModelAndView getRepoTypeList(ModelAndView model) throws JsonProcessingException {
+        int index = 0;
+        Map repoTypeMap = new HashMap();
+        for(String repoType : DataUtil.REPO_TYPES){
+            repoTypeMap.put(index, repoType);
+            index++;
+        }
+        String repoTypeListStr;
+        ObjectMapper mapper = new ObjectMapper();
+        repoTypeListStr = mapper.writeValueAsString(repoTypeMap);
+        model.addObject("repoTypeList", repoTypeListStr);
+        return model;
+    }
 }

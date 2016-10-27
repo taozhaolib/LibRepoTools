@@ -64,7 +64,6 @@ public class SshExecutor {
         this.charset = charset;
     }
 
-    @Autowired
     public void setServer(RepoServer server) {
         this.server = server;
     }

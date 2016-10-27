@@ -59,12 +59,13 @@
                         <div class="col-lg-4 col-sm-8">
                           <input type="text" class="form-control" name="address" placeholder="">
                         </div>   
-                        <div class="col-lg-6 col-sm-12">
-                            <input type="button"  class="btn btn-click col-lg-6 col-sm-6" value="Click to Set up Proxy">
-                        </div>
+                        
                     </div>
                     <br/><br/>
-                    <br/>
+                    <div class="col-lg-6 col-sm-12">
+                        <input type="button"  class="btn btn-info btn-click col-lg-6 col-sm-6" value="Click to Set up Proxy">
+                    </div>
+                    <br/><br/>    
                     <div class="form-group click-show-slow">
                         <label class="control-label col-lg-2 col-sm-4 text-left" for="proxyHost">Proxy Host:</label>
                         <div class="col-lg-6 col-sm-8">
@@ -90,14 +91,21 @@
                         <label class="control-label col-lg-2 col-sm-4 text-left" for="passPhrase">Passphrase:</label>
                         <div class="col-lg-4 col-sm-8">          
                             <input type="password" class="form-control" name="passPhrase" placeholder="Enter password">
-                        </div>
-                        <br><br><br>
+                        </div>                        
+                        <br><br>                     
                     </div>
+                    <br>
+                      
+                    <%@include file="repoTypeDropdown.jsp" %>
+                    
+                    <div>
+                        <br>
                         <input type="submit" class="btn btn-form loading-btn" value="Save">&nbsp;&nbsp;&nbsp;&nbsp;
                         <input type="button"  class="btn btn-form" onclick="location.href='/webserv/home'" value="Back to home page"><BR>
                         <%@ include file="spining.jsp" %> 
-                    <br>
-                    <input type="hidden" value="-1" name="serverId">
+                        <br>
+                        <input type="hidden" value="-1" name="serverId">
+                    </div>
 
                  </form>
                     <c:if test="${not empty message}">

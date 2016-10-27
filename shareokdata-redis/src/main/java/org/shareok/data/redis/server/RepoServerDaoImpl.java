@@ -36,6 +36,9 @@ public class RepoServerDaoImpl implements RepoServerDao {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(RepoServerDaoImpl.class);
     
     @Autowired
+    private RepoServerDaoHelper serverDaoHelper;
+    
+    @Autowired
     private JedisConnectionFactory connectionFactory;
             
     @Autowired
@@ -286,11 +289,12 @@ public class RepoServerDaoImpl implements RepoServerDao {
             BoundHashOperations<String, String, String> serverOps = redisTemplate.boundHashOps(RedisUtil.getServerQueryKey(serverId));
             if(null != serverOps){
                 RepoServer server = RedisUtil.getServerInstance();
+                int repoType = Integer.parseInt(serverOps.get("repoType"));
                 server.setServerId(serverId);
                 server.setServerName(serverOps.get("serverName"));
                 server.setPort(Integer.parseInt(serverOps.get("port")));
                 server.setProxyPort(Integer.parseInt(serverOps.get("proxyPort")));
-                server.setRepoType(Integer.parseInt(serverOps.get("repoType")));
+                server.setRepoType(repoType);
                 server.setTimeout(Integer.parseInt(serverOps.get("timeout")));
                 server.setHost(serverOps.get("host"));
                 server.setProxyHost(serverOps.get("proxyHost"));
@@ -301,6 +305,7 @@ public class RepoServerDaoImpl implements RepoServerDao {
                 server.setPassPhrase(serverOps.get("passPhrase"));
                 server.setRsaKey(serverOps.get("rsaKey"));
                 server.setAddress(serverOps.get("address"));
+                server = serverDaoHelper.getRepoServerDaoByRepoType(repoType).loadServerParametersByRepoType(server, serverOps);
                 return server;
             }
             else{
@@ -378,7 +383,8 @@ public class RepoServerDaoImpl implements RepoServerDao {
                         int id = Integer.parseInt(idStr);
                         BoundHashOperations<String, String, String> serverOps = redisTemplate.boundHashOps(RedisUtil.getServerQueryKey(id));
                         if(null != serverOps){
-                            RepoServer server = new RepoServer();//RedisUtil.getServerInstance(context);
+                            RepoServer server = new RepoServer();
+                            int repoType = Integer.parseInt(serverOps.get("repoType"));
                             server.setServerId(id);
                             server.setServerName(serverOps.get("serverName"));
                             server.setPort(Integer.parseInt(serverOps.get("port")));
@@ -392,8 +398,9 @@ public class RepoServerDaoImpl implements RepoServerDao {
                             server.setProxyPassword(serverOps.get("proxyPassword"));
                             server.setPassPhrase(serverOps.get("passPhrase"));
                             server.setRsaKey(serverOps.get("rsaKey"));
-                            server.setRepoType(Integer.parseInt(serverOps.get("repoType")));
-                            server.setAddress(serverOps.get("address"));
+                            server.setRepoType(repoType);
+                            server.setAddress(serverOps.get("address"));                           
+                            server = serverDaoHelper.getRepoServerDaoByRepoType(repoType).loadServerParametersByRepoType(server, serverOps);
                             serverList.add(server);
                         }
                     }
@@ -408,7 +415,6 @@ public class RepoServerDaoImpl implements RepoServerDao {
         }
         return null;
     }
-    
 //    @Override
 //    public RepoServer loadRepoServerByRepoType(RepoServer server){
 //        try{

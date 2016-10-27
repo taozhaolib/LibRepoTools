@@ -21,7 +21,7 @@
             var serverList = '<%= request.getAttribute("serverList") %>';        
             var data = $.parseJSON(serverList);
             $.each(data, function(key, value){                
-                var li = "<li role=\"presentation\"><a id=\"server-" + value + "\" role=\"menuitem\" tabindex=\"-1\" class=\"server-link\" href=\"javascript:void(0);\" >" + key + "</a></li>";
+                var li = "<li role=\"presentation\"><a id=\"server-" + value + "\" role=\"menuitem\" tabindex=\"-1\" class=\"server-link\" href=\"javascript:void(0);\" ><span class=\".text-capitalize \" ><strong>" + key + "</strong></span></a></li>";
                 $("#server-ui").append(li);
             });
             
@@ -86,6 +86,65 @@
                                 break;
                             case "address":
                                 $("input[name='address']").val(serverParser[id][key]);
+                                break;
+                            case "repoType":
+                                var repoType = serverParser[id][key];
+                                var repoTypeInfoDivCls = $(".repoTypeInfoDivCls");
+                                if(repoTypeInfoDivCls && repoTypeInfoDivCls.length > 0){
+                                    $(".repoTypeInfoDivCls").hide();
+                                    var repoTypeInfoDiv = $("#repoTypeInfoDiv-"+repoType);
+                                    if(repoTypeInfoDiv && repoTypeInfoDiv.length === 1){
+                                        repoTypeInfoDiv.show();
+                                        switch(repoType){
+                                            case 1:
+                                                var dspacePath = serverParser[id]['dspacePath'];
+                                                var dspaceUploadPath = serverParser[id]['dspaceUploadPath'];
+                                                if(dspacePath){
+                                                    var dspacePathInput = $("input[name='dspacePath']");
+                                                    if(dspacePathInput){
+                                                        dspacePathInput.attr("value", dspacePath);
+                                                    }
+                                                }
+                                                if(dspaceUploadPath){
+                                                    var dspaceUploadPathInput = $("input[name='dspaceUploadPath']");
+                                                    if(dspaceUploadPathInput){
+                                                        dspaceUploadPathInput.attr("value", dspaceUploadPath);
+                                                    }
+                                                }
+                                                break;
+                                            case 2:
+                                                var drupalPath = serverParser[id]['drupalPath'];
+                                                var islandoraUploadPath = serverParser[id]['islandoraUploadPath'];
+                                                var tempFilePath = serverParser[id]['tempFilePath'];
+                                                if(tempFilePath){
+                                                    var tempFilePathInput = $("input[name='tempFilePath']");
+                                                    if(tempFilePathInput){
+                                                        tempFilePathInput.attr("value", tempFilePath);
+                                                    }
+                                                }
+                                                if(drupalPath){
+                                                    var drupalPathInput = $("input[name='drupalPath']");
+                                                    if(drupalPathInput){
+                                                        drupalPathInput.attr("value", drupalPath);
+                                                    }
+                                                }
+                                                if(islandoraUploadPath){
+                                                    var islandoraUploadPathInput = $("input[name='islandoraUploadPath']");
+                                                    if(islandoraUploadPathInput){
+                                                        islandoraUploadPathInput.attr("value", islandoraUploadPath);
+                                                    }
+                                                }
+                                                break;
+                                            case 3:
+                                                break;
+                                            case 4:
+                                                break;
+                                            case 5:
+                                            default:
+                                                break;
+                                        }
+                                    }
+                                }
                                 break;
                             default:
                                 break;

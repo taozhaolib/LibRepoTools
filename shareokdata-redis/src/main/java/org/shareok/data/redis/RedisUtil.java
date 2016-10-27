@@ -15,6 +15,8 @@ import org.shareok.data.redis.job.DspaceApiJob;
 import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.JobDaoImpl;
 import org.shareok.data.redis.job.RedisJob;
+import org.shareok.data.redis.server.DspaceRepoServer;
+import org.shareok.data.redis.server.IslandoraRepoServer;
 import org.shareok.data.redis.server.RepoServer;
 import org.shareok.data.redis.server.RepoServerDaoImpl;
 import org.springframework.context.ApplicationContext;
@@ -116,5 +118,15 @@ public class RedisUtil {
     public static RepoServerDaoImpl getServerDaoInstance(){
         ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
         return (RepoServerDaoImpl) context.getBean("repoServerDaoImpl");
+    }
+    
+    public static IslandoraRepoServer getIslandoraRepoServerInstance(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
+        return (IslandoraRepoServer) context.getBean("islandoraRepoServer");
+    }
+    
+    public static DspaceRepoServer getDspaceRepoServerInstance(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
+        return (DspaceRepoServer) context.getBean("dspaceRepoServer");
     }
 }

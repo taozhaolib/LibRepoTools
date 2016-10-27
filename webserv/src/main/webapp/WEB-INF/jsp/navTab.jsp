@@ -29,6 +29,7 @@
            <span class="caret"></span></a>
            <ul class="dropdown-menu">
              <li class="mainMenuDrop" id="dataIs"><a href="/webserv/ssh/islandora/book/import/page/ssh-import">Islandora Book Import</a></li>
+             <li class="mainMenuDrop" id="dataIs"><a href="/webserv/s3/islandora/bag/import/page">Islandora S3 Bag Import</a></li>
            </ul>
         </li>
         <c:if test="${not empty loggedin }">

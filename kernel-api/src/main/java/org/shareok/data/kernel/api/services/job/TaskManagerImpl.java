@@ -153,7 +153,8 @@ public class TaskManagerImpl implements TaskManager {
         String filePath = "";
         switch(jobType){
             case 5:
-                filePath = "uri--" + remoteFilePath;                
+                filePath = "uri--" + remoteFilePath;  
+                break;
             case 4:
                 if(remoteFilePath.contains("job-")){
                     long oldJobId = Long.parseLong(remoteFilePath.split("-")[1]);

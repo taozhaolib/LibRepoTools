@@ -6,27 +6,9 @@
         <artifactId>shareokdata</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>kernel-api</artifactId>
+    <artifactId>ouHistory</artifactId>
     <packaging>jar</packaging>
-    <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-    </properties>
-    
     <dependencies>
-        <dependency>
-            <groupId>org.shareok.data</groupId>
-            <artifactId>sagedata</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-        
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>plosdata</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>config</artifactId>
@@ -34,24 +16,22 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>shareokdata-redis</artifactId>
+            <artifactId>documentProcessor</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>safbuilder</groupId>
+            <artifactId>safbuilder</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>dspaceManager</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>islandoraManager</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>ouHistory</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
 </project>

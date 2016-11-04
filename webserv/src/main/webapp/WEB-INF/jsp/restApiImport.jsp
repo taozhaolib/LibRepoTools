@@ -14,6 +14,9 @@
 <c:set var="string2" value="${repoType}"/>
 <c:set var="jobType2" value="${cg:upTextFirstLetter(string1)}" />
 <c:set var="repoType2" value="${cg:upTextFirstLetter(string2)}" />
+<c:set var="localFile" value='<%= request.getParameter("file") %>' />
+<c:set var="localFolder" value='<%= request.getParameter("folder") %>' />
+<c:set var="localSafDir" value='<%= request.getParameter("safDir") %>' />
 
 <div class="container">
     
@@ -36,7 +39,7 @@
                                 </div>
                                 <label class="control-label col-lg-3 col-sm-3 text-left" for="recipeFileUri">Remote online zip file of SAF package:</label>
                                 <div class="col-lg-4 col-sm-8">
-                                    <input type="text" class="form-control" name="remoteFileUri" />
+                                    <input type="text" class="form-control" name="remoteFileUri" value="${localFile}" />
                                 </div>
                             </div>
                             <c:set var="userNameInput" value="dspaceUserName"/>
@@ -78,7 +81,9 @@
                             <%@ include file="spining.jsp" %> 
                         <br>
                         <input type="hidden" value="${uploadFile}" name="uploadFile">
-                        
+                        <input type="hidden" value="${localFile}" name="localFile">
+                        <input type="hidden" value="${localFolder}" name="localFolder">
+                        <input type="hidden" value="${localSafDir}" name="localSafDir">
                      </form>
                     
                 </center>

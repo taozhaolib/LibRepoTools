@@ -110,7 +110,7 @@ public class DspaceRestServiceImpl implements DspaceRestService {
             if(null == job){
                 throw new IncompleteHandlerInfoException("Handler hasd a null Job!");
             }
-            jobService.updateJob(jobId, "status", "1");
+            jobService.updateJob(job.getJobId(), "status", "1");
             loadJobInfoByJob(job);
             logger.debug("Start to execute the DSpace Rest API loading...");
             String jobReturnValue = executeTask(DataUtil.JOB_TYPES[job.getType()]);

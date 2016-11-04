@@ -607,10 +607,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         try{            
             File safFile = new File(safPath);
             if(safPath.endsWith(".zip")){
-                FileZipper.unzipToDirectory(safPath);
+                String newPath = FileZipper.unzipToDirectory(safPath);
                 // Change the path to be the unzipped folder
-                safPath = FileUtil.getFileNameWithoutExtension(safPath);
-                safFile = new File(safPath);
+//                safPath = FileUtil.getFileNameWithoutExtension(safPath);
+                safFile = new File(newPath);
             }
             if(safFile.isDirectory()){
                 for(File file : safFile.listFiles()){
@@ -805,10 +805,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         catch(SafPackagePathErrorException | SafPackageMissingFileException ex){
             output += "Saf package is not valid!\n"+ex.getMessage()+"\n\n";
             logger.error("Cannot create new items with saf package path: " + safPath, ex);
-        } catch (FileTypeException | EmptyFilePathException ex) {
-            output += "Saf package cannot be unzipped!\n"+ex.getMessage()+"\n\n";
-            logger.error("Cannot unzip the saf package with path: " + safPath, ex);
-        }
+        } 
         finally{
             FileUtil.outputStringToFile(mapping, FileUtil.getFileContainerPath(reportFilePath)+File.separator+"mapfile");
             FileUtil.outputStringToFile(output, reportFilePath);

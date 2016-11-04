@@ -14,6 +14,7 @@
     <import resource="classpath*:**/redisContext.xml"/>
     <import resource="classpath*:**/dspaceManagerContext.xml"/>
     <import resource="classpath*:**/islandoraManagerContext.xml"/>
+    <import resource="classpath*:**/ouHistoryDataContext.xml"/>
     
     <bean id="plosDspaceServiceImpl" class="org.shareok.data.kernel.api.services.dspace.DspacePlosServiceImpl">
 
@@ -22,6 +23,8 @@
     <bean id="sageDspaceServiceImpl" class="org.shareok.data.kernel.api.services.dspace.DspaceSageServiceImpl">
 
     </bean>
+    
+    <bean id="ouHistoryJournalDspaceServiceImpl" class="org.shareok.data.kernel.api.services.dspace.DspaceOuHistoryJournalDataServiceImpl" />
     
     <bean id="redisUserServiceImpl" class="org.shareok.data.kernel.api.services.user.RedisUserServiceImpl">
 

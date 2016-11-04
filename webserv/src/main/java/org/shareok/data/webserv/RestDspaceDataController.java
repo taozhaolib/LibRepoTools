@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.datahandlers.DataHandlersUtil;
+import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.kernel.api.services.ServiceUtil;
 import org.shareok.data.kernel.api.services.job.TaskManager;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
@@ -93,8 +94,23 @@ public class RestDspaceDataController {
         logger.debug("Start to process the DSpace Rest API request...");
         
         try{
-            if(null == file){
-                filePath = (String)request.getParameter("remoteFileUri");
+            if(null == file || file.isEmpty()){
+                String localFile = (String)request.getParameter("localFile");
+                if(!FileUtil.isEmptyString(localFile)){
+                    filePath = localFile;
+                    String safDir = (String)request.getParameter("localSafDir");
+                    if(!FileUtil.isEmptyString(safDir)){
+                        filePath = safDir + File.separator + filePath;
+                    }
+                    String folder = (String)request.getParameter("localFolder");
+                    if(!FileUtil.isEmptyString(folder)){
+                        filePath = folder + File.separator + filePath;
+                    }
+                    filePath = ShareokdataManager.getOuhistoryUploadPath() + File.separator + filePath;
+                }
+                else{
+                    filePath = (String)request.getParameter("remoteFileUri");
+                }
             }
             else{
                 filePath = ServiceUtil.saveUploadedFile(file, ShareokdataManager.getDspaceRestImportPath(jobType+"-"+repoTypeStr));

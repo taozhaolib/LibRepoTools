@@ -74,6 +74,18 @@ public class ShareokdataManager {
         return sageUploadPath;
     }
     
+    public static String getOuhistoryUploadPath(){
+        if(null == prop){
+            loadProperties();
+        }
+        String sageUploadPath = prop.getProperty("ouhistoryUploadPath");
+        File sageUploadPathFile = new File(sageUploadPath);
+        if(!sageUploadPathFile.exists()){
+            sageUploadPathFile.mkdir();
+        }
+        return sageUploadPath;
+    }
+    
     public static String getPlosUploadPath(){
         if(null == prop){
             loadProperties();
@@ -110,6 +122,13 @@ public class ShareokdataManager {
             loadProperties();
         }
         return prop.getProperty("journalDataBean."+publisher);
+    }
+    
+    public static String getSafPackageDataServiceBean(String publisher){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("safPackageDataBean."+publisher);
     }
     
     public static String getDspceSampleDublinCoreFileName(){

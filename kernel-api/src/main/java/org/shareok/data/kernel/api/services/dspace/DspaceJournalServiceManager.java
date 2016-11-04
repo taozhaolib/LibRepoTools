@@ -30,4 +30,16 @@ public class DspaceJournalServiceManager {
         }
         return djds;
     }
+    
+    public static DspaceSafPackageDataService getDspaceSafPackageDataService(String publisher){
+        DspaceSafPackageDataService dspds = null;
+        try{
+            ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
+            dspds = (DspaceSafPackageDataService)context.getBean(ShareokdataManager.getSafPackageDataServiceBean(publisher));
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        return dspds;
+    }
 }

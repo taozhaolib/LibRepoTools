@@ -415,6 +415,33 @@ public class RepoServerDaoImpl implements RepoServerDao {
         }
         return null;
     }
+    
+    public String[] getRepoTypeServerFields(int repoType){
+        
+        String[] fields = null;
+        
+        switch(repoType){
+            case 1:
+                fields = new String[]{"dspacePath","dspaceUploadPath"};
+                break;
+            case 2:
+                fields = new String[]{"islandoraUploadPath","drupalPath","tempFilePath"};
+                break;
+            default:
+                break;
+        }
+        return fields;
+    }
+    
+    public void updateRepoTypeServerFieldInfo(Map<String, String> repoTypeServerFieldInfo, RepoServer server){
+        BoundHashOperations<String, String, String> serverOps = redisTemplate.boundHashOps(RedisUtil.getServerQueryKey(server.getServerId()));
+            if(null != serverOps){
+                for(String key : repoTypeServerFieldInfo.keySet()){
+                    serverOps.put(key, repoTypeServerFieldInfo.get(key));
+                }
+            }            
+    }
+    
 //    @Override
 //    public RepoServer loadRepoServerByRepoType(RepoServer server){
 //        try{

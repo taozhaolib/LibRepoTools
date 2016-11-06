@@ -67,6 +67,11 @@
             if(repoTypeInfoDiv && repoTypeInfoDiv.length === 1){
                 repoTypeInfoDiv.show();
             }
+            
+            var repoTypeInput = $("#repoType");
+            if(repoTypeInput){
+                repoTypeInput.val(id);
+            }
         });
     });
 

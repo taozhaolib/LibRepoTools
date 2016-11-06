@@ -5,6 +5,8 @@
  */
 package org.shareok.data.webserv;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
@@ -110,17 +112,31 @@ public class ServerController {
         
         if(null != serverId && serverId.equals("-1")){
             RepoServer newServer = serverService.addServer(server);
+            Map<String, String> repoTypeServerFieldInfo = getRepoTypeServerFieldInfo(request, serverService.getRepoTypeServerFields(newServer.getRepoType()));
+            serverService.updateRepoTypeServerFieldInfo(repoTypeServerFieldInfo, newServer);
             view.setUrl("/server/config");
             redirectAttrs.addFlashAttribute("message", "The new server \""+newServer.getServerName()+"\" has been added successfully!");
             model.setView(view);
         }
         else if(null != serverId && !serverId.equals("-1")){
             existingServer = serverService.updateServer(server);
+            Map<String, String> repoTypeServerFieldInfo = getRepoTypeServerFieldInfo(request, serverService.getRepoTypeServerFields(existingServer.getRepoType()));
+            serverService.updateRepoTypeServerFieldInfo(repoTypeServerFieldInfo, server);
             view.setUrl("/server/config");
             model.setView(view);
             redirectAttrs.addFlashAttribute("message", "The server \""+existingServer.getServerName()+"\" has been updated successfully!");
             return model; 
         }
         return model;
+    }
+    
+    private Map<String, String> getRepoTypeServerFieldInfo(HttpServletRequest request, String[] fields){
+        Map<String, String> fieldsInfo = new HashMap<>();
+        if(null != fields && fields.length > 0){
+            for(String field : fields){
+                fieldsInfo.put(field, (String)request.getParameter(field));
+            }
+        }
+        return fieldsInfo;
     }
 }

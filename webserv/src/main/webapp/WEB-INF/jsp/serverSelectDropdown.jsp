@@ -145,6 +145,10 @@
                                         }
                                     }
                                 }
+                                var repoTypeInput = $("#repoType");
+                                if(repoTypeInput){
+                                    repoTypeInput.val(repoType);
+                                }
                                 break;
                             default:
                                 break;

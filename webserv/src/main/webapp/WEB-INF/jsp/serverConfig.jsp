@@ -105,6 +105,7 @@
                         <%@ include file="spining.jsp" %> 
                         <br>
                         <input type="hidden" value="-1" name="serverId">
+                        <input type="hidden" value="-1" name="repoType" id="repoType">
                     </div>
 
                  </form>

@@ -42,7 +42,6 @@ public class OuHistoryJournalDataProcessorImpl implements OuHistoryJournalDataPr
                 throw new NonCsvFileException("The uploaded file is not a CSV file!");
             }
             SAFPackage safPackageInstance = new SAFPackage();
-            safPackageInstance.generateManifest(csvPath);
             safPackageInstance.processMetaPack(csvPath, true);
             String csvDirectoryPath = FileUtil.getFileContainerPath(csvPath);
             File csv = new File(csvPath);

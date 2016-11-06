@@ -28,6 +28,10 @@ input.btn-form{
     background-color: #5bc0de;
 }
 
+.repoTypeInfoDivCls{
+    display: none;
+}
+
 .file-input{
     height: 30px;
     float: left;
@@ -38,13 +42,8 @@ input.btn-form{
     display: none;
 }
 
-input.btn-click{
-    background-color: lightskyblue;
-}
-
-#server-list{
-    background-color: #337ab7;
-    color: #ffffff;
+.repoTypeInfoDivCls{
+    margin-bottom: 25px;
 }
 
 @media (min-width: 767px) {

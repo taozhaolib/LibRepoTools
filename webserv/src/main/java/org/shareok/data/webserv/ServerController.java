@@ -5,9 +5,7 @@
  */
 package org.shareok.data.webserv;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -17,11 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -59,7 +55,9 @@ public class ServerController {
 //                model.setViewName("userError");
 //                return model;
 //            }
-
+            
+            
+            model = WebUtil.getRepoTypeList(model);
             model = WebUtil.getServerList(model, serverService);
             model.setViewName("serverConfig");
         }
@@ -114,17 +112,31 @@ public class ServerController {
         
         if(null != serverId && serverId.equals("-1")){
             RepoServer newServer = serverService.addServer(server);
+            Map<String, String> repoTypeServerFieldInfo = getRepoTypeServerFieldInfo(request, serverService.getRepoTypeServerFields(newServer.getRepoType()));
+            serverService.updateRepoTypeServerFieldInfo(repoTypeServerFieldInfo, newServer);
             view.setUrl("/server/config");
             redirectAttrs.addFlashAttribute("message", "The new server \""+newServer.getServerName()+"\" has been added successfully!");
             model.setView(view);
         }
         else if(null != serverId && !serverId.equals("-1")){
             existingServer = serverService.updateServer(server);
+            Map<String, String> repoTypeServerFieldInfo = getRepoTypeServerFieldInfo(request, serverService.getRepoTypeServerFields(existingServer.getRepoType()));
+            serverService.updateRepoTypeServerFieldInfo(repoTypeServerFieldInfo, server);
             view.setUrl("/server/config");
             model.setView(view);
             redirectAttrs.addFlashAttribute("message", "The server \""+existingServer.getServerName()+"\" has been updated successfully!");
             return model; 
         }
         return model;
+    }
+    
+    private Map<String, String> getRepoTypeServerFieldInfo(HttpServletRequest request, String[] fields){
+        Map<String, String> fieldsInfo = new HashMap<>();
+        if(null != fields && fields.length > 0){
+            for(String field : fields){
+                fieldsInfo.put(field, (String)request.getParameter(field));
+            }
+        }
+        return fieldsInfo;
     }
 }

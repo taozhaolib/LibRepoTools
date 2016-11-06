@@ -10,8 +10,10 @@ package org.shareok.data.documentProcessor;
  * @author Tao Zhao
  */
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.zip.ZipEntry;
@@ -21,6 +23,9 @@ import org.shareok.data.documentProcessor.exceptions.EmptyFilePathException;
 import org.shareok.data.documentProcessor.exceptions.FileTypeException;
 
 public class FileZipper {
+    
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(FileZipper.class);
+    private static final int BUFFER_SIZE = 4096;
 
     public static void zipFolder(String srcFolder, String destZipFile) throws Exception {
         ZipOutputStream zip = null;
@@ -63,67 +68,98 @@ public class FileZipper {
         }
     }
    
-    public static void unzipToDirectory(String zipPath) throws FileTypeException, EmptyFilePathException{
+    public static String unzipToDirectory(String zipPath){
         File zip = new File(zipPath);
-        unzipToDirectory(zipPath, zip.getParent());
+        return unzipToDirectory(zipPath, zip.getParent());
     }
   
-    public static void unzipToDirectory(String zipPath, String outputPath) throws FileTypeException, EmptyFilePathException{
+    /**
+     * Extracts a zip file specified by the zipFilePath to a directory specified by
+     * destDirectory (will be created if does not exists)
+     * @param zipPath
+     * @param outputDir
+     * @return path to the new unzipped file
+     * @throws IOException
+     */
+    public static String unzipToDirectory(String zipPath, String outputDir){
         
-        File zipFile = new File(zipPath);
-        if(!zipFile.exists()){
-            throw new EmptyFilePathException("The zip file does not exist!");
-        }
-        
-        File outputDir = new File(outputPath);
-        if(outputDir.exists() && !outputDir.isDirectory()){
-            throw new FileTypeException("The output path is not a directory!");
-        }
-        if(!outputDir.exists()){
-            outputDir.mkdirs();
-        }
-        
-        ZipInputStream zis = null; 
-        FileOutputStream fos = null;
-        byte[] buffer = new byte[1024];
+        String newFilePath = null; 
+        String fileName = null;
+        ZipInputStream zipIn = null;
         
         try{
-            zis = new ZipInputStream(new FileInputStream(zipFile));
-            ZipEntry ze = zis.getNextEntry();
-
-            while(ze!=null){
-                
-                String fileName = ze.getName();
-                File newFile = new File(outputPath + File.separator + fileName);
-
-                new File(newFile.getParent()).mkdirs();
-
-                fos = new FileOutputStream(newFile);
-
-                int len;
-                while ((len = zis.read(buffer)) > 0) {
-                    fos.write(buffer, 0, len);
+            File destDir = new File(outputDir);
+            if (!destDir.exists()) {
+                destDir.mkdir();
+            }
+            zipIn = new ZipInputStream(new FileInputStream(zipPath));
+            ZipEntry entry = zipIn.getNextEntry();
+            // iterates over entries in the zip file
+            while (entry != null) {
+                String filePath = outputDir + File.separator + entry.getName();
+                if(null == fileName){
+                    fileName = filePath;
                 }
-
-                fos.close();
-                ze = zis.getNextEntry();
+                if(filePath.contains("MACOSX")){
+                    zipIn.closeEntry();
+                    entry = zipIn.getNextEntry();
+                    continue;
+                }
+                if (!entry.isDirectory()) {
+                    // if the entry is a file, extracts it
+                    extractFile(zipIn, filePath);
+                } else {
+                    // if the entry is a directory, make the directory
+                    File dir = new File(filePath);
+                    dir.mkdir();
+                }
+                zipIn.closeEntry();
+                entry = zipIn.getNextEntry();
+            }            
+        }
+        catch(IOException ex){
+            logger.error("Error after Zipping file: " + ex.getMessage());
+        }
+        finally{
+            if(null != zipIn){
+                try{
+                    zipIn.close();
+                }
+                catch(IOException ex){
+                    logger.error("Cannot close ZipInputStream after Zipping file: " + ex.getMessage());
+                }
+            }
+        }
+        return fileName;
+    }
+    
+    /**
+     * Extracts a zip entry (file entry)
+     * @param zipIn
+     * @param filePath
+     * @throws IOException
+     */
+    private static void extractFile(ZipInputStream zipIn, String filePath) {
+        BufferedOutputStream bos = null;
+        try{
+            bos = new BufferedOutputStream(new FileOutputStream(filePath));
+            byte[] bytesIn = new byte[BUFFER_SIZE];
+            int read = 0;
+            while ((read = zipIn.read(bytesIn)) != -1) {
+                bos.write(bytesIn, 0, read);
             }
         }
         catch(IOException ex){
-            ex.printStackTrace();
+            logger.error("Cannot close BufferedOutputStream after Zipping file: " + ex.getMessage());
         }
         finally{
-            try{
-                if(null != fos){
-                    fos.close();
+            if(null != bos){
+                try{
+                    bos.close();
                 }
-                if(null != zis){
-                    zis.closeEntry();
-                    zis.close();
-                }                
-            }
-            catch(IOException ex){
-                ex.printStackTrace();
+                catch(IOException ex){
+                    logger.error("Cannot close BufferedOutputStream after Zipping file: " + ex.getMessage());
+                }
             }
         }
     }

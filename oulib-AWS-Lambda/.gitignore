@@ -1,0 +1,10 @@
+ouaws/.metadata/
+ouaws/src/main/java/oulib/aws/Main.java
+**/target/
+commons-imaging/
+.metadata/
+ouaws/.classpath
+ouaws/.project
+ouaws/.settings/
+ouaws/nbactions.xml
+ouaws/output/

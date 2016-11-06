@@ -15,6 +15,8 @@ import org.shareok.data.kernel.api.services.job.TaskManager;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
+import org.shareok.data.redis.server.IslandoraRepoServer;
+import org.shareok.data.redis.server.RepoServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -68,12 +70,17 @@ public class SshIslandoraDataController {
         String userId = String.valueOf(request.getSession().getAttribute("userId"));
         
         String serverId = handler.getServerId();
+        IslandoraRepoServer server = (IslandoraRepoServer)serverService.findServerById(Integer.valueOf(serverId));
         if(null == serverId || serverId.equals("")){
             String serverName = (String)request.getParameter("serverName");
             if(null != serverName){
-                handler.setServerId(String.valueOf(serverService.findServerIdByName(serverName)));
+                server = (IslandoraRepoServer)serverService.findServerByName(serverName);
+                handler.setServerId(String.valueOf(server.getServerId()));
             }
         }
+        handler.setDrupalDirectory(server.getDrupalPath());
+        handler.setFilePath(server.getIslandoraUploadPath());
+        handler.setTmpPath(server.getTempFilePath());
         
         if ((null != file && !file.isEmpty()) || (null != recipeFileUri && !"".equals(recipeFileUri))) {
             try {

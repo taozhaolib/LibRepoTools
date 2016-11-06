@@ -107,11 +107,13 @@ public class RepoServerDaoImpl implements RepoServerDao {
                     return serverList;
                 }
             });
+            server.setServerId(serverIdCount);
+            return server;
         }
         catch(Exception ex){
             logger.error("Cannot create a new server.", ex);
+            return null;
         }
-        return server;
     }
     
     @Override

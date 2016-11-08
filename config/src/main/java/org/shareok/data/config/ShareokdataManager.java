@@ -283,4 +283,9 @@ public class ShareokdataManager {
         }
         return prop.getProperty("s3BucketUriPrefix");
     }
+    
+    public static boolean getOpenRegistrationConfig(){
+        loadProperties();
+        return Boolean.valueOf(prop.getProperty("openRegistration"));
+    }
 }

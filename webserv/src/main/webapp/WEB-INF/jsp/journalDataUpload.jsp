@@ -20,6 +20,7 @@
                 <div class="panel-body">
                     <c:if test="${publisher == 'ouhistory'}">
                         <h3>${uploadStr2}</h3>
+                        &nbsp;&nbsp;<span>Note: The zip file should containing the metadata csv file and the data files, e.g. the PDF files.</span><br><br>
                         <c:set var="dataType" value="safpackage"/>
                     </c:if>
                     

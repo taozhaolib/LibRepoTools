@@ -106,7 +106,10 @@ public class FileZipper {
                     continue;
                 }
                 if (!entry.isDirectory()) {
-                    // if the entry is a file, extracts it
+                    if(!FileUtil.isEmptyString(FileUtil.getFileContainerPath(filePath))){
+                        File folderFile = new File(FileUtil.getFileContainerPath(filePath));
+                        folderFile.mkdirs();
+                    }
                     extractFile(zipIn, filePath);
                 } else {
                     // if the entry is a directory, make the directory

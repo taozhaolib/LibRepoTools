@@ -226,7 +226,7 @@ public class IslandoraSshHandler implements JobHandler {
             return savedReportFilePath;
         }
         catch(Exception ex){
-            logger.error("Cannot import the SAF package into DSapce", ex);
+            logger.error("Cannot import the SAF package into Islandora", ex);
             return null; 
         }
     }

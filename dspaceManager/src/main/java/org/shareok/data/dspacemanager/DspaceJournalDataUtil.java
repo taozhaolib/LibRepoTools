@@ -25,6 +25,8 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class DspaceJournalDataUtil {
     
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DspaceJournalDataUtil.class);
+    
     /**
      * 
      * @param file : the uploaded file
@@ -81,6 +83,21 @@ public class DspaceJournalDataUtil {
     }
     
     /**
+     * @param filePath String : in a form of : /shareokdata/uploads/sage/2016.02.03.14.35.08/sagedata--2016.02.03.14.35.08.xlsx
+     * @return Map downloadLinks : the download links to the original uploaded file and the output zip file for DSpace loading
+     */
+    public static String getDspaceSafPackageDataDownloadLinks(String filePath){
+
+        String[] filePathInfo = filePath.split("/");
+        int length = filePathInfo.length;
+        
+        String folderPath = filePathInfo[length-4] + File.separator + filePathInfo[length-3] + File.separator + filePathInfo[length-2] + File.separator;        
+        String loadingFileLink = File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "safpackage" + File.separator + folderPath + filePathInfo[length-1] + File.separator;
+        
+        return loadingFileLink;
+    }
+    
+    /**
      *
      * @param publisher : e.g. sage or plos
      * @return downloadPath : the file path for downloading
@@ -117,6 +134,20 @@ public class DspaceJournalDataUtil {
         }
         catch(NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex){
             Logger.getLogger(DspaceJournalDataUtil.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return downloadPath;
+    }
+    
+    public static String getDspaceSafPackageDownloadFilePath(String publisher, String folderName, String safDirName, String fileName){
+        String downloadPath = null;
+        Class noparams[] = {};
+        try{
+            String uploadPathFunction = ShareokdataManager.getUploadPathFunction(publisher);
+            Method method = ShareokdataManager.class.getMethod(uploadPathFunction, noparams);
+            downloadPath = (String)method.invoke(null, (Object[])noparams) + File.separator + folderName + File.separator + safDirName + File.separator + fileName;
+        }
+        catch(NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex){
+            logger.error(ex.getMessage());
         }
         return downloadPath;
     }

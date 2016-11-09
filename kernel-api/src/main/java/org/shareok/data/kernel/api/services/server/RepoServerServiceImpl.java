@@ -65,4 +65,14 @@ public class RepoServerServiceImpl implements RepoServerService{
     public int findServerIdByName(String serverName) {
         return serverDao.findServerIdByName(serverName);
     }
+
+    @Override
+    public String[] getRepoTypeServerFields(int repoType) {
+        return serverDao.getRepoTypeServerFields(repoType);
+    }
+
+    @Override
+    public void updateRepoTypeServerFieldInfo(Map<String, String> repoTypeServerFieldInfo, RepoServer server) {
+        serverDao.updateRepoTypeServerFieldInfo(repoTypeServerFieldInfo, server);
+    }
 }

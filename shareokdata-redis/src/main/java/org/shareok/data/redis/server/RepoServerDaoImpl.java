@@ -36,6 +36,9 @@ public class RepoServerDaoImpl implements RepoServerDao {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(RepoServerDaoImpl.class);
     
     @Autowired
+    private RepoServerDaoHelper serverDaoHelper;
+    
+    @Autowired
     private JedisConnectionFactory connectionFactory;
             
     @Autowired
@@ -104,11 +107,13 @@ public class RepoServerDaoImpl implements RepoServerDao {
                     return serverList;
                 }
             });
+            server.setServerId(serverIdCount);
+            return server;
         }
         catch(Exception ex){
             logger.error("Cannot create a new server.", ex);
+            return null;
         }
-        return server;
     }
     
     @Override
@@ -286,11 +291,12 @@ public class RepoServerDaoImpl implements RepoServerDao {
             BoundHashOperations<String, String, String> serverOps = redisTemplate.boundHashOps(RedisUtil.getServerQueryKey(serverId));
             if(null != serverOps){
                 RepoServer server = RedisUtil.getServerInstance();
+                int repoType = Integer.parseInt(serverOps.get("repoType"));
                 server.setServerId(serverId);
                 server.setServerName(serverOps.get("serverName"));
                 server.setPort(Integer.parseInt(serverOps.get("port")));
                 server.setProxyPort(Integer.parseInt(serverOps.get("proxyPort")));
-                server.setRepoType(Integer.parseInt(serverOps.get("repoType")));
+                server.setRepoType(repoType);
                 server.setTimeout(Integer.parseInt(serverOps.get("timeout")));
                 server.setHost(serverOps.get("host"));
                 server.setProxyHost(serverOps.get("proxyHost"));
@@ -301,6 +307,7 @@ public class RepoServerDaoImpl implements RepoServerDao {
                 server.setPassPhrase(serverOps.get("passPhrase"));
                 server.setRsaKey(serverOps.get("rsaKey"));
                 server.setAddress(serverOps.get("address"));
+                server = serverDaoHelper.getRepoServerDaoByRepoType(repoType).loadServerParametersByRepoType(server, serverOps);
                 return server;
             }
             else{
@@ -378,7 +385,8 @@ public class RepoServerDaoImpl implements RepoServerDao {
                         int id = Integer.parseInt(idStr);
                         BoundHashOperations<String, String, String> serverOps = redisTemplate.boundHashOps(RedisUtil.getServerQueryKey(id));
                         if(null != serverOps){
-                            RepoServer server = new RepoServer();//RedisUtil.getServerInstance(context);
+                            RepoServer server = new RepoServer();
+                            int repoType = Integer.parseInt(serverOps.get("repoType"));
                             server.setServerId(id);
                             server.setServerName(serverOps.get("serverName"));
                             server.setPort(Integer.parseInt(serverOps.get("port")));
@@ -392,8 +400,9 @@ public class RepoServerDaoImpl implements RepoServerDao {
                             server.setProxyPassword(serverOps.get("proxyPassword"));
                             server.setPassPhrase(serverOps.get("passPhrase"));
                             server.setRsaKey(serverOps.get("rsaKey"));
-                            server.setRepoType(Integer.parseInt(serverOps.get("repoType")));
-                            server.setAddress(serverOps.get("address"));
+                            server.setRepoType(repoType);
+                            server.setAddress(serverOps.get("address"));                           
+                            server = serverDaoHelper.getRepoServerDaoByRepoType(repoType).loadServerParametersByRepoType(server, serverOps);
                             serverList.add(server);
                         }
                     }
@@ -407,6 +416,32 @@ public class RepoServerDaoImpl implements RepoServerDao {
             logger.error("Cannot get the server list from the server ID collection.", ex);
         }
         return null;
+    }
+    
+    public String[] getRepoTypeServerFields(int repoType){
+        
+        String[] fields = null;
+        
+        switch(repoType){
+            case 1:
+                fields = new String[]{"dspacePath","dspaceUploadPath"};
+                break;
+            case 2:
+                fields = new String[]{"islandoraUploadPath","drupalPath","tempFilePath"};
+                break;
+            default:
+                break;
+        }
+        return fields;
+    }
+    
+    public void updateRepoTypeServerFieldInfo(Map<String, String> repoTypeServerFieldInfo, RepoServer server){
+        BoundHashOperations<String, String, String> serverOps = redisTemplate.boundHashOps(RedisUtil.getServerQueryKey(server.getServerId()));
+            if(null != serverOps){
+                for(String key : repoTypeServerFieldInfo.keySet()){
+                    serverOps.put(key, repoTypeServerFieldInfo.get(key));
+                }
+            }            
     }
     
 //    @Override

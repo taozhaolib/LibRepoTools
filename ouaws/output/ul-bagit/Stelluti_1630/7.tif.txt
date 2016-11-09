@@ -1,0 +1,2 @@
+Start to generate smaller tif image for the object Stelluti_1630/data/47.tifFinished to generate smaller tif image for the object Stelluti_1630/data/47.tif.tifStart to generate smaller tif image for the object Stelluti_1630/data/117.tifFinished to generate smaller tif image for the object Stelluti_1630/data/117.tif.tifCaught an AmazonClientException, which means the client encountered an internal error while trying to communicate with S3, 
+such as not being able to access the network.Error Message: Unable to execute HTTP request: ul-bagit.s3.amazonaws.com

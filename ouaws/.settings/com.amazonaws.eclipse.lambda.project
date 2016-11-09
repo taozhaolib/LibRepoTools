@@ -1,0 +1,5 @@
+#Lambda Function Project Metadata
+#Mon Aug 01 16:41:58 CDT 2016
+lastDeploymentFunctionName=Derivative-generator-with-target-size
+lastDeploymentBucketName=ul-ir-workspace
+lastDeploymentEndpoint=https\://lambda.us-east-1.amazonaws.com/

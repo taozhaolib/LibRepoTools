@@ -1,0 +1,1 @@
+Start to generate smaller tif image for the object Today_1979_March/data/004.tif

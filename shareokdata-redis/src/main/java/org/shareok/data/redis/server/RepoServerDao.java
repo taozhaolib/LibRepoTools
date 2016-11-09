@@ -27,6 +27,8 @@ public interface RepoServerDao {
     public int findServerIdByName(String serverName);
     public Map<String, String> getServerNameIdList();
     public List<RepoServer> getServerObjList(Collection<String> serverIds);
+    public String[] getRepoTypeServerFields(int repoType);
+    public void updateRepoTypeServerFieldInfo(Map<String, String> repoTypeServerFieldInfo, RepoServer server);
 //    public RepoServer loadRepoServerByRepoType(RepoServer server);
 //    public List<RepoServer> loadRepoServerListByRepoType(List<RepoServer> serverList);
 }

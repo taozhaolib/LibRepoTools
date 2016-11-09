@@ -32,7 +32,7 @@
     
     <bean id="jobDaoImpl" class="org.shareok.data.redis.job.JobDaoImpl"></bean>
     
-    <bean id="repoServer" class="org.shareok.data.redis.server.RepoServer">
+    <bean id="repoServer" class="org.shareok.data.redis.server.RepoServer" >
         <property name="address" value="" />
         <property name="timeout" value="5000" />
         <property name="port" value="22" />
@@ -48,7 +48,24 @@
         <property name="rsaKey" value="" />
     </bean>
     
+    <bean id="islandoraRepoServer" class="org.shareok.data.redis.server.IslandoraRepoServer" >
+        <property name="drupalPath" value=""/>
+        <property name="islandoraUploadPath" value=""/>
+        <property name="tempFilePath" value=""/>
+    </bean>
+    
+    <bean id="dspaceRepoServer" class="org.shareok.data.redis.server.DspaceRepoServer" >
+        <property name="dspacePath" value=""/>
+        <property name="dspaceUploadPath" value=""/>
+    </bean>
+    
     <bean id="repoServerDaoImpl" class="org.shareok.data.redis.server.RepoServerDaoImpl"></bean>
+    
+    <bean id="dspaceRepoServerDaoImpl" class="org.shareok.data.redis.server.DspaceRepoServerDaoImpl"></bean>
+    
+    <bean id="islandoraRepoServerDaoImpl" class="org.shareok.data.redis.server.IslandoraRepoServerDaoImpl"></bean>
+    
+    <bean id="repoServerDaoHelper" class="org.shareok.data.redis.server.RepoServerDaoHelper" />
     
     <bean id="job" class="org.shareok.data.redis.job.RedisJob">
         <property name="repoType" value="0" />

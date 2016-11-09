@@ -91,7 +91,7 @@ public class IslandoraAwsDataController {
             
         }
         handler.setDrupalDirectory(server.getDrupalPath());
-        handler.setFilePath(server.getIslandoraUploadPath());
+//        handler.setFilePath(server.getIslandoraUploadPath());
         handler.setTmpPath(server.getTempFilePath());
         
         try {

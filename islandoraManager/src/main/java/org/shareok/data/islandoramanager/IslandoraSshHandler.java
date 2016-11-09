@@ -20,6 +20,7 @@ import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.RedisJob;
+import org.shareok.data.redis.server.IslandoraRepoServer;
 import org.shareok.data.ssh.SshExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -189,12 +190,14 @@ public class IslandoraSshHandler implements JobHandler {
             if(null == folderName || "".equals(folderName)){
                 folderName = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
             }
+            IslandoraRepoServer iServer = (IslandoraRepoServer)sshExec.getServer();
+            String iUploadDst = iServer.getIslandoraUploadPath();
             String uploadFileName = new File(localRecipeFilePath).getName();
-            String islandoraTargetFilePath = uploadDst + File.separator + folderName + File.separator + uploadFileName;
-            String newDirCommand = " bash -c \"mkdir " + uploadDst + File.separator + folderName + "\"";
+            String islandoraTargetFilePath = iUploadDst + File.separator + folderName + File.separator + uploadFileName;
+            String newDirCommand = " bash -c \"mkdir " + iUploadDst + File.separator + folderName + "\"";
             sshExec.addReporter("Build up a new directory for the new importing: "+newDirCommand);
             sshExec.execCmd(newDirCommand);
-            sshExec.upload(uploadDst + File.separator + folderName, localRecipeFilePath);  
+            sshExec.upload(iUploadDst + File.separator + folderName, localRecipeFilePath);  
             sshExec.addReporter("The SAF package has been uploaded to the Islandora server: " + islandoraTargetFilePath + "\n");
             return islandoraTargetFilePath;
         }

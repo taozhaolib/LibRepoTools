@@ -35,10 +35,12 @@
                                 <div class="col-lg-3 col-sm-8">
                                     <input type="file" class="file-input" name="recipeLocal" />
                                 </div>
+                                <!--
                                 <label class="control-label col-lg-3 col-sm-3 text-left" for="recipeFileUri">Remote online recipe file:</label>
                                 <div class="col-lg-4 col-sm-8">
                                     <input type="text" class="form-control" name="recipeFileUri" />
                                 </div>
+                                -->
                             </div>
                         </c:if>
                         <c:if test="${jobType == 'import-uploaded'}">

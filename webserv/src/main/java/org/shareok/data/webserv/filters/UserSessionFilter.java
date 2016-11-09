@@ -19,6 +19,7 @@ import javax.servlet.http.HttpSession;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.kernel.api.services.user.RedisUserService;
 import org.shareok.data.redis.RedisUser;
+import org.shareok.data.webserv.exceptions.NoNewUserRegistrationException;
 import org.shareok.data.webserv.exceptions.UserRegisterInfoNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -54,7 +55,7 @@ public class UserSessionFilter implements Filter{
             if(null != contextPath && !"".equals(contextPath) && ShareokdataManager.requiredUserAuthentication(contextPath)){
                 SessionRepository<Session> repo = (SessionRepository<Session>) httpRequest.getAttribute(SessionRepository.class.getName());
                 
-                if(contextPath.equals("register")){                    
+                if(contextPath.equals("register")){     
                     String email = (String) httpRequest.getParameter("email");
                     String password = (String) httpRequest.getParameter("password");
                     String userName = (String) httpRequest.getParameter("nickname");

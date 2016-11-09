@@ -15,7 +15,7 @@
     <body>
         <div class="container">
         <div class="jumbotron">
-        <h4>The user information cannot be found!</h4>
+        <h4>Sorry, right now the new user registration has been closed. Please contact dcorbly@ou.edu or tao.zhao@ou.edu to open registration.</h4>
         <h5>Error message: <%= errorMessage %> </h5>
         <br>
         <input type="button"  class="btn btn-form" onclick="location.href='/webserv/home'" value="Back to Home">

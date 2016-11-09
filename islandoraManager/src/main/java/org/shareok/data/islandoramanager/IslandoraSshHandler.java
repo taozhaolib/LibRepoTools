@@ -253,7 +253,7 @@ public class IslandoraSshHandler implements JobHandler {
                 setRecipeFileUri(uri);
             }
             else{
-                setLocalRecipeFilePath(localRecipeFilePath);
+                setLocalRecipeFilePath(uploadFile);
             }
         }
         catch(ArrayIndexOutOfBoundsException ex){

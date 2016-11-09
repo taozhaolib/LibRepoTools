@@ -21,6 +21,7 @@ import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.kernel.api.services.user.RedisUserService;
 import org.shareok.data.redis.RedisUser;
 import org.shareok.data.webserv.exceptions.NUllUserException;
+import org.shareok.data.webserv.exceptions.NoNewUserRegistrationException;
 import org.shareok.data.webserv.exceptions.NullSessionException;
 import org.shareok.data.webserv.exceptions.RegisterUserInfoExistedException;
 import org.shareok.data.webserv.exceptions.UserRegisterInfoNotFoundException;
@@ -48,7 +49,10 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
             if(null != contextPath && !"".equals(contextPath) && ShareokdataManager.requiredUserAuthentication(contextPath)){
                 SessionRepository<Session> repo = (SessionRepository<Session>) request.getAttribute(SessionRepository.class.getName());
                 
-                if(contextPath.equals("register")){                    
+                if(contextPath.equals("register")){  
+                    if(!ShareokdataManager.getOpenRegistrationConfig()){
+                        throw new NoNewUserRegistrationException("The registraion of new users has been closed!");
+                    }
                     String email = (String) request.getParameter("email");
                     String password = (String) request.getParameter("password");
                     String userName = (String) request.getParameter("nickname");
@@ -177,6 +181,9 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
         } catch (RegisterUserInfoExistedException ex) {
             request.setAttribute("errorMessage", ex.getMessage());
             request.getRequestDispatcher("/WEB-INF/jsp/userError.jsp").forward(request, response);
+        } catch (NoNewUserRegistrationException ex) {
+            request.setAttribute("errorMessage", ex.getMessage());
+            request.getRequestDispatcher("/WEB-INF/jsp/closedRegistration.jsp").forward(request, response);
         }
          
         return true;

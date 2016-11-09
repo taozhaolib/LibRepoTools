@@ -56,9 +56,6 @@ public class UserSessionFilter implements Filter{
                 SessionRepository<Session> repo = (SessionRepository<Session>) httpRequest.getAttribute(SessionRepository.class.getName());
                 
                 if(contextPath.equals("register")){     
-                    if(!ShareokdataManager.getOpenRegistrationConfig()){
-                        throw new NoNewUserRegistrationException("The registraion of new users has been closed!");
-                    }
                     String email = (String) httpRequest.getParameter("email");
                     String password = (String) httpRequest.getParameter("password");
                     String userName = (String) httpRequest.getParameter("nickname");
@@ -144,9 +141,6 @@ public class UserSessionFilter implements Filter{
         } catch (UserRegisterInfoNotFoundException ex) {
             request.setAttribute("errorMessage", ex);
             request.getRequestDispatcher("/WEB-INF/jsp/userError.jsp").forward(request, response);
-        } catch (NoNewUserRegistrationException ex) {
-            request.setAttribute("errorMessage", ex);
-            request.getRequestDispatcher("/WEB-INF/jsp/closedRegistration.jsp").forward(request, response);
         }
 
     }

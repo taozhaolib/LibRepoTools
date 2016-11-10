@@ -1,5 +1,5 @@
 # LibRepoTools
-LibRepoTools provides a UI to handle data packaging (e.g. SAF package), date transformation and data importing from local files and remote sites such as PLOS ONE and SAGE Open into digital repositories such as DSpace and (soon) Fedora and Islandora. 
+LibRepoTools provides a UI to handle data packaging (e.g. SAF package), date migration and data importing from local files and remote storages, e.g. AWS S3 buckets, into digital repositories, e.g. DSpace and Islandora. 
 
 ##Installation:
 
@@ -22,12 +22,12 @@ Java 8(required), Maven 3, Tomcat 7, Spring Core, Spring Data, Spring Session, S
 https://libtools-demo.repository.ou.edu/webserv/home
 
 ##Configuration:
-1. The config directory under the LibRepoTools installation directory contains all the configuration information. 
-2. Will push out the UI configuration feature soon.
+1. The config module under the LibRepoTools installation directory contains all the configuration information. 
 
-##Projects ongoing:
-1. DSpace data process through the REST API.
-2. Importing into Islandora/Fedora repository with Bag data.
+##Projects:
+1. DSpace data processing through the REST API.
+2. Data package, exporting from and importing into Islandora/Fedora repository.
+3. Data package and transformation in AWS S3 buckets.
 
 ##Please give us your suggestions, comments, and ideas to help us improve this software.
 

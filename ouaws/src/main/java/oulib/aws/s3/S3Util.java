@@ -79,6 +79,9 @@ public class S3Util {
     public static final long COMPRESSOIN_TARGET_SIZE__SMALL = 20000000;
     public static final long COMPRESSOIN_TARGET_SIZE_MEDIUM = 60000000;
     
+    public static final String S3_SMALL_DERIVATIVE_OUTPUT = "/var/local/librepotools/librepotools-data/s3_small_derivatives";
+    public static final String S3_NO_NUMBER_ENDDING_TIFF_PATTERN = "^(.*)(\\d+)(.tiff|.tif)$";
+    
     /**
      * Check if an Amazon S3 folder exists
      * 
@@ -471,7 +474,7 @@ public class S3Util {
         }
         else if(tagInfo instanceof TagInfoByte){
             final TagInfoByte byteInfo = (TagInfoByte)tagInfo;
-            exifDirectory.add(byteInfo, String.valueOf(value).getBytes());
+//            exifDirectory.add(byteInfo, String.valueOf(value).getBytes());
         }
         /**
          * Implement more taginfo types here....

@@ -58,6 +58,7 @@
                             </div>
                         </div>
                         <br><br>
+                        <!--
                         <div class="form-group">
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="rsaKey">${repoType2} User Name:</label>
                             <div class="col-lg-4 col-sm-8">
@@ -69,6 +70,7 @@
                             </div>                
                         </div>
                         <br/><br/>
+                        -->
                         <div class="form-group">                            
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="collectionId">Collection ID:</label>
                             <div class="col-lg-4 col-sm-8">

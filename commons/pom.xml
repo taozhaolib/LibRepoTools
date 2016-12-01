@@ -29,4 +29,26 @@
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
+    
+    <build>
+        <plugins>
+            <plugin>  
+                <groupId>org.codehaus.mojo</groupId>  
+                <artifactId>exec-maven-plugin</artifactId>  
+                <version>1.5.0</version>  
+                <configuration>  
+                    <executable>java</executable>
+                    <arguments>  
+                        <argument>-XX:MaxPermSize=256m</argument> 
+                        <argument>-classpath</argument>
+                        <classpath/>
+                        <argument>org.shareok.data.commons.Main</argument>
+                        <argument>ul-bagit</argument>
+                        <argument>ul-ir-workspace</argument>
+                        <argument>sample_s3book_info_1.csv</argument>
+                    </arguments>  
+                </configuration>  
+            </plugin>  
+        </plugins>
+    </build>
 </project>

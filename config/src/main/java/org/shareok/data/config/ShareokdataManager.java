@@ -288,4 +288,11 @@ public class ShareokdataManager {
         loadProperties();
         return Boolean.valueOf(prop.getProperty("openRegistration"));
     }
+    
+    public static String getSecurityFilePath(){
+        if(null == prop){
+            loadProperties();
+        }
+        return prop.getProperty("securityFilePath");
+    }
 }

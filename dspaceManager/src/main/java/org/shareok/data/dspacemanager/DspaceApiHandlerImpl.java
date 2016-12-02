@@ -6,6 +6,8 @@
 package org.shareok.data.dspacemanager;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,11 +16,11 @@ import java.util.ListIterator;
 import java.util.Map;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.shareok.data.config.DataUtil;
+import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.datahandlers.exceptions.IncompleteServerInfoException;
+import org.shareok.data.datahandlers.exceptions.SecurityFileDoesNotExistException;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.documentProcessor.FileZipper;
-import org.shareok.data.documentProcessor.exceptions.EmptyFilePathException;
-import org.shareok.data.documentProcessor.exceptions.FileTypeException;
 import org.shareok.data.dspacemanager.exceptions.EmptyDspaceCredentialInfoException;
 import org.shareok.data.dspacemanager.exceptions.ErrorDspaceApiResponseException;
 import org.shareok.data.dspacemanager.exceptions.SafPackageMissingFileException;
@@ -149,16 +151,34 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     @Override
     public String getTokenFromServer(){
         
-        String dspaceUserName = job.getDspaceUserName();
-        String dspacePassword = job.getDspaceUserPw();
+        String dspaceUserName = null;
+        String dspacePassword = null;
         String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+	String[] credential = null;
+	
+	try {
+
+	    if(null == dspaceApiUrl || "".equals(dspaceApiUrl)){
+                throw new IncompleteServerInfoException("empty or null url.");
+            }
+
+            String domain = DataHandlersUtil.getDomainNameFromUrl(dspaceApiUrl);
+            credential = DataHandlersUtil.getRepoCredentials(domain);
+            dspaceUserName = credential[0];
+            dspacePassword = credential[1];
+        } catch (SecurityFileDoesNotExistException | IOException ex) {
+            logger.error(ex.getMessage());
+            return null;
+        } catch (URISyntaxException ex) {
+            logger.error("Repository URL cannot be parsed: " + ex.getMessage());
+            return null;
+        } catch (IncompleteServerInfoException ex) {
+            logger.error("Incomplete server information." + ex.getMessage());
+        }    
         
         try{
             if(null == dspaceUserName || "".equals(dspaceUserName) || null == dspacePassword || "".equals(dspacePassword)){
                 throw new EmptyDspaceCredentialInfoException("The DSpace username or DSpace password information is missing!");
-            }
-            if(null == dspaceApiUrl || "".equals(dspaceApiUrl)){
-                throw new IncompleteServerInfoException("empty or null url.");
             }
         
             Map<String, String> headerInfo = new HashMap<>();
@@ -174,10 +194,6 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                     throw new ErrorDspaceApiResponseException("Got response code "+responseInfo[0]);
                 }
             }
-            //return response;
-        }
-        catch(IncompleteServerInfoException inEx){
-            logger.error("Incomplete server information.", inEx);
         }
         catch(EmptyDspaceCredentialInfoException empEx){
             logger.error("Missing DSpace log in information", empEx);

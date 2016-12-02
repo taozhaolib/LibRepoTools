@@ -13,23 +13,26 @@ import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
  * @author Tao Zhao
  */
 public class S3TiffProcessorThread implements Runnable {
-	
-	public static String OUTPUT_BUCKET_PATH = "/Users/zhao0677/Projects/oulib-AWS-Lambda/ouaws/output/";
-    
+
     private S3BookInfo bookInfo;
     private String filter;
     private AmazonS3 s3client;
@@ -95,10 +98,10 @@ public class S3TiffProcessorThread implements Runnable {
         String targetBucketName = bookInfo.getBucketTargetName();
         String bookName = bookInfo.getBookName();
         
-        String bucketFolder = OUTPUT_BUCKET_PATH + File.separator + sourceBucketName;
+        String bucketFolder = S3Util.S3_SMALL_DERIVATIVE_OUTPUT + File.separator + sourceBucketName;
         File bucketFolderFile = new File(bucketFolder);
-        if(!bucketFolderFile.exists()){
-        	bucketFolderFile.mkdir();
+        if(!bucketFolderFile.exists() || !bucketFolderFile.isDirectory()){
+        	bucketFolderFile.mkdirs();
         }
         
         String bookPath = bucketFolder + File.separator + bookName;
@@ -123,15 +126,21 @@ public class S3TiffProcessorThread implements Runnable {
 
                 for (String key : tiffList) {
 //                    String key = objectSummary.getKey();
-                    if(key.contains(".tif") && key.contains(filter) && !targetBucketKeyMap.containsKey(key+".tif")){
+//                    if(key.contains(".tif") && key.contains(filter) && !targetBucketKeyMap.containsKey(key+".tif")){
+                    if(key.contains(".tif") && matchS3ObjKeyWithFilter(key, filter) && !targetBucketKeyMap.containsKey(key+".tif")){
                         S3Object object = s3client.getObject(new GetObjectRequest(sourceBucketName, key));
-                        output += ("Start to generate smaller tif image for the object "+key);
-                        System.out.println("Start to generate smaller tif image for the object "+key);
+                        output += ("Start to generate smaller tif image for the object "+key+"\n");
+                        System.out.println("Start to generate smaller tif image for the object "+key+"\n");
+//                        System.out.println("Working on the object "+key);
                         S3Util.generateSmallTiffWithTargetSize(s3client, object, targetBucketName, bookInfo.getCompressionSize());
      //                   S3Util.copyS3ObjectTiffMetadata(s3client, object, s3client.getObject(new GetObjectRequest(targetBucketName, key)), targetBucketName, key+".tif");
-                        System.out.println("Finished to generate smaller tif image for the object "+key);
-                        output += "Finished to generate smaller tif image for the object "+key;
-                        break;
+                        System.out.println("Finished to generate smaller tif image for the object "+key+"\n");
+                        output += "Finished to generate smaller tif image for the object "+key+"\n";
+                        try {
+                            object.close();
+                        } catch (IOException ex) {
+                            Logger.getLogger(S3TiffProcessorThread.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
                 }
 //                output += "Next Continuation Token : " + result.getNextContinuationToken();
@@ -140,29 +149,33 @@ public class S3TiffProcessorThread implements Runnable {
 //            } while(result.isTruncated() == true ); 
 	        
         } catch (AmazonServiceException ase) {
-            output += "Caught an AmazonServiceException, which means your request made it to Amazon S3, but was rejected with an error response for some reason.";
+            output += "Caught an AmazonServiceException, which means your request made it to Amazon S3, but was rejected with an error response for some reason.\n";
             output += "Error Message:    " + ase.getMessage();
             output += "HTTP Status Code: " + ase.getStatusCode();
             output += "AWS Error Code:   " + ase.getErrorCode();
             output += "Error Type:       " + ase.getErrorType();
             output += "Request ID:       " + ase.getRequestId();
-           System.out.println("Caught an AmazonServiceException, which means your request made it to Amazon S3, but was rejected with an error response for some reason.");
+           System.out.println("Caught an AmazonServiceException, which means your request made it to Amazon S3, but was rejected with an error response for some reason.\n");
            System.out.println("Error Message:    " + ase.getMessage());
            System.out.println("HTTP Status Code: " + ase.getStatusCode());
            System.out.println("AWS Error Code:   " + ase.getErrorCode());
            System.out.println("Error Type:       " + ase.getErrorType());
            System.out.println("Request ID:       " + ase.getRequestId());
        } catch (AmazonClientException ace) {
-           output += "Caught an AmazonClientException, which means the client encountered an internal error while trying to communicate with S3, \nsuch as not being able to access the network.";
+           output += "Caught an AmazonClientException, which means the client encountered an internal error while trying to communicate with S3, \nsuch as not being able to access the network.\n";
            output += "Error Message: " + ace.getMessage();
-           System.out.println("Caught an AmazonClientException, which means the client encountered an internal error while trying to communicate with S3, \nsuch as not being able to access the network.");
+           System.out.println("Caught an AmazonClientException, which means the client encountered an internal error while trying to communicate with S3, \nsuch as not being able to access the network.\n");
            System.out.println("Error Message: " + ace.getMessage());
        } finally{
-            outputToFile("/Users/zhao0677/Projects/oulib-AWS-Lambda/ouaws/output/"+sourceBucketName+File.separator+bookName+File.separator+filter+".txt");
+            outputToFile(bookPath+File.separator+filter+".txt");
         }
     }
     
     public void outputToFile(String filePath){
+        FileWriter fw = null;
+        BufferedWriter bw = null;
+        PrintWriter out = null;
+        
         try{
             File file = new File(filePath);  
             File parentDir = new File(file.getParent());
@@ -172,17 +185,56 @@ public class S3TiffProcessorThread implements Runnable {
             if(!file.exists()){
                 file.createNewFile();                
             }
-            try (FileOutputStream op = new FileOutputStream(file)) {
-                byte[] loggingIngoBytes = output.getBytes();
-                op.write(loggingIngoBytes);
-                op.flush();
-            }
+            
+            fw = new FileWriter(filePath, true);
+            bw = new BufferedWriter(fw);
+            out = new PrintWriter(bw);
+            out.println(output);
+            
         }
         catch(FileNotFoundException ex){
             Logger.getLogger(S3TiffProcessorThread.class.getName()).log(Level.SEVERE, "Cannot save output to file.", ex);
         }
         catch(IOException ex){
             Logger.getLogger(S3TiffProcessorThread.class.getName()).log(Level.SEVERE, "Cannot save output to file.", ex);
+        }
+        finally{
+            try {
+                if(out != null)
+                    out.close();
+            } catch (Exception e) {
+                //exception handling left as an exercise for the reader
+            }
+            try {
+                if(bw != null)
+                    bw.close();
+            } catch (IOException e) {
+                //exception handling left as an exercise for the reader
+            }
+            try {
+                if(fw != null)
+                    fw.close();
+            } catch (IOException e) {
+                //exception handling left as an exercise for the reader
+            }
+        }
+    }
+    
+    private boolean matchS3ObjKeyWithFilter(String key, String filter){
+        if(null == filter || "".equals(filter) || null==key || "".equals(key) || !key.contains(".tif")){
+            return false;
+        }
+        Pattern pattern = Pattern.compile(S3Util.S3_NO_NUMBER_ENDDING_TIFF_PATTERN);
+        boolean objKeyEndingWithDigit = false;
+        Matcher m = pattern.matcher(key);
+        if (m.find( )) {
+           objKeyEndingWithDigit = true;
+        }
+        if(filter.equals("10.tif")){
+            return objKeyEndingWithDigit != true;
+        }
+        else{
+            return key.contains(filter);
         }
     }
 }

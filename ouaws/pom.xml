@@ -59,9 +59,7 @@
             <configuration>  
                 <executable>java</executable> 
                 <arguments>  
-                    <argument>-Xms512m</argument>
-                    <argument>-Xms6144m</argument>
-                    <argument>-XX:MaxPermSize=256m</argument>
+                    <argument>-Xms7168m</argument>
                     <argument>-classpath</argument>
                     <classpath/>
                     <argument>oulib.aws.Main</argument>
@@ -70,9 +68,9 @@
                     <!-- target bucket -->
                     <argument>ul-ir-workspace</argument>
                     <!-- bag name -->
-                    <argument>Borelli_1685</argument>
+                    <argument>Borelli_1680_1681</argument>
                     <!-- max thread number -->
-                    <argument>10</argument>
+                    <argument>5</argument>
                 </arguments>  
             </configuration>  
         </plugin>  

@@ -8,12 +8,16 @@ package oulib.aws;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,24 +35,51 @@ public class Main {
     public static void main(String[] args){
         
         try {
-            AWSCredentials credentials = null;
-            ClientConfiguration config = null;
+            AWSCredentials credentials = null;            
+            AmazonS3 s3Client = null;
+//            args = new String[4];
+//            args[0] = "ul-bagit";
+//            args[1] = "ul-ir-workspace";
+//            args[2] = "Borelli_1680-1681";
+//            args[3] = "6";
             try {
-                credentials = new ProfileCredentialsProvider("default").getCredentials();
-                config = new ClientConfiguration();
-                config.setConnectionTimeout(250000);
-                config.setSocketTimeout(250000);
+                credentials = new ProfileCredentialsProvider("default").getCredentials();                   
             } catch (Exception e) {
-                throw new AmazonClientException(
-                        "Cannot load the credentials from the credential profiles file. " +
-                                "Please make sure that your credentials file is at the correct " +
-                                "location (/Users/zhao0677/.aws/credentials), and is in valid format.",
+                String access_key_id = null;
+                String secret_key_id = null;
+                String credentialInfo = AwsUtil.getAwsCredentials();                
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String,String> credentialInfoMap = new HashMap<>();
+                credentialInfoMap = mapper.readValue(credentialInfo, HashMap.class);
+                for(String key : credentialInfoMap.keySet()){
+
+                    if("AccessKeyId".equals(key)){
+                        access_key_id = credentialInfoMap.get(key);
+                    }
+                    else if("SecretAccessKey".equals(key)){
+                        secret_key_id = credentialInfoMap.get(key);
+                    }
+                }
+//                System.out.println("access_key_id = "+access_key_id+" access_key_id = "+access_key_id);
+                if(null != access_key_id && null != secret_key_id){
+                    credentials = new BasicAWSCredentials(access_key_id, secret_key_id);
+//                    s3Client = AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(awsCreds)).build();
+                }
+                else{
+                    throw new AmazonClientException(
+                        "Cannot load the credentials from the credential information. " +
+                                "Please make sure that your credentials file is at the correct, and is in valid format.",
                         e);
+                }
             }
             
-            AmazonS3 s3client = new AmazonS3Client(credentials, config);
+            ClientConfiguration config = new ClientConfiguration();
+            config.setConnectionTimeout(250000);
+            config.setSocketTimeout(50000);     
+            
+            s3Client = new AmazonS3Client(credentials, config);
             Region usEast = Region.getRegion(Regions.US_EAST_1);
-            s3client.setRegion(usEast);
+            s3Client.setRegion(usEast);
             
             String bookName = args[2];
             
@@ -73,49 +104,28 @@ public class Main {
                 ex.printStackTrace();//logger.error("Cannot parse the thread count! "+ex.getMessage());
                 return;
             }
-            //System.out.println("arg0 = "+args[0]+" arg1 = "+args[1]+" arg2 = "+args[2]+ " arg3 = "+args[3]);
+            System.out.println("arg0 = "+args[0]+" arg1 = "+args[1]+" arg2 = "+args[2]+ " arg3 = "+args[3]);
             ExecutorService executor = Executors.newFixedThreadPool(threadMaxCount);
-            List<String> tiffDiff = S3Util.getS3BucketFolderObjDiff(s3client, "ul-bagit", bookName+"/data", "ul-ir-workspace", bookName+"/data");
+            List<String> tiffDiff = S3Util.getS3BucketFolderObjDiff(s3Client, args[0], bookName+"/data", args[1], bookName+"/data");
             int diff = tiffDiff.size();
             if(diff > 0){
                 System.out.println("There are totally "+String.valueOf(diff)+" tiff images to process.\nStart processing at "+(new java.util.Date()).toString());
                 AwsDataProcessorThreadFactory threadFactory = new AwsDataProcessorThreadFactory();                
                 for(int i = 0; i <= 10; i++){
-                    S3TiffProcessorThread s3TiffProcessorThread = new S3TiffProcessorThread(s3client, bookInfo, String.valueOf(i)+".tif", tiffDiff);
+                    S3TiffProcessorThread s3TiffProcessorThread = new S3TiffProcessorThread(s3Client, bookInfo, String.valueOf(i)+".tif", tiffDiff);
                     threadFactory.setIndex(i);
                     threadFactory.setJobType("small-tiff-" + bookName);
                     executor.execute(threadFactory.newThread(s3TiffProcessorThread));
                 }
             }
+            else{
+                System.out.println("There are no tiff images to process");
+            }
             executor.shutdown();
             while (!executor.isTerminated()) {
             }
             System.out.println("All the derivatives were generated at "+(new java.util.Date()).toString()+"!");
-//            System.out.println("size = "+tiffDiff.size());
-//            new Thread(new S3TiffProcessorThread(s3client, bookInfo, "1.tif", tiffDiff), "thread 1").start();
-//            new Thread(new S3TiffProcessorThread(s3client, bookInfo, "2.tif", tiffDiff), "thread 2").start();
-//            new Thread(new S3TiffProcessorThread(s3client, bookInfo, "3.tif", tiffDiff), "thread 3").start();
-//            new Thread(new S3TiffProcessorThread(s3client, bookInfo, "4.tif", tiffDiff), "thread 4").start();
-//            new Thread(new S3TiffProcessorThread(s3client, bookInfo, "5.tif", tiffDiff), "thread 5").start();
-//            new Thread(new S3TiffProcessorThread(s3client, bookInfo, "6.tif", tiffDiff), "thread 6").start();
-//            new Thread(new S3TiffProcessorThread(s3client, bookInfo, "7.tif", tiffDiff), "thread 7").start();
-//            new Thread(new S3TiffProcessorThread(s3client, bookInfo, "8.tif", tiffDiff), "thread 8").start();
-//            new Thread(new S3TiffProcessorThread(s3client, bookInfo, "9.tif", tiffDiff), "thread 9").start();
-//            new Thread(new S3TiffProcessorThread(s3client, bookInfo, "0.tif", tiffDiff), "thread 10").start();
-//            System.out.println("There are "+tiffDiff.size()+" items different.");
-//            Iterator<String> it = tiffDiff.iterator();
-//            while(it.hasNext()){
-//                System.out.println("File = "+it.next());
-//            }
-//            S3Util.generateTifDerivativesByS3Bucket(s3client, bookInfo);
-            
-//            S3Object obj1 = s3client.getObject("ul-bagit", "Alberti_1568/data/001.tif");
-//            S3Object obj2 = s3client.getObject("ul-ir-workspace", "Alberti_1568/data/067.tif");
-//            S3Util.generateSmallTiff(s3client, obj1, "ul-ir-workspace", S3Util.COMPRESSION_RATE_75_PERCENT_OF_ORIGINAL);
-//            S3Util.generateSmallTiffWithTargetSize(s3client, obj1, "ul-ir-workspace", S3Util.COMPRESSOIN_TARGET_SIZE_EXTRA_SMALL);
-//            S3Util.copyS3ObjectTiffMetadata(s3client, obj1, s3client.getObject(new GetObjectRequest("ul-ir-workspace", obj1.getKey())), "ul-ir-workspace", obj1.getKey()+".tif");
-//            S3Util.copyS3ObjectTiffMetadata(s3client, obj1, obj2, "ul-ir-workspace", "Alberti_1568/data/067.tif.tif");
-            
+
         } catch (Exception ex) {
             ex.printStackTrace();//logger.error("Cannot finish generating the small tiff images" + ex.getMessage());
         }

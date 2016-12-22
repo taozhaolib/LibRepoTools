@@ -49,6 +49,14 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DspaceApiHandlerImpl.class);
     
+    public static final List<String> METADATA_FILE_NAMES_LIST;
+    static{
+        METADATA_FILE_NAMES_LIST = new ArrayList<>();
+        METADATA_FILE_NAMES_LIST.add("dcterms");
+        METADATA_FILE_NAMES_LIST.add("dublin_core");
+        METADATA_FILE_NAMES_LIST.add("metadata_ou");
+    }
+    
     public static final Map <String, String> DSPACE_FILE_MIME_TYPE_LIST;
     static{
         DSPACE_FILE_MIME_TYPE_LIST = new HashMap<>();
@@ -650,7 +658,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                 containsContentsFile = true;
                                 contentFile = itemFile;
                             }
-                            else if(fileName.equals("dublin_core.xml") || fileName.endsWith("dcterms.xml")){
+                            else if(METADATA_FILE_NAMES_LIST.contains(fileName.replaceAll(".xml", ""))){
                                 containsMetadataFile = true;
                                 metadataFileList.add(itemFile);
                             }

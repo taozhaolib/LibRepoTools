@@ -16,7 +16,13 @@
     <div class="container">
         <div class="jumbotron">
             <div class="panel panel-primary">
-                <div class="panel-heading"><h4>Process the ${publisher} Publications:</h4></div>
+		<c:if test="${publisher == 'ouhistory'}">
+		    <div class="panel-heading"><h4>Generate the SAF package for DSpace loading:</h4></div>
+		</c:if>
+		<c:if test="${publisher != 'ouhistory'}">
+                    <div class="panel-heading"><h4>Process the ${publisher} Publications:</h4></div>
+                </c:if>
+                
                 <div class="panel-body">
                     <c:if test="${publisher == 'ouhistory'}">
                         <h3>${uploadStr2}</h3>

@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.kernel.api.services.config.ConfigService;
 import org.shareok.data.kernel.api.services.user.RedisUserService;
 import org.shareok.data.redis.RedisUser;
 import org.shareok.data.webserv.exceptions.NUllUserException;
@@ -38,6 +39,9 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
     @Autowired
     private RedisUserService redisUserService;
     
+    @Autowired
+    private ConfigService configService;
+    
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
          
@@ -50,7 +54,7 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
                 SessionRepository<Session> repo = (SessionRepository<Session>) request.getAttribute(SessionRepository.class.getName());
                 
                 if(contextPath.equals("register")){  
-                    if(!ShareokdataManager.getOpenRegistrationConfig()){
+                    if(!configService.getRegistrationConfig()){
                         throw new NoNewUserRegistrationException("The registraion of new users has been closed!");
                     }
                     String email = (String) request.getParameter("email");

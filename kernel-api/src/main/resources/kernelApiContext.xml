@@ -54,5 +54,7 @@
     
     <bean id="configServiceImpl" class="org.shareok.data.kernel.api.services.config.ConfigServiceImpl" />
     
+    <bean id="passwordAuthenticationServiceImpl" class="org.shareok.data.kernel.api.services.user.PasswordAuthenticationServiceImpl" />
+    
 </beans>
 

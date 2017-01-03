@@ -110,6 +110,10 @@ public class RedisUtil {
         return ShareokdataManager.getRedisServerQueryPrefix() + String.valueOf(serverId);
     }
     
+    public static String getConfigQueryKey(){
+        return "redisConfig";
+    }
+    
     public static RepoServer getServerInstance(){
         ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
         return (RepoServer) context.getBean("repoServer");

@@ -90,6 +90,8 @@
     
     <bean id="dspaceApiJobDaoImpl" class="org.shareok.data.redis.job.DspaceApiJobDaoImpl"></bean>
     
+    <bean id="redisConfigImpl" class="org.shareok.data.redis.RedisConfigImpl"></bean>
+    
 <!--    
     <bean id="dateEditor" class="org.springframework.beans.propertyeditors.CustomDateEditor">
             <constructor-arg>

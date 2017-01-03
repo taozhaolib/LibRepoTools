@@ -13,6 +13,24 @@
         <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
     
+    <build>
+        <plugins>
+            <plugin>  
+                <groupId>org.codehaus.mojo</groupId>  
+                <artifactId>exec-maven-plugin</artifactId>  
+                <version>1.5.0</version>  
+                <configuration>  
+                    <executable>java</executable> 
+                    <arguments>  
+                        <argument>-classpath</argument>
+                        <classpath/>
+                        <argument>org.shareok.data.kernel.api.services.Main</argument>
+                    </arguments>  
+                </configuration>  
+            </plugin>  
+        </plugins>
+    </build>
+    
     <dependencies>
         <dependency>
             <groupId>org.shareok.data</groupId>

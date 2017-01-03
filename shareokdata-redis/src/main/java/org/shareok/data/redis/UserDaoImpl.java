@@ -130,17 +130,18 @@ public class UserDaoImpl implements UserDao {
         BoundHashOperations<String, String, String> userOps = redisTemplate.boundHashOps(RedisUtil.getUserQueryKey(userId));
         if(null != userOps){
             ApplicationContext context = new ClassPathXmlApplicationContext("redisContext.xml");
-            RedisUser user = (RedisUser) context.getBean("user");
-            user.setEmail(userOps.get("email"));
-            user.setUserName(userOps.get("userName"));
-            user.setUserId(Long.parseLong(userOps.get("userId")));
-            user.setPassword(userOps.get("password"));
-            user.setSessionKey(userOps.get("sessionKey"));
-            return user;
+            String email = userOps.get("email");
+            if(null != email && !email.equals("")){
+                RedisUser user = (RedisUser) context.getBean("user");
+                user.setEmail(userOps.get("email"));
+                user.setUserName(userOps.get("userName"));
+                user.setUserId(Long.parseLong(userOps.get("userId")));
+                user.setPassword(userOps.get("password"));
+                user.setSessionKey(userOps.get("sessionKey"));
+                return user;
+            }
         }
-        else{
-            return null;
-        }
+        return null;
     }
     
     @Override

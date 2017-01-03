@@ -18,6 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.kernel.api.services.config.ConfigService;
+import org.shareok.data.kernel.api.services.user.PasswordAuthenticationService;
 import org.shareok.data.kernel.api.services.user.RedisUserService;
 import org.shareok.data.redis.RedisUser;
 import org.shareok.data.webserv.exceptions.NUllUserException;
@@ -38,6 +40,12 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
     @Autowired
     private RedisUserService redisUserService;
     
+    @Autowired
+    private ConfigService configService;
+    
+    @Autowired
+    private PasswordAuthenticationService pwAuthenService;
+    
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
          
@@ -50,11 +58,11 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
                 SessionRepository<Session> repo = (SessionRepository<Session>) request.getAttribute(SessionRepository.class.getName());
                 
                 if(contextPath.equals("register")){  
-                    if(!ShareokdataManager.getOpenRegistrationConfig()){
+                    if(!configService.getRegistrationConfig()){
                         throw new NoNewUserRegistrationException("The registraion of new users has been closed!");
                     }
                     String email = (String) request.getParameter("email");
-                    String password = (String) request.getParameter("password");
+                    String password = pwAuthenService.hash((String) request.getParameter("password"));
                     String userName = (String) request.getParameter("nickname");
                     if(null == email || "".equals(email)){
                         throw new UserRegisterInfoNotFoundException("Valid email register information is required!");
@@ -110,7 +118,7 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
                     String sessionId = session.getId();
                     RedisUser user = redisUserService.findUserByUserEmail(email);
                     
-                    if(null == user || !password.equals(user.getPassword())){
+                    if(null == user || !pwAuthenService.authenticate(password, user.getPassword())){
                         throw new UserRegisterInfoNotFoundException("User information cannot be found!");
                     }
                     

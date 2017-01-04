@@ -513,16 +513,15 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         try{
             for(String path : paths){
                 String json = "";
-                String dcType;
-                if(path.endsWith("dcterms.xml")){
-                    dcType = "dcterms";
-                }
-                else{
-                    dcType = "dc";
-                }
+                String dcType = "dc";
                 doc = FileUtil.loadXMLFromString(path);
                 if(null != doc){
                     doc.getDocumentElement().normalize();
+                    Node dcNode = doc.getDocumentElement();
+                    Node schema = dcNode.getAttributes().getNamedItem("schema");
+                    if(null != schema){
+                        dcType = schema.getNodeValue();
+                    }
                     NodeList nList = doc.getElementsByTagName("dcvalue");
                     for (int temp = 0; temp < nList.getLength(); temp++) {
                             Node nNode = nList.item(temp);

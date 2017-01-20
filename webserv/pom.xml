@@ -17,6 +17,7 @@
     <properties>
         <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <springsecurity.version>4.0.4.RELEASE</springsecurity.version>
     </properties>
 
     <dependencies>
@@ -26,6 +27,23 @@
             <version>4.1.1.RELEASE</version>
             <type>jar</type>
         </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <version>${springsecurity.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+            <version>${springsecurity.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-taglibs</artifactId>
+            <version>${springsecurity.version}</version>
+        </dependency>
+        
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>dspaceManager</artifactId>

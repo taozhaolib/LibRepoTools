@@ -98,7 +98,13 @@ public class FileZipper {
             while (entry != null) {
                 String filePath = outputDir + File.separator + entry.getName();
                 if(null == fileName){
-                    fileName = filePath;
+                    // Zip files from windows op can have different entries
+                    if(!entry.isDirectory()){ 
+                        fileName = new File(filePath).getParent();
+                    }
+                    else{
+                        fileName = filePath;
+                    }                    
                 }
                 if(filePath.contains("MACOSX")){
                     zipIn.closeEntry();

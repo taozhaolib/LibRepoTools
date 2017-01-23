@@ -8,6 +8,7 @@ package org.shareok.data.webserv;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -22,6 +23,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,9 +36,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.shareok.data.kernel.api.services.dspace.DspaceJournalServiceManager;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
+import org.shareok.data.webserv.exceptions.EmptyDoiInformationException;
+import org.shareok.data.webserv.exceptions.IncorrectDoiResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
@@ -54,6 +61,24 @@ public class JournalDataController {
     @Autowired
     public void setServerService(RepoServerService serverService) {
         this.serverService = serverService;
+    }
+    
+    @RequestMapping("/dspace/journal/{publisher}/doi")
+    public ModelAndView journalDoi(HttpServletRequest req, @PathVariable("publisher") String publisher) {
+        ModelAndView model = new ModelAndView();
+        try {
+//            String sampleDublinCoreLink = DspaceJournalDataUtil.getJournalSampleDublinCoreLink();          
+            model = WebUtil.getServerList(model, serverService);
+            model.setViewName("journalDoiData");
+            model.addObject("publisher", publisher);
+//            model.addObject("sampleDublinCore", sampleDublinCoreLink);
+            return model;
+        } catch (JsonProcessingException ex) {
+            logger.error("Cannot get the list of the servers", ex);
+            model.addObject("errorMessage", "Cannot get the list of the servers");
+            model.setViewName("serverError");
+            return model;
+        }
     }
     
     @RequestMapping("/dspace/journal/{publisher}")
@@ -188,6 +213,78 @@ public class JournalDataController {
         catch(IOException ioex){
             Logger.getLogger(JournalDataController.class.getName()).log(Level.SEVERE, null, ioex);
         }
+    }
+    
+    @RequestMapping(value="/dspace/safpackage/doi/generate", method=RequestMethod.POST)
+    public ModelAndView safPackageGenerateByDois(HttpServletRequest request, @RequestParam(value="multiDoiUploadFile", required=false) MultipartFile file) {
+        String singleDoi = (String)request.getParameter("singleDoi");
+        String multiDoi = (String)request.getParameter("multiDoi");
+        ByteArrayInputStream stream = null;
+        
+        if ((null != file && !file.isEmpty()) || null != singleDoi || null != multiDoi) {
+            try {
+                String[] dois;
+                if(null != singleDoi){
+                    String doi = (String)request.getParameter("doiInput");
+                    if(null == doi || doi.equals("")){
+                        throw new EmptyDoiInformationException("Empty information from single DOI submission!");
+                    }
+                    dois = new String[]{doi};
+                }
+                else if(null != multiDoi){
+                    String doi = (String)request.getParameter("multiDoiInput");
+                    if(null == doi || doi.equals("")){
+                        throw new EmptyDoiInformationException("Empty information from multiple DOI submission!");
+                    }
+                    dois = doi.trim().split("\\s*;\\s*");
+                }
+                else if(null != file && !file.isEmpty()){
+                    stream = new   ByteArrayInputStream(file.getBytes());
+                    String doiString = IOUtils.toString(stream, "UTF-8");
+                    dois = doiString.trim().split("\\s*\\r?\\n\\s*");
+                }
+                else {
+                    throw new EmptyDoiInformationException("Empty DOI information from unknown DOI submission!");
+                }
+                if(dois != null && dois.length > 0){
+                    for(String doi : dois){
+                        try{
+                            String[] doiInfo = DataHandlersUtil.getItemInfoByDoi(doi).split("\\n");
+                            if(null == doiInfo || doiInfo.length != 2){
+                                throw new IncorrectDoiResponseException("Cannot get the correct response from crossref for DOI: "+doi);
+                            }
+                            else if(!doiInfo[0].equals("200")){
+                                throw new IncorrectDoiResponseException("The response code is "+ doiInfo[0] + " from crossref for DOI: "+doi);
+                            }
+                            else{
+                                JSONObject obj = new JSONObject(doiInfo[1]);
+                                String url = obj.getJSONObject("message").getString("URL");
+                                if(null == url || url.equals("")){
+                                    throw new IncorrectDoiResponseException("Cannot get the URL from the crossref response for DOI: "+doi);
+                                }
+                            }
+                        }
+                        catch(IncorrectDoiResponseException ex){
+                            logger.error("Cannot get correct response from crossref by doi", ex);
+                        }
+                    }
+                }
+            }
+            catch(Exception ex){
+                logger.error("Cannot generate the SAF packages by the DOIs", ex);
+            }
+            finally{
+                if(null != stream){
+                    try{
+                        stream.close();
+                    }
+                    catch(IOException ex){
+                        logger.error("Cannot close the input stream when reading the file containing the DOIs", ex);
+                    }
+                }
+            }
+        }
+        return null;
     }
     
     @RequestMapping(value="/dspace/safpackage/{publisher}/upload", method=RequestMethod.POST)

@@ -12,18 +12,23 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.aspectj.util.FileUtil;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import static org.shareok.data.config.ShareokdataManager.getShareokdataPath;
 import org.shareok.data.datahandlers.exceptions.SecurityFileDoesNotExistException;
+import org.shareok.data.htmlrequest.HttpRequestHandler;
 import org.shareok.data.redis.job.RedisJob;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
  * @author Tao Zhao
  */
 public class DataHandlersUtil {
+    
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DataHandlersUtil.class);
+    
     public static String getJobReportPath(String jobType, long jobId){
         String shareokdataPath = getShareokdataPath();
         String repoType = jobType.split("-")[2];
@@ -76,5 +81,19 @@ public class DataHandlersUtil {
         URI uri = new URI(url);
         String domain = uri.getHost();
         return domain.startsWith("www.") ? domain.substring(4) : domain;
+    }
+    
+    public static String getItemInfoByDoi(String doi){
+        String response = null;
+        ApplicationContext context = new ClassPathXmlApplicationContext("htmlRequestContext.xml");
+        HttpRequestHandler handler = (HttpRequestHandler) context.getBean("httpRequestHandler");
+        String url = "http://api.crossref.org/works/" + doi;
+        try{
+            response = handler.sendGet(url);
+        }
+        catch(Exception ex){
+            logger.error("Cannot get item information by Doi", ex);
+        }
+        return response;
     }
 }

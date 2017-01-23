@@ -6,5 +6,6 @@
 **/citizenScience/
 **/Main.java
 log.txt
+ouaws/*.log
 dspaceManager/src/main/java/org/shareok/data/dspacemanager/DspaceJournalData.java
 ouaws/.metadata/

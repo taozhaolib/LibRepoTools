@@ -46,6 +46,14 @@ input.btn-form{
     margin-bottom: 25px;
 }
 
+.home-page-list{
+    background-color: #f5f5f5;
+}
+
+a.home-page-list:hover{
+    background-color: buttonhighlight;
+}
+
 @media (min-width: 767px) {
     .caret-right {
         width: 0; 

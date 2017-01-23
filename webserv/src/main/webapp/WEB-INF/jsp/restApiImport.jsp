@@ -23,8 +23,7 @@
     <div class="jumbotron">
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <span style="font-size: 16px; font-weight: 800;">${jobType2} into ${repoType2} repository:</span>
-                <span class="pull-right"><%@include file="serverSelectDropdown.jsp" %></span>
+                <span style="font-size: 16px; font-weight: 800;">${jobType2} into ${repoType2} repository:</span>                
             </div>
             <div class="panel-body">
                 <center>
@@ -42,12 +41,17 @@
                                     <input type="text" class="form-control" name="remoteFileUri" value="${localFile}" />
                                 </div>
                             </div>
+                            <c:set var="restImport" value="Import into Server"/>
                             <c:set var="userNameInput" value="dspaceUserName"/>
                             <c:set var="userPasswordInput" value="dspaceUserPw"/>
                         </c:if>
                             <br/><br/><br/><br>
                     </c:if>
+                       
                         <div class="form-group">
+                            <div class="container-fluid" style="padding-left: 0px">
+                                <span class="pull-left"><%@include file="serverSelectDropdown.jsp" %></span>
+                            </div>
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="serverName">${repoType2} server name:</label>
                             <div class="col-lg-6 col-sm-8">
                               <input type="text" class="form-control" name="serverName">
@@ -78,7 +82,7 @@
                             </div>
                         </div>
                         <br/><br/><br/>
-                            <input type="submit" class="btn btn-form loading-btn" value="${jobType2}">&nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="submit" class="btn btn-form loading-btn" value="${restImport}">&nbsp;&nbsp;&nbsp;&nbsp;
                             <input type="button"  class="btn btn-form" onclick="location.href='/webserv/home'" value="Back to home page"><BR>
                             <%@ include file="spining.jsp" %> 
                         <br>

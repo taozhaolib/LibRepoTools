@@ -36,7 +36,7 @@
 //                    alert(fileName);
                     var item = "<span style=\"margin-left:20px; font-s=ize: 1.2em; font-weight: bold; \">"+fileName+"</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+"<a href=\""+value+"\" class=\"btn btn-info btn-sm\" role=\"button\">Download</a>&nbsp;"+
                                 "&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"\/webserv\/rest\/dspace\/saf\/page\/rest-import?file="+fileName+"&safDir="
-                                +safDir+"&folder="+folder+"\" class=\"btn btn-info btn-sm\" role=\"button\" target=\"_blank\">Import</a><br><br>";
+                                +safDir+"&folder="+folder+"\" class=\"btn btn-info btn-sm\" role=\"button\" target=\"_blank\">Import into Server</a><br><br>";
                     safListDiv.append(item);
                 });
             });
@@ -47,7 +47,7 @@
     <div class="container">
         <div class="jumbotron">
             <div class="panel panel-primary">
-                <div class="panel-heading"><h4>List of the SAF packages for ${publisher}:</h4></div>
+                <div class="panel-heading"><h4>List of the Generated SAF packages</h4></div>
                 <div class="panel-body">                    
                     <br>
                     <div class="download-link-div">                        

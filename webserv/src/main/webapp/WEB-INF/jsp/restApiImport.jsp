@@ -81,6 +81,13 @@
                               <input type="text" class="form-control" name="collectionId" placeholder="">
                             </div>
                         </div>
+                        <br/><br/>
+                        <c:if test="${jobType == 'rest-import' && repoType == 'dspace'}">
+                            <div class="download-link-div pull-left" style="margin-left: 15px">
+                                <span>** Download the sample SAF package to test Dspace loading here:</span>&nbsp;&nbsp;&nbsp;
+                                <a href="${sampleSafPackageLink}" class="btn btn-info btn-sm" role="button">Sample SAF Package</a>                                
+                            </div>
+                        </c:if>
                         <br/><br/><br/>
                             <input type="submit" class="btn btn-form loading-btn" value="${restImport}">&nbsp;&nbsp;&nbsp;&nbsp;
                             <input type="button"  class="btn btn-form" onclick="location.href='/webserv/home'" value="Back to home page"><BR>

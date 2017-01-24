@@ -76,7 +76,7 @@
                         <br/><br/>
                         -->
                         <div class="form-group">                            
-                            <label class="control-label col-lg-2 col-sm-4 text-left" for="collectionId">Collection ID:</label>
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="collectionId">Collection ID (exclude the prefix):</label>
                             <div class="col-lg-4 col-sm-8">
                               <input type="text" class="form-control" name="collectionId" placeholder="">
                             </div>

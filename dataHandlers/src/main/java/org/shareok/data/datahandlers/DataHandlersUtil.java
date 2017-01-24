@@ -12,6 +12,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import org.apache.commons.io.FilenameUtils;
 import org.aspectj.util.FileUtil;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
@@ -76,5 +77,15 @@ public class DataHandlersUtil {
         URI uri = new URI(url);
         String domain = uri.getHost();
         return domain.startsWith("www.") ? domain.substring(4) : domain;
+    }
+    
+    /**
+     * Get the key from file name to retrieve the download path from database
+     * 
+     * @param fileName
+     * @return : key
+     */
+    public static String getFileNameKeyForDownloadPath(String fileName){
+        return FilenameUtils.removeExtension(fileName);
     }
 }

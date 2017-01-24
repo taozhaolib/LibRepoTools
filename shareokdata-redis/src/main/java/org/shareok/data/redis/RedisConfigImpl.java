@@ -6,6 +6,7 @@
 package org.shareok.data.redis;
 
 import org.apache.log4j.Logger;
+import org.shareok.data.redis.exceptions.FileDownloadPathNotExistException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.BoundHashOperations;
@@ -55,5 +56,23 @@ public class RedisConfigImpl implements RedisConfig {
             logger.error("Cannot get allow registration info ", ex);
             return false;
         }
+    }
+
+    @Override
+    public String getFileDownloadPathByNameKey(String nameKey) {
+        String path = null;
+        try{
+            BoundHashOperations<String, String, String> fileDownloadPathsOps = redisTemplate.boundHashOps("file_download_paths");
+            if(fileDownloadPathsOps.hasKey(nameKey)){
+                return (String)fileDownloadPathsOps.get(nameKey);
+            }
+            else{
+                throw new FileDownloadPathNotExistException("The key " + nameKey + " for file downloading does not exist!");
+            }
+        }
+        catch(Exception ex){
+            logger.error("Cannot find the download path ", ex);
+        }
+        return path;
     }
 }

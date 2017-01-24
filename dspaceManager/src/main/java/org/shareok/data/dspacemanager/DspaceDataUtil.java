@@ -5,12 +5,11 @@
  */
 package org.shareok.data.dspacemanager;
 
-import org.shareok.data.htmlrequest.HttpRequestHandler;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
 /**
  *
  * @author Tao Zhao
  */
 
+public class DspaceDataUtil {
+    public static final String DSPACE_REPOSITORY_HANDLER_ID_PREFIX = "11244/";
+}

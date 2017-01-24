@@ -11,5 +11,6 @@ package org.shareok.data.kernel.api.services.config;
  */
 public interface ConfigService {
     public void updateRegistrationConfig(boolean allowRegistration);
+    public String getFileDownloadPathByNameKey(String nameKey);
     public boolean getRegistrationConfig();    
 }

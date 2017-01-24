@@ -14,6 +14,8 @@ import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.dspacemanager.DspaceDataUtil;
+import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.shareok.data.kernel.api.services.ServiceUtil;
 import org.shareok.data.kernel.api.services.job.TaskManager;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
@@ -68,9 +70,11 @@ public class RestDspaceDataController {
        
         ModelAndView model = new ModelAndView();
         try {            
+            String sampleSafPackageLink = DspaceJournalDataUtil.getLinkToSampleSafPackageFile();
             model = WebUtil.getServerList(model, serverService);
             model.addObject("jobType", jobType);
             model.addObject("repoType", "dspace");
+            model.addObject("sampleSafPackageLink", sampleSafPackageLink);
             model.setViewName("restApiImport");
         } catch (JsonProcessingException ex) {
             model.addObject("errorMessage", "Cannot get the server list");
@@ -125,6 +129,7 @@ public class RestDspaceDataController {
         
         String userId = String.valueOf(request.getSession().getAttribute("userId"));
         job.setUserId(Long.valueOf(userId));
+        job.setCollectionId(DspaceDataUtil.DSPACE_REPOSITORY_HANDLER_ID_PREFIX + job.getCollectionId());
         job.setRepoType(DataUtil.getRepoTypeIndex(repoTypeStr));
         job.setType(DataUtil.getJobTypeIndex(jobType, repoTypeStr));
         job.setStatus(Arrays.asList(RedisUtil.REDIS_JOB_STATUS).indexOf("created"));
@@ -144,7 +149,7 @@ public class RestDspaceDataController {
 
             model.setViewName("jobReport");
             model.addObject("host", serverService.findServerById(returnedJob.getServerId()).getHost());
-            model.addObject("collection", job.getCollectionId()); 
+            model.addObject("collection", DspaceDataUtil.DSPACE_REPOSITORY_HANDLER_ID_PREFIX + job.getCollectionId()); 
             model.addObject("repoType", repoTypeStr.toUpperCase());
             model.addObject("isFinished", isFinished);
             model.addObject("reportPath", DataHandlersUtil.getJobReportFilePath(DataUtil.JOB_TYPES[returnedJob.getType()], returnedJob.getJobId())); 

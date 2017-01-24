@@ -30,5 +30,10 @@ public class ConfigServiceImpl implements ConfigService {
     public boolean getRegistrationConfig() {
         return redisConfig.getRegistrationConfig();
     }
+
+    @Override
+    public String getFileDownloadPathByNameKey(String nameKey) {
+        return redisConfig.getFileDownloadPathByNameKey(nameKey);
+    }
     
 }

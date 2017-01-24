@@ -174,6 +174,14 @@ public class DspaceJournalDataUtil {
         return File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "journal" + File.separator + "sampleDC.xml";
     }
     
+    public static String getLinkToSampleFilesForSafPackageGeneration(){
+        return File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "sample" + File.separator + "sample_for_saf_generation.zip";
+    }
+    
+    public static String getLinkToSampleSafPackageFile(){
+        return File.separator + "webserv" + File.separator + "download" + File.separator + "dspace" + File.separator + "sample" + File.separator + "sample_saf_package.zip";
+    }
+    
     public static String getJournalImportFilePath(String uploadFileName, String publisher){
         return ShareokdataManager.getShareokdataPath() + File.separator + "uploads" + File.separator +
                 publisher + File.separator + uploadFileName;

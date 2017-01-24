@@ -11,5 +11,6 @@ package org.shareok.data.redis;
  */
 public interface RedisConfig {
     public void updateConfig(String configInfoType, String value);
+    public String getFileDownloadPathByNameKey(String nameKey);
     public boolean getRegistrationConfig();
 }

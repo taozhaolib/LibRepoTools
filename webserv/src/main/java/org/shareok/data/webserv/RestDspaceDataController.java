@@ -15,6 +15,7 @@ import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.dspacemanager.DspaceDataUtil;
+import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.shareok.data.kernel.api.services.ServiceUtil;
 import org.shareok.data.kernel.api.services.job.TaskManager;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
@@ -69,9 +70,11 @@ public class RestDspaceDataController {
        
         ModelAndView model = new ModelAndView();
         try {            
+            String sampleSafPackageLink = DspaceJournalDataUtil.getLinkToSampleSafPackageFile();
             model = WebUtil.getServerList(model, serverService);
             model.addObject("jobType", jobType);
             model.addObject("repoType", "dspace");
+            model.addObject("sampleSafPackageLink", sampleSafPackageLink);
             model.setViewName("restApiImport");
         } catch (JsonProcessingException ex) {
             model.addObject("errorMessage", "Cannot get the server list");

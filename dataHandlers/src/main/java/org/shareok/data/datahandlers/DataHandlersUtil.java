@@ -12,6 +12,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import org.apache.commons.io.FilenameUtils;
+import org.aspectj.util.FileUtil;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import static org.shareok.data.config.ShareokdataManager.getShareokdataPath;
@@ -95,5 +97,15 @@ public class DataHandlersUtil {
             logger.error("Cannot get item information by Doi", ex);
         }
         return response;
+    }
+    
+    /**
+     * Get the key from file name to retrieve the download path from database
+     * 
+     * @param fileName
+     * @return : key
+     */
+    public static String getFileNameKeyForDownloadPath(String fileName){
+        return FilenameUtils.removeExtension(fileName);
     }
 }

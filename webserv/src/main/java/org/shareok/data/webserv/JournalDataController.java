@@ -38,6 +38,7 @@ import org.springframework.web.servlet.ModelAndView;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
+import org.shareok.data.kernel.api.services.config.ConfigService;
 import org.shareok.data.kernel.api.services.dspace.DspaceJournalServiceManager;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.webserv.exceptions.EmptyDoiInformationException;
@@ -57,10 +58,17 @@ public class JournalDataController {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(JournalDataController.class);
     
     private RepoServerService serverService;
+    
+    private ConfigService configService;
 
     @Autowired
     public void setServerService(RepoServerService serverService) {
         this.serverService = serverService;
+    }
+    
+    @Autowired
+    public void setConfigService(ConfigService configService) {
+        this.configService = configService;
     }
     
     @RequestMapping("/dspace/journal/{publisher}/doi")
@@ -85,11 +93,15 @@ public class JournalDataController {
     public ModelAndView journalHello(HttpServletRequest req, @PathVariable("publisher") String publisher) {
         ModelAndView model = new ModelAndView();
         try {
-            String sampleDublinCoreLink = DspaceJournalDataUtil.getJournalSampleDublinCoreLink();          
+            String sampleDublinCoreLink = DspaceJournalDataUtil.getJournalSampleDublinCoreLink(); 
+            String sampleForSafGenerationLink = DspaceJournalDataUtil.getLinkToSampleFilesForSafPackageGeneration();
+            String sampleSafPackageLink = DspaceJournalDataUtil.getLinkToSampleSafPackageFile();
             model = WebUtil.getServerList(model, serverService);
             model.setViewName("journalDataUpload");
             model.addObject("publisher", publisher);
             model.addObject("sampleDublinCore", sampleDublinCoreLink);
+            model.addObject("sampleSafPackageLink", sampleSafPackageLink);
+            model.addObject("sampleForSafGenerationLink", sampleForSafGenerationLink);
             return model;
         } catch (JsonProcessingException ex) {
             logger.error("Cannot get the list of the servers", ex);
@@ -159,7 +171,7 @@ public class JournalDataController {
                 model.setViewName("journalDataUpload");
                 model.addObject("oldFile", (String)downloadLinks.get("oldFile"));
                 model.addObject("loadingFile", downloadLink);
-                model.addObject("sampleDublinCore", sampleDublinCoreLink);
+                model.addObject("sampleDublinCore", sampleDublinCoreLink);                
                 model.addObject("publisher", publisher);
                 model.addObject("uploadFile", uploadFileLink);
                 return model;
@@ -348,6 +360,14 @@ public class JournalDataController {
     public void sampleDspaceJournalDCFileDownload(HttpServletResponse response){
         
         String downloadPath = ShareokdataManager.getDspceSampleDublinCoreFileName();
+        
+        WebUtil.setupFileDownload(response, downloadPath);
+    }
+    
+    @RequestMapping(value="/download/dspace/sample/{fileName}")
+    public void dspaceSampleFilesDownload(HttpServletResponse response, @PathVariable("fileName") String fileName){
+        
+        String downloadPath = configService.getFileDownloadPathByNameKey(DataHandlersUtil.getFileNameKeyForDownloadPath(fileName));
         
         WebUtil.setupFileDownload(response, downloadPath);
     }

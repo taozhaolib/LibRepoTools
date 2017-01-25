@@ -23,8 +23,7 @@
     <div class="jumbotron">
         <div class="panel panel-primary">
             <div class="panel-heading">
-                <span style="font-size: 16px; font-weight: 800;">${jobType2} into ${repoType2} repository:</span>
-                <span class="pull-right"><%@include file="serverSelectDropdown.jsp" %></span>
+                <span style="font-size: 16px; font-weight: 800;">${jobType2} into ${repoType2} repository:</span>                
             </div>
             <div class="panel-body">
                 <center>
@@ -42,12 +41,17 @@
                                     <input type="text" class="form-control" name="remoteFileUri" value="${localFile}" />
                                 </div>
                             </div>
+                            <c:set var="restImport" value="Import into Server"/>
                             <c:set var="userNameInput" value="dspaceUserName"/>
                             <c:set var="userPasswordInput" value="dspaceUserPw"/>
                         </c:if>
                             <br/><br/><br/><br>
                     </c:if>
+                       
                         <div class="form-group">
+                            <div class="container-fluid" style="padding-left: 0px">
+                                <span class="pull-left"><%@include file="serverSelectDropdown.jsp" %></span>
+                            </div>
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="serverName">${repoType2} server name:</label>
                             <div class="col-lg-6 col-sm-8">
                               <input type="text" class="form-control" name="serverName">
@@ -72,13 +76,20 @@
                         <br/><br/>
                         -->
                         <div class="form-group">                            
-                            <label class="control-label col-lg-2 col-sm-4 text-left" for="collectionId">Collection ID:</label>
+                            <label class="control-label col-lg-2 col-sm-4 text-left" for="collectionId">Collection ID (exclude the prefix):</label>
                             <div class="col-lg-4 col-sm-8">
                               <input type="text" class="form-control" name="collectionId" placeholder="">
                             </div>
                         </div>
+                        <br/><br/>
+                        <c:if test="${jobType == 'rest-import' && repoType == 'dspace'}">
+                            <div class="download-link-div pull-left" style="margin-left: 15px">
+                                <span>** Download the sample SAF package to test Dspace loading here:</span>&nbsp;&nbsp;&nbsp;
+                                <a href="${sampleSafPackageLink}" class="btn btn-info btn-sm" role="button">Sample SAF Package</a>                                
+                            </div>
+                        </c:if>
                         <br/><br/><br/>
-                            <input type="submit" class="btn btn-form loading-btn" value="${jobType2}">&nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="submit" class="btn btn-form loading-btn" value="${restImport}">&nbsp;&nbsp;&nbsp;&nbsp;
                             <input type="button"  class="btn btn-form" onclick="location.href='/webserv/home'" value="Back to home page"><BR>
                             <%@ include file="spining.jsp" %> 
                         <br>

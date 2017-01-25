@@ -22,14 +22,14 @@
     </bean>
    
     <mvc:resources mapping="/resources/**" location="/resources/"  cache-period="524288000"/>
-    <mvc:annotation-driven />
+    <mvc:annotation-driven ignore-default-model-on-redirect="true" />
 
     
     <bean id="multipartResolver"
         class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
  
          <!-- setting maximum upload size -->
-        <property name="maxUploadSize" value="1610612736" />
+        <property name="maxUploadSize" value="3221225472" />
 
     </bean>
     

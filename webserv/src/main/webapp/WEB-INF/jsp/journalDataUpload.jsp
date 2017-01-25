@@ -16,12 +16,18 @@
     <div class="container">
         <div class="jumbotron">
             <div class="panel panel-primary">
-                <div class="panel-heading"><h4>Process the ${publisher} Publications:</h4></div>
+		<c:if test="${publisher == 'ouhistory'}">
+		    <div class="panel-heading"><h4>Generate the SAF package for DSpace loading:</h4></div>
+		</c:if>
+		<c:if test="${publisher != 'ouhistory'}">
+                    <div class="panel-heading"><h4>Process the ${publisher} Publications:</h4></div>
+                </c:if>
+                
                 <div class="panel-body">
                     <c:if test="${publisher == 'ouhistory'}">
                         <h3>${uploadStr2}</h3>
-                        &nbsp;&nbsp;<span>Note: The zip file should containing the metadata csv file and the data files, e.g. the PDF files.</span><br><br>
-                        <c:set var="dataType" value="safpackage"/>
+                        &nbsp;&nbsp;<span>Note: The zip file should containing the metadata <b style="color: red">csv file</b> and the data files, e.g. the PDF files.</span><br><br>
+                        <c:set var="dataType" value="safpackage"/>                        
                     </c:if>
                     
                     <c:if test="${publisher != 'ouhistory'}">
@@ -53,6 +59,23 @@
                     </div>
                     <BR>
                     </c:if>
+                    
+                    <c:if test="${publisher == 'ouhistory' }">
+                        <div class="download-link-div">
+                            <h4>Download the sample zip file to test generation of SAF package here:</h4><br>
+                            <a href="${sampleForSafGenerationLink}" class="btn btn-info btn-sm" role="button">Sample Files for Testing SAF Package Generation</a>
+                            <br><br><br>
+                        </div>
+                    </c:if>
+                    
+                    <c:if test="${publisher == 'ouhistory' }">
+                        <div class="download-link-div">
+                            <h4>Download the sample SAF package here:</h4><br>
+                            <a href="${sampleSafPackageLink}" class="btn btn-info btn-sm" role="button">Sample SAF Package</a>
+                            <br><br><br>
+                        </div>
+                    </c:if>
+                    
                 </div>
             </div>
             

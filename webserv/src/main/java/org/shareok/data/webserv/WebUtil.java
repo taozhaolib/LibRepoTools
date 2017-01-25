@@ -30,6 +30,7 @@ import org.shareok.data.redis.job.RedisJob;
 import org.shareok.data.redis.server.RepoServer;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  *
@@ -87,6 +88,19 @@ public class WebUtil {
         model.addObject("startTime", (null == startTime) ? "" : ShareokdataManager.getSimpleDateFormat().format(startTime));
         model.addObject("endTime", (null == endTime) ? "" : ShareokdataManager.getSimpleDateFormat().format(endTime));
         model.addObject("jobType", DataUtil.JOB_TYPES[job.getType()]);
+    }
+    
+    public static void outputJobInfoToModel(RedirectAttributes redirectAttrs, RedisJob job){
+        
+        Date startTime = job.getStartTime();
+        Date endTime = job.getEndTime();
+        
+        redirectAttrs.addFlashAttribute("jobId", String.valueOf(job.getJobId()));
+        redirectAttrs.addFlashAttribute("status", RedisUtil.REDIS_JOB_STATUS[job.getStatus()]);
+        redirectAttrs.addFlashAttribute("startTime", (null != startTime ? ShareokdataManager.getSimpleDateFormat().format(startTime) : ""));
+        redirectAttrs.addFlashAttribute("endTime", (null != endTime ? ShareokdataManager.getSimpleDateFormat().format(endTime) : ""));
+        redirectAttrs.addFlashAttribute("jobType", DataUtil.JOB_TYPES[job.getType()]);
+        redirectAttrs.addFlashAttribute("repoType", DataUtil.REPO_TYPES[job.getRepoType()].toUpperCase());
     }
     
     public static String getReportDownloadLink(String jobType, String jobId){

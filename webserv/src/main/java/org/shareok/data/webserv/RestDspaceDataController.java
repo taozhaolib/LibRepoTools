@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 /**
  *
@@ -86,11 +88,11 @@ public class RestDspaceDataController {
             
     @RequestMapping(value="/rest/{repoTypeStr}/{jobType}", method=RequestMethod.POST)
     public ModelAndView sshDspaceSaFImporter(HttpServletRequest request, 
+                                            RedirectAttributes redirectAttrs,
                                             @PathVariable("repoTypeStr") String repoTypeStr, 
                                             @RequestParam(value = "localFile", required=false) MultipartFile file,
                                             @PathVariable("jobType") String jobType, 
                                             @ModelAttribute("SpringWeb")DspaceApiJob job) {
-       
         ModelAndView model = new ModelAndView();
         
         String filePath = "";
@@ -146,14 +148,16 @@ public class RestDspaceDataController {
 
             int statusIndex = job.getStatus();
             String isFinished = (statusIndex == 2 || statusIndex == 6) ? "true" : "false";
-
-            model.setViewName("jobReport");
-            model.addObject("host", serverService.findServerById(returnedJob.getServerId()).getHost());
-            model.addObject("collection", DspaceDataUtil.DSPACE_REPOSITORY_HANDLER_ID_PREFIX + job.getCollectionId()); 
-            model.addObject("repoType", repoTypeStr.toUpperCase());
-            model.addObject("isFinished", isFinished);
-            model.addObject("reportPath", DataHandlersUtil.getJobReportFilePath(DataUtil.JOB_TYPES[returnedJob.getType()], returnedJob.getJobId())); 
-            WebUtil.outputJobInfoToModel(model, returnedJob);
+            
+            RedirectView view = new RedirectView();
+            view.setContextRelative(true);
+            view.setUrl("/report/job/"+String.valueOf(returnedJob.getJobId()));
+            model.setView(view);                        
+            redirectAttrs.addFlashAttribute("host", serverService.findServerById(returnedJob.getServerId()).getHost());
+            redirectAttrs.addFlashAttribute("collection", DspaceDataUtil.DSPACE_REPOSITORY_HANDLER_ID_PREFIX + job.getCollectionId());             
+            redirectAttrs.addFlashAttribute("isFinished", isFinished);
+            redirectAttrs.addFlashAttribute("reportPath", DataHandlersUtil.getJobReportFilePath(DataUtil.JOB_TYPES[returnedJob.getType()], returnedJob.getJobId())); 
+            WebUtil.outputJobInfoToModel(redirectAttrs, returnedJob);
         }
         catch(Exception ex){
             logger.error("Cannot process the job of DSpace import using REST API.", ex);

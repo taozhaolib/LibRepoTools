@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.shareok.data.datahandlers.exceptions.NoMatchingRegularExpressionException;
 import org.shareok.data.htmlrequest.HtmlParser;
 import org.shareok.data.documentProcessor.ExcelHandler;
 import org.shareok.data.documentProcessor.FileUtil;
@@ -316,5 +317,39 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
             throw new Exception("Date match not found\n");
         }
         plosData.setDateIssued(date);
+    }
+
+    @Override
+    public String getDspaceJournalLoadingFilesByDoi(String[] dois) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    private String getIsPartOfSeriesByCitation(String citation) throws NoMatchingRegularExpressionException{
+        String isPartOfSeries = null;
+        String pattern = "\\.(\\s?)PLoS(\\s?)(.*)(\\d+)(\\((\\d+)\\):(\\s?)e(\\d+))";
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(citation);
+        if (m.find() && m.groupCount() == 1) {
+           isPartOfSeries = m.group(0);
+        }
+        else{
+            String message = "";
+            if(!m.find()){
+                message = "Cannot find match strings at all!";
+            }
+            else if(m.groupCount() > 1){
+                message = "It is matching multiple strings!";
+            }
+            else{
+                message = "Something is wrong while it is matching and matching only one string!";
+            }
+            throw new NoMatchingRegularExpressionException(message);
+        }
+        return isPartOfSeries;
+    }
+
+    @Override
+    public String getDspaceJournalLoadingFilesBySingleDoi(String doi) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

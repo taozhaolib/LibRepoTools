@@ -14,4 +14,5 @@ import org.springframework.web.multipart.MultipartFile;
 public interface DspaceJournalDataService {
     public String getDsapceJournalLoadingFiles(MultipartFile file);
     public String getDsapceJournalLoadingFiles(String userFilePath);
+    public String getDspaceJournalLoadingFilesByDoi(String[] dois);
 }

@@ -38,11 +38,14 @@ import org.springframework.web.servlet.ModelAndView;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
+import org.shareok.data.kernel.api.services.ServiceUtil;
 import org.shareok.data.kernel.api.services.config.ConfigService;
+import org.shareok.data.kernel.api.services.dspace.DspaceJournalDataService;
 import org.shareok.data.kernel.api.services.dspace.DspaceJournalServiceManager;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.webserv.exceptions.EmptyDoiInformationException;
 import org.shareok.data.webserv.exceptions.IncorrectDoiResponseException;
+import org.shareok.data.webserv.exceptions.NoServiceProcessDoiException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
@@ -271,12 +274,18 @@ public class JournalDataController {
                             else{
                                 JSONObject obj = new JSONObject(doiInfo[1]);
                                 String url = obj.getJSONObject("message").getString("URL");
+                                String publisher = obj.getJSONObject("message").getString("publisher");
+                                DspaceJournalDataService serviceObj = ServiceUtil.getDspaceJournalDataServInstanceByPublisher(publisher);
+                                if(null == serviceObj){
+                                    throw new NoServiceProcessDoiException("Cannot find the DOI processing service for publisher " + publisher + "!");
+                                }
+                                String path = serviceObj.getDspaceJournalLoadingFilesByDoi(dois);
                                 if(null == url || url.equals("")){
                                     throw new IncorrectDoiResponseException("Cannot get the URL from the crossref response for DOI: "+doi);
                                 }
                             }
                         }
-                        catch(IncorrectDoiResponseException ex){
+                        catch(IncorrectDoiResponseException | NoServiceProcessDoiException ex){
                             logger.error("Cannot get correct response from crossref by doi", ex);
                         }
                     }

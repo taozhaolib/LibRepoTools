@@ -30,4 +30,9 @@ public class DspacePlosServiceImpl implements DspaceJournalDataService{
         return null;
     }
 
+    @Override
+    public String getDspaceJournalLoadingFilesByDoi(String[] dois) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

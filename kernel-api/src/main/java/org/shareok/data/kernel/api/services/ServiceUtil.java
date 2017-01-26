@@ -17,7 +17,11 @@ import java.util.Date;
 import org.shareok.data.config.DataUtil;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.datahandlers.DataHandlersUtil;
+import org.shareok.data.kernel.api.services.dspace.DspaceJournalDataService;
 import org.shareok.data.kernel.api.services.job.DspaceApiJobServiceImpl;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
 import org.shareok.data.redis.job.RedisJob;
@@ -226,5 +230,16 @@ public class ServiceUtil {
             default:
                 return (RedisJobService) context.getBean("redisJobServiceImpl");
         }
+    }
+    
+    public static DspaceJournalDataService getDspaceJournalDataServInstanceByPublisher(String publisher){
+        DspaceJournalDataService obj = null;
+        try {
+            Class cl = Class.forName((String)DataHandlersUtil.CROSSREF_PUBLISHER_LIST.get(publisher));
+            return (DspaceJournalDataService)cl.newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            logger.error("Cannot create the instance to get item information by DOI! ", ex);
+        }
+        return obj;
     }
 }

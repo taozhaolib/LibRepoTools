@@ -14,5 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface PlosDoiData {
     public void getDspaceLoadingData(String fileName) throws Exception;
     public String getDspaceLoadingData(MultipartFile file);
+    public String getDspaceJournalLoadingFilesBySingleDoi(String doi);
+    public String getDspaceJournalLoadingFilesByDoi(String[] dois);
 //    public String saveUploadedData(MultipartFile file);
 }

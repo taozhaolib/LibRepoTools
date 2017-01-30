@@ -231,12 +231,17 @@ public class JournalDataController {
     }
     
     @RequestMapping(value="/dspace/safpackage/doi/generate", method=RequestMethod.POST)
-    public ModelAndView safPackageGenerateByDois(HttpServletRequest request, @RequestParam(value="multiDoiUploadFile", required=false) MultipartFile file) {
+    public ModelAndView safPackageGenerateByDois(HttpServletRequest request, RedirectAttributes redirectAttrs, @RequestParam(value="multiDoiUploadFile", required=false) MultipartFile file) {
         String singleDoi = (String)request.getParameter("singleDoi");
         String multiDoi = (String)request.getParameter("multiDoi");
         ByteArrayInputStream stream = null;
         
+        ModelAndView model = new ModelAndView();
+        RedirectView view = new RedirectView();
+        view.setContextRelative(true);
+        
         if ((null != file && !file.isEmpty()) || null != singleDoi || null != multiDoi) {
+            String safFilePath = null;
             try {
                 String[] dois;
                 if(null != singleDoi){
@@ -279,7 +284,7 @@ public class JournalDataController {
                                 if(null == serviceObj){
                                     throw new NoServiceProcessDoiException("Cannot find the DOI processing service for publisher " + publisher + "!");
                                 }
-                                String path = serviceObj.getDspaceJournalLoadingFilesByDoi(dois);
+                                safFilePath = serviceObj.getDspaceJournalLoadingFilesByDoi(dois);
                                 if(null == url || url.equals("")){
                                     throw new IncorrectDoiResponseException("Cannot get the URL from the crossref response for DOI: "+doi);
                                 }
@@ -304,8 +309,23 @@ public class JournalDataController {
                     }
                 }
             }
+            if(null != safFilePath && !safFilePath.equals("")){
+                redirectAttrs.addFlashAttribute("safFilePath", safFilePath);
+                view.setUrl(".jsp");
+                model.setView(view);
+            }
+            else{
+                redirectAttrs.addFlashAttribute("errorMessage", "The saf file path is invalid");
+                view.setUrl("journalDataUpload.jsp");
+                model.setView(view);
+            }
         }
-        return null;
+        else{
+            redirectAttrs.addFlashAttribute("errorMessage", "The server information is empty");
+            view.setUrl("errors/serverError.jsp");
+            model.setView(view);
+        }
+        return model;
     }
     
     @RequestMapping(value="/dspace/safpackage/{publisher}/upload", method=RequestMethod.POST)

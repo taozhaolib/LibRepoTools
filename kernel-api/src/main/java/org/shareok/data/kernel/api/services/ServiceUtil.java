@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.datahandlers.DataHandlersUtil;
+import org.shareok.data.kernel.api.exceptions.NotFoundServiceBeanException;
 import org.shareok.data.kernel.api.services.dspace.DspaceJournalDataService;
 import org.shareok.data.kernel.api.services.job.DspaceApiJobServiceImpl;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
@@ -56,6 +57,8 @@ public class ServiceUtil {
                     break; 
             }
         }
+        serviceBeanMap.put("Public Library of Science (PLoS)", "plosDspaceServiceImpl");
+        serviceBeanMap.put("SAGE Publications", "sageDspaceServiceImpl");
     }
     
     public static String getServiceBean(int repoType, int jobType){
@@ -235,9 +238,13 @@ public class ServiceUtil {
     public static DspaceJournalDataService getDspaceJournalDataServInstanceByPublisher(String publisher){
         DspaceJournalDataService obj = null;
         try {
-            Class cl = Class.forName((String)DataHandlersUtil.CROSSREF_PUBLISHER_LIST.get(publisher));
-            return (DspaceJournalDataService)cl.newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            String bean = serviceBeanMap.get(publisher);
+            if(null == bean){
+                throw new NotFoundServiceBeanException("No beans found for publisher "+publisher);
+            }
+            ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
+            return (DspaceJournalDataService)context.getBean(bean);            
+        } catch (NotFoundServiceBeanException ex) {
             logger.error("Cannot create the instance to get item information by DOI! ", ex);
         }
         return obj;

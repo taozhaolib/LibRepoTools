@@ -7,16 +7,24 @@ package org.shareok.data.kernel.api.services.dspace;
 
 import org.shareok.data.plosdata.PlosDoiData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
  * @author Tao Zhao
  */
+@Service
+@Configurable
 public class DspacePlosServiceImpl implements DspaceJournalDataService{
+
+    private PlosDoiData pdd;
     
     @Autowired
-    private PlosDoiData pdd;
+    public DspacePlosServiceImpl(PlosDoiData pdd){
+        this.pdd = pdd;
+    }
     
     @Override
     public String getDsapceJournalLoadingFiles(MultipartFile file){
@@ -32,7 +40,7 @@ public class DspacePlosServiceImpl implements DspaceJournalDataService{
 
     @Override
     public String getDspaceJournalLoadingFilesByDoi(String[] dois) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return pdd.getDspaceJournalLoadingFilesByDoi(dois);
     }
 
 }

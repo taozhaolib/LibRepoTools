@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.documentProcessor.FileZipper;
+import org.shareok.data.dspacemanager.exceptions.NonExistingUploadPathException;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -61,6 +62,38 @@ public class DspaceJournalDataUtil {
             Logger.getLogger(DspaceJournalDataUtil.class.getName()).log(Level.SEVERE, null, ex);
         }
         return uploadedFilePath;
+    }
+    
+    /**
+     * Create and return the path of the folder storing the DSpace loading files
+     * @param user : user name
+     * @param publisher : publisher name
+     * @return : path of the created folder
+     */
+    public static String getDspaceJournalUploadPath(String publisher){
+        String time = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+        String uploadPath =  null;
+        try{
+            uploadPath = getDspaceJournalUploadFolderPath(publisher);
+            if(null != uploadPath){
+                File uploadFolder = new File(uploadPath);
+                if(!uploadFolder.exists()){
+                    uploadFolder.mkdir();
+                }
+                File uploadTimeFolder = new File(uploadPath + File.separator + time);
+                if(!uploadTimeFolder.exists()){
+                    uploadTimeFolder.mkdir();
+                    uploadPath = uploadTimeFolder.getCanonicalPath();
+                }
+            }
+            else{
+                throw new NonExistingUploadPathException("The upload path for publisher "+publisher+" has not been set up!");
+            }
+        }
+        catch(Exception ex){
+            logger.error(ex);
+        }
+        return uploadPath;
     }
     
     /**

@@ -33,12 +33,6 @@ public class DataHandlersUtil {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DataHandlersUtil.class);
     
-    public static Map<String, String> CROSSREF_PUBLISHER_LIST = new HashMap<>();
-    static {
-        CROSSREF_PUBLISHER_LIST.put("Public Library of Science (PLoS)", "org.shareok.data.kernel.api.services.dspace.DspacePlosServiceImpl");
-        CROSSREF_PUBLISHER_LIST.put("SAGE Publications", "org.shareok.data.kernel.api.services.dspace.DspaceSageServiceImpl");
-    }
-    
     public static String getJobReportPath(String jobType, long jobId){
         String shareokdataPath = getShareokdataPath();
         String repoType = jobType.split("-")[2];

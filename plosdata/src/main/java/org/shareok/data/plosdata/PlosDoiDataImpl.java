@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.shareok.data.datahandlers.exceptions.NoMatchingRegularExpressionException;
+import org.shareok.data.datahandlers.exceptions.NotFoundPublisherException;
 import org.shareok.data.htmlrequest.HtmlParser;
 import org.shareok.data.documentProcessor.ExcelHandler;
 import org.shareok.data.documentProcessor.FileUtil;
@@ -31,6 +32,8 @@ import org.springframework.web.multipart.MultipartFile;
  * @author Tao Zhao
  */
 public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
+    
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(PlosDoiDataImpl.class);
     
     private HashMap<String,String[]> data;
     private ExcelHandler excelHandler;
@@ -153,103 +156,7 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
                 String isPartOfSeries = valArray[0];
                 String[] doiArr = valArray[1].split(":");
                 doi = doiArr[0];
-                String doiDataVal = req.getFullData(doi);
-                String[] tagNames = {"property"};
-                HashMap<String,ArrayList<String>> metaData = HtmlParser.metaDataParserWithTagNames(doiDataVal, tagNames);
-                
-                String acknowledgement = PlosUtil.getPlosAck(doiDataVal);
-                String citation = PlosUtil.getPlosCitation(doiDataVal);
-                String contributions = PlosUtil.getAuthorContributions(doiDataVal);
-                String journalTypeString = doi.split("journal.")[1].split("\\.")[0];
-                
-                plosData.setPlosJournalType(journalTypeString);
-                plosData.setDoi(doi);
-                plosData.setRelationUri(req.getRelationUriByDoi(doi));
-                plosData.setUri(PlosUtil.DOI_PREFIX + doi);
-                plosData.setAcknowledgements(acknowledgement);
-                plosData.setAuthorContributions(contributions);
-                plosData.setIsPartOfSeries(isPartOfSeries);
-                plosData.setCitation(citation);
-                JournalType type = plosData.getJournalType();
-            
-                switch(type){
-                    case PLOSONE: 
-                        plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PONE);
-                        plosData.setPublisher("PLos One");
-                        break;
-                    case PLOSBIO: 
-                        plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PBIO);
-                        plosData.setPublisher("PLos Biology");
-                        break;
-                    case PLOSGEN: 
-                        plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PGEN);
-                        plosData.setPublisher("PLos Genetics");
-                        break;
-                    case PLOSMED: 
-                        plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PMED);
-                        plosData.setPublisher("PLOS Medicine");
-                        break;
-                    case PLOSCBI: 
-                        plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PCBI);
-                        plosData.setPublisher("PLOS Computational Biology");
-                        break;
-                    case PLOSPAT: 
-                        plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PPAT);
-                        plosData.setPublisher("PLoS Pathogens");
-                        break;
-                    case PLOSNTD: 
-                        plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PNTD);
-                        plosData.setPublisher("PLoS Neglected Tropical Diseases");
-                        break;
-                    default:
-                        throw new Exception("Journal type is undefined!");
-                        //break;
-                }
-                
-                Iterator it = metaData.entrySet().iterator();
-                
-                try{
-                    while(it.hasNext()){
-                        Map.Entry pairs = (Map.Entry)it.next();
-                        if(pairs.getKey().equals("citation_title") || pairs.getKey().equals("og:title")){
-                            plosData.setTitle(pairs.getValue().toString().replaceAll("(\\[|\\])*", ""));
-                        }
-                        else if(pairs.getKey().equals("twitter:description") || pairs.getKey().equals("og:description")){
-                            plosData.setAbstractText(pairs.getValue().toString().replaceAll("(\\[|\\])*", ""));
-                        }
-                        else if(pairs.getKey().equals("citation_date")){
-                            Date date = null;
-                            String dateString = pairs.getValue().toString().replaceAll("(\\[|\\])*", "");
-                            matchCitationDate(dateString, plosData);
-                        }
-                        else if(pairs.getKey().equals("citation_author")){
-                            plosData.setAuthors(pairs.getValue().toString().replaceAll("(\\[|\\])*", "").split(", "));
-                        }
-                        else if(pairs.getKey().equals("keywords")){
-                            plosData.setSubjects(pairs.getValue().toString().replaceAll("(\\[|\\])*", "").split(", "));
-                        }
-                        //System.out.println(pairs.getKey() + " = " + pairs.getValue()+"\n\n");
-                        it.remove(); // avoids a ConcurrentModificationException
-                    }
-                    if(null == plosData.getSubjects()){
-                        String[] subjects = PlosUtil.getSubjects(doiDataVal);
-                        plosData.setSubjects(subjects);
-                    }
-                    if(null == plosData.getTitle() || "".equals(plosData.getTitle())){
-                        plosData.setTitle(PlosUtil.getTitleFromHtml(doiDataVal));
-                    }
-                    // download the PDF full text
-                    String articleOutputFolderPath = getArticleOutputFolderPath(doi);
-                    req.downloadPlosOnePdfByDoi(doi, articleOutputFolderPath);
-                    PlosUtil.createContentFile(articleOutputFolderPath+File.separator+"contents", doi.split("/")[1]+".pdf");
-                    plosData.exportXmlByDoiData(articleOutputFolderPath+File.separator+"dublin_core.xml");
-                    String outputFolderPath = FileUtil.getFileContainerPath(articleOutputFolderPath);
-                    DspaceJournalDataUtil.packLoadingData(outputFolderPath);
-                }
-                catch(Exception ex){
-                    System.out.print("The data processing from doiData to plosData is wrong!\n");
-                    ex.printStackTrace();
-                }
+                plosData = getDspaceJournalLoadingFilesBySingleDoi(doi);
                 plosDataList.add(plosData);
             }
         }
@@ -321,7 +228,14 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
 
     @Override
     public String getDspaceJournalLoadingFilesByDoi(String[] dois) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String uploadPath = null;
+        plosDataList.clear();
+        uploadPath = DspaceJournalDataUtil.getDspaceJournalUploadPath("plos");
+        setOutputPath(uploadPath+File.separator+"output");
+        for(String doi : dois){
+            getDspaceJournalLoadingFilesBySingleDoi(doi);
+        }
+        return uploadPath+File.separator+"output.zip";
     }
     
     private String getIsPartOfSeriesByCitation(String citation) throws NoMatchingRegularExpressionException{
@@ -329,27 +243,133 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
         String pattern = "\\.(\\s?)PLoS(\\s?)(.*)(\\d+)(\\((\\d+)\\):(\\s?)e(\\d+))";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(citation);
-        if (m.find() && m.groupCount() == 1) {
+        if (m.find()) {
            isPartOfSeries = m.group(0);
         }
         else{
-            String message = "";
-            if(!m.find()){
-                message = "Cannot find match strings at all!";
-            }
-            else if(m.groupCount() > 1){
-                message = "It is matching multiple strings!";
-            }
-            else{
-                message = "Something is wrong while it is matching and matching only one string!";
-            }
-            throw new NoMatchingRegularExpressionException(message);
+            throw new NoMatchingRegularExpressionException("Cannot find match strings at all!");
         }
-        return isPartOfSeries;
+        return isPartOfSeries.substring(2);
     }
 
     @Override
-    public String getDspaceJournalLoadingFilesBySingleDoi(String doi) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public PlosData getDspaceJournalLoadingFilesBySingleDoi(String doi) {
+
+        PlosRequest req = (PlosRequest)PlosUtil.getPlosContext().getBean("plosRequest");
+        PlosData plosData = (PlosData)PlosUtil.getPlosContext().getBean("plosData");
+        
+        String doiDataVal = req.getFullData(doi);
+        String[] tagNames = {"property"};
+        HashMap<String,ArrayList<String>> metaData = HtmlParser.metaDataParserWithTagNames(doiDataVal, tagNames);
+
+        String acknowledgement = PlosUtil.getPlosAck(doiDataVal);
+        String citation = PlosUtil.getPlosCitation(doiDataVal);
+        String contributions = PlosUtil.getAuthorContributions(doiDataVal);
+        String journalTypeString = doi.split("journal.")[1].split("\\.")[0];
+
+        try {
+            plosData.setPlosJournalType(journalTypeString);
+        } catch (Exception ex) {
+            logger.error(ex);
+        }
+        plosData.setDoi(doi);
+        plosData.setRelationUri(req.getRelationUriByDoi(doi));
+        plosData.setUri(PlosUtil.DOI_PREFIX + doi);
+        plosData.setAcknowledgements(acknowledgement);
+        plosData.setAuthorContributions(contributions);    
+        if(!FileUtil.isEmptyString(citation)){
+            try {
+                plosData.setIsPartOfSeries(getIsPartOfSeriesByCitation(citation));
+            } catch (NoMatchingRegularExpressionException ex) {
+                logger.error("Cannot get the string of IsPartOfSeries!", ex);
+            }
+        }
+        plosData.setCitation(citation);
+        JournalType type = plosData.getJournalType();
+
+        switch(type){
+            case PLOSONE: 
+                plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PONE);
+                plosData.setPublisher("PLos One");
+                break;
+            case PLOSBIO: 
+                plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PBIO);
+                plosData.setPublisher("PLos Biology");
+                break;
+            case PLOSGEN: 
+                plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PGEN);
+                plosData.setPublisher("PLos Genetics");
+                break;
+            case PLOSMED: 
+                plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PMED);
+                plosData.setPublisher("PLOS Medicine");
+                break;
+            case PLOSCBI: 
+                plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PCBI);
+                plosData.setPublisher("PLOS Computational Biology");
+                break;
+            case PLOSPAT: 
+                plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PPAT);
+                plosData.setPublisher("PLoS Pathogens");
+                break;
+            case PLOSNTD: 
+                plosData.setPeerReviewNotes(PlosUtil.PEERREVIEWNOTES_PNTD);
+                plosData.setPublisher("PLoS Neglected Tropical Diseases");
+                break;
+            default:
+                {
+                    try {
+                        throw new NotFoundPublisherException("Journal type is undefined!");
+                    } catch (NotFoundPublisherException ex) {
+                        logger.error(ex);
+                    }
+                }
+                break;
+        }
+
+        Iterator it = metaData.entrySet().iterator();
+
+        try{
+            while(it.hasNext()){
+                Map.Entry pairs = (Map.Entry)it.next();
+                if(pairs.getKey().equals("citation_title") || pairs.getKey().equals("og:title")){
+                    plosData.setTitle(pairs.getValue().toString().replaceAll("(\\[|\\])*", ""));
+                }
+                else if(pairs.getKey().equals("twitter:description") || pairs.getKey().equals("og:description")){
+                    plosData.setAbstractText(pairs.getValue().toString().replaceAll("(\\[|\\])*", ""));
+                }
+                else if(pairs.getKey().equals("citation_date")){
+                    Date date = null;
+                    String dateString = pairs.getValue().toString().replaceAll("(\\[|\\])*", "");
+                    matchCitationDate(dateString, plosData);
+                }
+                else if(pairs.getKey().equals("citation_author")){
+                    plosData.setAuthors(pairs.getValue().toString().replaceAll("(\\[|\\])*", "").split(", "));
+                }
+                else if(pairs.getKey().equals("keywords")){
+                    plosData.setSubjects(pairs.getValue().toString().replaceAll("(\\[|\\])*", "").split(", "));
+                }
+                it.remove(); // avoids a ConcurrentModificationException
+            }
+            if(null == plosData.getSubjects()){
+                String[] subjects = PlosUtil.getSubjects(doiDataVal);
+                plosData.setSubjects(subjects);
+            }
+            if(null == plosData.getTitle() || "".equals(plosData.getTitle())){
+                plosData.setTitle(PlosUtil.getTitleFromHtml(doiDataVal));
+            }
+            // download the PDF full text
+            String articleOutputFolderPath = getArticleOutputFolderPath(doi);
+            req.downloadPlosOnePdfByDoi(doi, articleOutputFolderPath);
+            PlosUtil.createContentFile(articleOutputFolderPath+File.separator+"contents", doi.split("/")[1]+".pdf");
+            plosData.exportXmlByDoiData(articleOutputFolderPath+File.separator+"dublin_core.xml");
+            String outputFolderPath = FileUtil.getFileContainerPath(articleOutputFolderPath);
+            DspaceJournalDataUtil.packLoadingData(outputFolderPath);
+        }
+        catch(Exception ex){
+            System.out.print("The data processing from doiData to plosData is wrong!\n");
+            ex.printStackTrace();
+        }
+        return plosData;
     }
 }

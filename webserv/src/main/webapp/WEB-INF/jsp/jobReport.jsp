@@ -30,6 +30,7 @@
                     <br>
                     <c:if test="${not empty isFinished && isFinished == 'true'}">
                         <a href="/webserv/download/report/${jobType}/${jobId}" class="btn btn-info btn-sm" role="button">Download Job Report</a>
+                        <a href="/webserv/download/mapfile/${jobType}/${jobId}" class="btn btn-info btn-sm" role="button">Download Map File</a>
                     </c:if>                        
                     <input type="button"  class="btn btn-form" onclick="location.href='/webserv/home'" value="Back to home page"><BR>
                 </div>

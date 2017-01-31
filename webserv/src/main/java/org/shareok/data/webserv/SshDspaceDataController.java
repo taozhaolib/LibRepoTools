@@ -175,9 +175,18 @@ public class SshDspaceDataController {
     }
     
     @RequestMapping(value="/download/report/{jobType}/{jobId}")
-    public void sshDspaceReportDownload(HttpServletResponse response, @PathVariable("jobType") String jobType, @PathVariable("jobId") String jobId){
+    public void dspaceReportDownload(HttpServletResponse response, @PathVariable("jobType") String jobType, @PathVariable("jobId") String jobId){
         
         String downloadPath = WebUtil.getReportDownloadLink(jobType, jobId);
+        
+        WebUtil.setupFileDownload(response, downloadPath);
+        
+    }
+    
+    @RequestMapping(value="/download/mapfile/{jobType}/{jobId}")        
+    public void dspaceMapFileDownload(HttpServletResponse response, @PathVariable("jobType") String jobType, @PathVariable("jobId") String jobId){
+        
+        String downloadPath = WebUtil.getMapFileDownloadLink(jobType, jobId);
         
         WebUtil.setupFileDownload(response, downloadPath);
         

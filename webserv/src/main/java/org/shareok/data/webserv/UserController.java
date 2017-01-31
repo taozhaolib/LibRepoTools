@@ -12,6 +12,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.shareok.data.config.DataUtil;
@@ -19,10 +21,14 @@ import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.kernel.api.services.ServiceUtil;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
+import org.shareok.data.kernel.api.services.user.PasswordAuthenticationService;
 import org.shareok.data.kernel.api.services.user.RedisUserService;
+import org.shareok.data.redis.RedisUser;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
 import org.shareok.data.redis.server.RepoServer;
+import org.shareok.data.webserv.exceptions.IncorrectUserCredentialInfoException;
+import org.shareok.data.webserv.exceptions.UserRegisterInfoNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +37,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 /**
  *
@@ -46,6 +53,7 @@ public class UserController{
     private RedisUserService userService;
     private RedisJobService jobService;
     private RepoServerService serverService;
+    private PasswordAuthenticationService pwAuthenService;
 
     public RedisUserService getUserService() {
         return userService;
@@ -69,6 +77,11 @@ public class UserController{
     @Autowired
     public void setUserService(RedisUserService userService) {
         this.userService = userService;
+    }
+    
+    @Autowired
+    public void setPwAuthenService(PasswordAuthenticationService pwAuthenService){
+        this.pwAuthenService = pwAuthenService;
     }
     
     @RequestMapping("/login")
@@ -190,6 +203,87 @@ public class UserController{
             model.addObject("errorMessage", "Cannot retrieve the job information.");
         }
 
+        return model;
+    }
+    
+    @RequestMapping("/userProfile")
+    public ModelAndView userProfilePage(HttpServletRequest request){
+        
+        ModelAndView model = new ModelAndView();
+        model.setViewName("userProfile");
+
+        return model;
+    }
+    
+    @RequestMapping("/user/newPass")
+    public ModelAndView userNewPass(HttpServletRequest request){
+        
+        ModelAndView model = new ModelAndView();
+        
+        String oldPass = (String)request.getParameter("oldPass");
+        String newPass = (String)request.getParameter("newPass");
+        String newPassConfirm = (String)request.getParameter("newPassConfirm");
+        if(null != oldPass && !oldPass.equals("") && null != newPass && !newPass.equals("") && null != newPassConfirm && !newPassConfirm.equals("")){
+            if(!newPass.equals(newPassConfirm)){
+                try {
+                    throw new IncorrectUserCredentialInfoException("The two new passwords do not match!");
+                } catch (IncorrectUserCredentialInfoException ex) {
+                    logger.error(ex);
+                    model.addObject("errorMessage", "The two new passwords do not match!");
+                    model.setViewName("userError");
+                    return model;
+                }
+            }
+            String email = (String)request.getSession().getAttribute("email");
+            RedisUser user = userService.findUserByUserEmail(email);
+            if(null == user || !pwAuthenService.authenticate(oldPass, user.getPassword())){
+                String message = null;
+                try {                    
+                    if(null == user){
+                        message = "User information cannot by found by user email!";
+                    }
+                    else{
+                        message = "User old password is incorrect!";
+                    }
+                    throw new UserRegisterInfoNotFoundException(message);
+                } catch (UserRegisterInfoNotFoundException ex) {
+                    logger.error(ex);
+                    model.addObject("errorMessage", message);
+                    model.setViewName("userError");
+                    return model;
+                }
+            }
+            // Check if the user is the current user in session
+            String sessionId = (String)request.getSession().getId();
+            String userSessionId = user.getSessionKey();
+            if(null == userSessionId || !userSessionId.equals(sessionId)){
+                try {
+                    throw new UserRegisterInfoNotFoundException("The user session ID does not match the current session ID!");
+                } catch (UserRegisterInfoNotFoundException ex) {
+                    logger.error(ex);
+                    model.addObject("errorMessage", "The user session ID does not match the current session ID!");
+                    model.setViewName("userError");
+                    return model;
+                }
+            }            
+            String password = pwAuthenService.hash(newPass);
+            user.setPassword(password);
+            userService.updateUser(user);
+            RedirectView view = new RedirectView();
+            view.setContextRelative(true);
+            view.setUrl("/userProfile");
+            model.setView(view);
+            return model;
+        }
+        else{
+            try {
+                throw new IncorrectUserCredentialInfoException("Some password information is empty for resetting user password!");
+            } catch (IncorrectUserCredentialInfoException ex) {
+                logger.error(ex);
+                model.addObject("errorMessage", "Some password information is empty for resetting user password!");
+                model.setViewName("userError");
+            }
+        }        
         return model;
     }
 }

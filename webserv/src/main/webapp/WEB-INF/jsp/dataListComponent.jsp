@@ -1,20 +1,3 @@
-<%-- 
-    Document   : dataListComponent
-    Created on : Feb 17, 2017, 12:22:44 AM
-    Author     : Tao Zhao
---%>
-
-<div id="dataListComponentDiv">
-    <form id="search">
-      Search <input name="query" v-model="searchQuery">
-    </form>
-    <demo-grid
-      :data="gridData"
-      :columns="gridColumns"
-      :filter-key="searchQuery">
-    </demo-grid>
-</div>
-
 <script type="text/x-template" id="grid-template">
     <table class="table-hover table-condensed table-responsive table-striped" style="width: 100%">
         <thead>
@@ -41,8 +24,7 @@
 </script>
 
 <script>
-    <script>
-    Vue.component('demo-grid', {
+    Vue.component('data-grid', {
         template: '#grid-template',
         props: {
           data: Array,
@@ -95,8 +77,11 @@
         }
       })
 
-    getVueObjectForList('dataListComponentDiv', columns, listData);
+    getVueObjectForList(columns, listData, displaySearch);
+
 </script>
+
+
 
 <style>
 

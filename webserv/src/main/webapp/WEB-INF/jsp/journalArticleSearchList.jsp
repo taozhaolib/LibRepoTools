@@ -33,12 +33,6 @@
                         <br>
                         </div>
                     </form>
-                          
-                    <script>
-
-                      var columns = ['title', 'journal', 'author', 'doi'];
-                      var listData = ${articles};
-                    </script>
                     
                     <%@include file= "journalArticleList.jsp" %>
                     

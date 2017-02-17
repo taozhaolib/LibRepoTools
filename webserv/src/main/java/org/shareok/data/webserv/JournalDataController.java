@@ -413,7 +413,11 @@ public class JournalDataController {
     }
     
     @RequestMapping(value="/journal/search/{publisher}/date", method=RequestMethod.POST)
-    public ModelAndView searchJournalArticlesByDate(HttpServletRequest request, @RequestParam(value="endDate", required = false) String endDate, @PathVariable("publisher") String publisher) {
+    public ModelAndView searchJournalArticlesByDate(HttpServletRequest request, 
+                                                    RedirectAttributes redirectAttrs, 
+                                                    @RequestParam(value="endDate", required = false) String endDate, 
+                                                    @PathVariable("publisher") String publisher) 
+    {
         
         ModelAndView model = new ModelAndView();
         String startDate = request.getParameter("startDate");
@@ -421,12 +425,15 @@ public class JournalDataController {
         DspaceJournalDataService serviceObj = ServiceUtil.getDspaceJournalDataServInstanceByPublisher(publisher);
         String articlesData = serviceObj.getApiResponseByDatesAffiliate(startDate, endDate, affiliate);
         
-        model.setViewName("journalArticleSearchList");
-        model.addObject("publisher", publisher);
-        model.addObject("startDate", startDate);
-        model.addObject("endDate", null == endDate ? "" : endDate);
-        model.addObject("institutions", DataUtil.getJsonArrayFromStringArray(DataUtil.INSTITUTIONS));
-        model.addObject("articles", null == articlesData ? "" : articlesData);
+        RedirectView view = new RedirectView();
+        view.setContextRelative(true);
+        view.setUrl("/journal/search/"+publisher+"/date");
+        model.setView(view);                        
+        redirectAttrs.addFlashAttribute("publisher", publisher);
+        redirectAttrs.addFlashAttribute("startDate", null == startDate ? "" : startDate);
+        redirectAttrs.addFlashAttribute("endDate", null == endDate ? "" : endDate);
+        redirectAttrs.addFlashAttribute("institutions", DataUtil.getJsonArrayFromStringArray(DataUtil.INSTITUTIONS));
+        redirectAttrs.addFlashAttribute("articles", null == articlesData ? "" : articlesData);
         return model;
     }
 }

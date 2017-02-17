@@ -18,11 +18,9 @@
     <template v-else="emptyData">
         <h4>List of the search Results</h4>
         <template v-if="displaySearch">
-            <form id="search">
-                Search <input name="query" v-model="searchQuery">
-                <br><br>
-            </form>
+                Search <input name="query" v-model="searchQuery">                
         </template>
+        <br><br>
         <data-grid
             :data="gridData"
             :columns="gridColumns"

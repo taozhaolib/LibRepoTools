@@ -12,7 +12,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
 
 <script>
-      
       Vue.component('date-range-picker', {
         template: '<table style="width: 60%" >' +
                     '<tbody>' +
@@ -20,14 +19,14 @@
                             '<td>' +
                                 '<div class="form-group">' +
                                   '<label class="control-label" for="startDate">Start Date</label>' +
-                                  '<input class="form-control" id="startDate" name="startDate" placeholder="YYYY-MM-DD" type="text"/>' +
+                                  '<input class="form-control" id="startDate" name="startDate" placeholder="YYYY-MM-DD" value="'+startDate+'" type="text"/>' +
                                 '</div>' +
                             '</td>' +
                             '<td style="width:10%"></td>' +
                             '<td>' +
                                 '<div class="form-group">' +
                                   '<label class="control-label" for="endDate">End Date</label>' +
-                                  '<input class="form-control" id="endDate" name="endDate" placeholder="YYYY-MM-DD" type="text"/>' +
+                                  '<input class="form-control" id="endDate" name="endDate" placeholder="YYYY-MM-DD" value="'+endDate+'" type="text"/>' +
                                 '</div>' +
                             '</td>' +
                         '</tr>' +

@@ -5,7 +5,7 @@
 --%>
 
 <div id="institutionsSelectDiv" class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 2%; margin-bottom: 4%">
-    <label class="control-label">Select a affiliated institution:</label>
+    <label class="control-label">Select an affiliated institution:</label>
     <br>
     <div class="selectContainer col-lg-6 col-md-12 col-sm-12 col-xs-12" style="padding-left: 0px !important">
     <select id="affiliate" name="affiliate" class="form-control input-medium">

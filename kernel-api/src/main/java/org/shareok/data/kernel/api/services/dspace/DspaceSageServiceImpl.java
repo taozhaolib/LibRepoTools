@@ -66,4 +66,9 @@ public class DspaceSageServiceImpl implements DspaceJournalDataService {
     public String getDspaceJournalLoadingFilesByDoi(String[] dois) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public String getApiResponseByDatesAffiliate(String startDate, String endDate, String affiliate) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

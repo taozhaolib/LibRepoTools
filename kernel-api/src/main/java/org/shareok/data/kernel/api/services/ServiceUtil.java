@@ -58,6 +58,8 @@ public class ServiceUtil {
             }
         }
         serviceBeanMap.put("Public Library of Science (PLoS)", "plosDspaceServiceImpl");
+        serviceBeanMap.put("plos", "plosDspaceServiceImpl");
+        serviceBeanMap.put("sage", "sageDspaceServiceImpl");
         serviceBeanMap.put("SAGE Publications", "sageDspaceServiceImpl");
     }
     

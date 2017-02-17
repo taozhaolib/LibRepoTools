@@ -22,8 +22,8 @@ public class DataUtil {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DataUtil.class);
     
-    public static String[] REPO_TYPES = {"unknown", "dspace", "islandora", "fedora", "hydra"};
-    public static String[] JOB_TYPES = {"unknown", "ssh-import-dspace", "rest-import-dspace", "ssh-upload-dspace", "ssh-importloaded-dspace",
+    public static final String[] REPO_TYPES = {"unknown", "dspace", "islandora", "fedora", "hydra"};
+    public static final String[] JOB_TYPES = {"unknown", "ssh-import-dspace", "rest-import-dspace", "ssh-upload-dspace", "ssh-importloaded-dspace",
                                         "ssh-import-islandora"};
     public static Map<String, String> JOB_TYPE_DATA_SCHEMA = new HashMap<>();
     static {
@@ -46,6 +46,8 @@ public class DataUtil {
             }
         }
     }
+    
+    public static final String[] INSTITUTIONS = {"University of Oklahoma", "Oklahoma State University", "Universitoy of Central University"};
     
     public static int getJobTypeIndex(String jobType, String repoType){
         String key = jobType + "-" + repoType;
@@ -108,5 +110,17 @@ public class DataUtil {
             logger.error("Cannot convert the json string into list of hashmaps", ex);
         }
         return list;
+    }
+    
+    public static String getJsonArrayFromStringArray(String[] array){        
+        String json = null;
+        try{
+            ObjectMapper mapper = new ObjectMapper();
+            json = mapper.writeValueAsString(array);
+        }
+        catch(Exception ex){
+            logger.error("Cannot convert the string array into json array", ex);
+        }
+        return json;
     }
 }

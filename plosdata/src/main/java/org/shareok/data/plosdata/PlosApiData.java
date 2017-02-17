@@ -10,6 +10,6 @@ package org.shareok.data.plosdata;
  * @author Tao Zhao
  */
 public interface PlosApiData {
-    public String getApiResponse();
+    public String getApiResponseByDatesAffiliate(String startDate, String endDate, String affiliate);
     public String outputResponse();
 }

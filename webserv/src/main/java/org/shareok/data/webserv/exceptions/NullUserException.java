@@ -9,12 +9,12 @@ package org.shareok.data.webserv.exceptions;
  *
  * @author Tao Zhao
  */
-public class NUllUserException extends Exception {  
+public class NullUserException extends Exception {  
     /**
      *
      * @param message
      */
-    public NUllUserException(String message){
+    public NullUserException(String message){
         super(message);
     }
 

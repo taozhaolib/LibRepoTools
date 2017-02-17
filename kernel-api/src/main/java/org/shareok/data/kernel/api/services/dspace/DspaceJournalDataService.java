@@ -15,4 +15,5 @@ public interface DspaceJournalDataService {
     public String getDsapceJournalLoadingFiles(MultipartFile file);
     public String getDsapceJournalLoadingFiles(String userFilePath);
     public String getDspaceJournalLoadingFilesByDoi(String[] dois);
+    public String getApiResponseByDatesAffiliate(String startDate, String endDate, String affiliate);
 }

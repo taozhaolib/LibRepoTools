@@ -12,6 +12,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
@@ -109,5 +112,17 @@ public class DataHandlersUtil {
      */
     public static String getFileNameKeyForDownloadPath(String fileName){
         return FilenameUtils.removeExtension(fileName);
+    }
+    
+    /**
+     * Convert "yyyy-MM-dd'T'HH:mm:ss" to "yyyy-MM-dd"
+     * @param dateTime : input date time
+     * @return formatted dateTime
+     */
+    public static String convertPubTimeFormat(String dateTime) throws ParseException{
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd");
+        Date d = sdf.parse(dateTime);
+        return output.format(d);
     }
 }

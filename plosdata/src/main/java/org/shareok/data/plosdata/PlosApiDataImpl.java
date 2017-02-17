@@ -9,8 +9,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shareok.data.plosdata.exception.InvalidPlosApiQueryException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.activation.DataHandler;
+import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.htmlrequest.HttpRequestHandler;
 import org.shareok.data.plosdata.exception.ErrorPlosApiResponseException;
@@ -30,39 +38,44 @@ import org.w3c.dom.NodeList;
 public class PlosApiDataImpl implements PlosApiData {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(PlosApiDataImpl.class);
-    
-    private String startDate;
-    private String endDate;
-    private String affiliate;
-
-    public String getStartDate() {
-        return startDate;
-    }
-
-    public String getEndDate() {
-        return endDate;
-    }
-
-    public String getAffiliate() {
-        return affiliate;
-    }
-
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
-    }
-
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
-    }
-
-    public void setAffiliate(String affiliate) {
-        this.affiliate = affiliate;
-    }
-    
+   
     @Override
-    public String getApiResponse() {
+    public String getApiResponseByDatesAffiliate(String startDate, String endDate, String affiliate){
+        String query = getApiQuery(startDate, endDate, affiliate);   
+        return getJsonApiResponseByQuery(query);
+    }
+
+    @Override
+    public String outputResponse() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+//    
+//    private String getApiQuery(){
+//        try {
+//            return PlosUtil.API_SEARCH_PREFIX + URLEncoder.encode("author_affiliate:\"" + affiliate + "\" AND publication_date:[", "UTF-8") +
+//                    startDate + "T00:00:00Z" + URLEncoder.encode(" TO ", "UTF-8") +
+//                    endDate + "T23:59:59Z]&rows=" + PlosUtil.API_SEARCH_ROW + "&fl=" + PlosUtil.API_SEARCH_FACETS + 
+//                    "&api_key=" + PlosUtil.API_KEY;
+//        } catch (UnsupportedEncodingException ex) {
+//            logger.error("Cannot encode the query parameters!", ex);
+//        }
+//        return null;
+//    }
+    
+    private String getApiQuery(String startDate, String endDate, String affiliate){
+        try {
+            return PlosUtil.API_SEARCH_PREFIX + URLEncoder.encode("author_affiliate:\"" + affiliate + "\" AND publication_date:[", "UTF-8") +
+                    startDate + "T00:00:00Z" + URLEncoder.encode(" TO ", "UTF-8") +
+                    endDate + "T23:59:59Z]&rows=" + PlosUtil.API_SEARCH_ROW + "&fl=" + PlosUtil.API_SEARCH_FACETS + 
+                    "&api_key=" + PlosUtil.API_KEY;
+        } catch (UnsupportedEncodingException ex) {
+            logger.error("Cannot encode the query parameters!", ex);
+        }
+        return null;
+    }
+    
+    private String getJsonApiResponseByQuery(String query){
         String jsonData = null;
-        String query = getApiQuery();        
         try{
             if(null != query){System.out.println(query);
 //                query = "http://api.plos.org/search?q=author_affiliate%3A%22University%20of%20Oklahoma%22%20AND%20publication_date:[2016-01-01T00:00:00Z+TO+2016-12-31T23:59:59Z]&rows=500&fl=affiliate,doi,author,volume,issue,title,journal,publication_date&api_key=mC8TEAzqwfvDWs4eamFh";
@@ -71,7 +84,7 @@ public class PlosApiDataImpl implements PlosApiData {
                 String response = req.sendGet(query);
                 String[] responseInfoArr = response.split("\\n");
                 if(null != responseInfoArr[0] && responseInfoArr[0].equals("200")){
-                    Map<String, Map<String, String>> mapData = new HashMap<>();
+                    List <Map<String, String>> articleData = new ArrayList<>();
                     String responseDocs = responseInfoArr[1];
                     if(!FileUtil.isEmptyString(responseDocs)){
                         Document doc = FileUtil.loadXMLFromStringContent(responseDocs);
@@ -80,7 +93,7 @@ public class PlosApiDataImpl implements PlosApiData {
                             Element item = (Element) docList.item(i);
                             Map<String, String> tmpMapData = getArticleMapData(item);
                             if(tmpMapData.containsKey("doi")){
-                                mapData.put(tmpMapData.get("doi"), tmpMapData);
+                                articleData.add(tmpMapData);
                             }
                             else{
                                 throw new NoDoiDataException("Parseing the api response did not get DOI information!");
@@ -88,7 +101,7 @@ public class PlosApiDataImpl implements PlosApiData {
                         }
                     }
                     ObjectMapper mapper = new ObjectMapper();             
-                    jsonData = mapper.writeValueAsString(mapData);
+                    jsonData = mapper.writeValueAsString(articleData);
                 }
                 else{
                     throw new ErrorPlosApiResponseException("Got the response code "+responseInfoArr[0]);
@@ -103,27 +116,9 @@ public class PlosApiDataImpl implements PlosApiData {
         }
         return jsonData;
     }
-
-    @Override
-    public String outputResponse() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    private String getApiQuery(){
-        try {
-            return PlosUtil.API_SEARCH_PREFIX + URLEncoder.encode("author_affiliate:\"" + affiliate + "\" AND publication_date:[", "UTF-8") +
-                    startDate + "T00:00:00Z" + URLEncoder.encode(" TO ", "UTF-8") +
-                    endDate + "T23:59:59Z]&rows=" + PlosUtil.API_SEARCH_ROW + "&fl=" + PlosUtil.API_SEARCH_FACETS + 
-                    "&api_key=" + PlosUtil.API_KEY;
-        } catch (UnsupportedEncodingException ex) {
-            logger.error("Cannot encode the query parameters!", ex);
-        }
-        return null;
-    }
     
     private Map<String, String> getArticleMapData(Element ele){
         Map<String, String> mapData = new HashMap<>();
-//        String[] tagNames = new String[]{"arr", "str", "int", "date"};
         NodeList eleChildren = ele.getChildNodes();
         for(int childIndex = 0; childIndex < eleChildren.getLength(); childIndex++){
             Node node = eleChildren.item(childIndex);
@@ -138,12 +133,23 @@ public class PlosApiDataImpl implements PlosApiData {
                     for(int j = 0; j < children.getLength(); j++){
                         Node child = children.item(j);
                         if(child.getNodeName().equals("str")){
-                            val += child.getTextContent()+"||";
+                            val += child.getTextContent()+";  ";
                         }
                     }
                 }
                 else{
                     val = node.getTextContent();
+                }
+                if(val.endsWith(";  ")){
+                    val = val.substring(0, val.length()-2);
+                }
+                if(attributeVal.equals("publication_date")){
+                    attributeVal = "publication date";
+                    try {
+                        val = DataHandlersUtil.convertPubTimeFormat(val);
+                    } catch (ParseException ex) {
+                        logger.error("Cannot convert the publication time from yyyy-MM-dd'T'HH:mm:ss to yyyy-MM-dd format", ex);
+                    }
                 }
                 mapData.put(attributeVal, val);
             }

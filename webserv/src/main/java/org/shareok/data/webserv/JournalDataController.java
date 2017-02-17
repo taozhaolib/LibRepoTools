@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.shareok.data.config.DataUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -399,5 +400,33 @@ public class JournalDataController {
         String downloadPath = configService.getFileDownloadPathByNameKey(DataHandlersUtil.getFileNameKeyForDownloadPath(fileName));
         
         WebUtil.setupFileDownload(response, downloadPath);
+    }
+    
+    @RequestMapping(value="/journal/search/{publisher}/date", method=RequestMethod.GET)
+    public ModelAndView searchJournalArticlesByDatePage(HttpServletRequest request, @PathVariable("publisher") String publisher) {
+        
+        ModelAndView model = new ModelAndView();
+        model.setViewName("journalArticleSearchList");
+        model.addObject("publisher", publisher);
+        model.addObject("institutions", DataUtil.getJsonArrayFromStringArray(DataUtil.INSTITUTIONS));
+        return model;
+    }
+    
+    @RequestMapping(value="/journal/search/{publisher}/date", method=RequestMethod.POST)
+    public ModelAndView searchJournalArticlesByDate(HttpServletRequest request, @RequestParam(value="endDate", required = false) String endDate, @PathVariable("publisher") String publisher) {
+        
+        ModelAndView model = new ModelAndView();
+        String startDate = request.getParameter("startDate");
+        String affiliate = request.getParameter("affiliate");
+        DspaceJournalDataService serviceObj = ServiceUtil.getDspaceJournalDataServInstanceByPublisher(publisher);
+        String articlesData = serviceObj.getApiResponseByDatesAffiliate(startDate, endDate, affiliate);
+        
+        model.setViewName("journalArticleSearchList");
+        model.addObject("publisher", publisher);
+        model.addObject("startDate", startDate);
+        model.addObject("endDate", null == endDate ? "" : endDate);
+        model.addObject("institutions", DataUtil.getJsonArrayFromStringArray(DataUtil.INSTITUTIONS));
+        model.addObject("articles", null == articlesData ? "" : articlesData);
+        return model;
     }
 }

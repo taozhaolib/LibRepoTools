@@ -107,108 +107,7 @@ public class PlosRequest {
         
         return data;
     }
-    
-    public void getOutput(String fileName) throws IOException {
-        try {
-                File file = new File(fileName);
-                if(!file.exists()){
-                    file.createNewFile();
-                }
-            
-		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
  
-		// root elements
-		Document doc = docBuilder.newDocument();
-		Element rootElement = doc.createElement("company");
-		doc.appendChild(rootElement);
- 
-		// staff elements
-		Element staff = doc.createElement("Staff");
-		rootElement.appendChild(staff);
- 
-		// set attribute to staff element
-		Attr attr = doc.createAttribute("id");
-		attr.setValue("1");
-		staff.setAttributeNode(attr);
- 
-		// shorten way
-		// staff.setAttribute("id", "1");
- 
-		// firstname elements
-		Element firstname = doc.createElement("firstname");
-		firstname.appendChild(doc.createTextNode("yong"));
-		staff.appendChild(firstname);
- 
-		// lastname elements
-		Element lastname = doc.createElement("lastname");
-		lastname.appendChild(doc.createTextNode("mook kim"));
-		staff.appendChild(lastname);
- 
-		// nickname elements
-		Element nickname = doc.createElement("nickname");
-		nickname.appendChild(doc.createTextNode("mkyong"));
-		staff.appendChild(nickname);
- 
-		// salary elements
-		Element salary = doc.createElement("salary");
-		salary.appendChild(doc.createTextNode("100000"));
-		staff.appendChild(salary);
- 
-		// write the content into xml file
-		TransformerFactory transformerFactory = TransformerFactory.newInstance();
-		Transformer transformer = transformerFactory.newTransformer();
-		DOMSource source = new DOMSource(doc);
-		StreamResult result = new StreamResult(file);
- 
-		// Output to console for testing
-		// StreamResult result = new StreamResult(System.out);
- 
-		transformer.transform(source, result);
- 
-		System.out.println("File saved!");
- 
-	  } catch (ParserConfigurationException pce) {
-		pce.printStackTrace();
-	  } catch (TransformerException tfe) {
-		tfe.printStackTrace();
-	  }
-    }
-
- 
-    // HTTP GET request
-    private void sendGet() throws Exception {
-
-            String url = "http://www.google.com/search?q=mkyong";
-
-            URL obj = new URL(url);
-            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-            // optional default is GET
-            con.setRequestMethod("GET");
-
-            //add request header
-            con.setRequestProperty("User-Agent", USER_AGENT);
-
-            int responseCode = con.getResponseCode();
-            System.out.println("\nSending 'GET' request to URL : " + url);
-            System.out.println("Response Code : " + responseCode);
-
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer response = new StringBuffer();
-
-            while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-            }
-            in.close();
-
-            //print result
-            System.out.println(response.toString());
-
-    }
-    
 //    public String getImportedDataPath(String doi) {
 //        
 //        String path = "";
@@ -245,7 +144,7 @@ public class PlosRequest {
             }
             if(directoryExists){
                 //The example url to downlaod: http://dx.plos.org/10.1371/journal.pone.0041479.pdf
-                String pdfUrl = PlosUtil.API_FULLTEXT_PDF_PREFIX + doi + ".pdf";
+                String pdfUrl = PlosUtil.getPlosPDFUrl(doi);
                 getHtmlRequest().getPdfByUrl(pdfUrl, newDir + File.separator + doi.split("/")[1] + ".pdf");
             }
             

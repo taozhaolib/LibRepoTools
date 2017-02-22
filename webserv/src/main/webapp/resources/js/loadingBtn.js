@@ -8,6 +8,7 @@ $(document).ready(function(){
     
     $(".loading-btn").click(function(){
         $(".spining-class").show();
+        $(this).attr("disabled", true);
     });
     
     $(".btn-click").click(function(){

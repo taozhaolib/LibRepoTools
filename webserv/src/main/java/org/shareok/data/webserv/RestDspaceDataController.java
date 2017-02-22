@@ -112,7 +112,13 @@ public class RestDspaceDataController {
                     if(!FileUtil.isEmptyString(folder)){
                         filePath = folder + File.separator + filePath;
                     }
-                    filePath = ShareokdataManager.getOuhistoryUploadPath() + File.separator + filePath;
+                    String journalSearch = (String)request.getParameter("journalSearch");
+                    if(null != journalSearch && journalSearch.equals("1")){
+                        filePath = ShareokdataManager.getDspaceUploadPath()+ File.separator + filePath;
+                    }
+                    else{
+                        filePath = ShareokdataManager.getOuhistoryUploadPath() + File.separator + filePath;
+                    }
                 }
                 else{
                     filePath = (String)request.getParameter("remoteFileUri");

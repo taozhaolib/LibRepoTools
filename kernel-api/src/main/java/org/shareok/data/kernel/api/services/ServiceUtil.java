@@ -13,11 +13,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import org.shareok.data.config.DataUtil;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.json.JSONObject;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.datahandlers.DataHandlersUtil;
+import org.shareok.data.kernel.api.exceptions.IncorrectDoiResponseException;
+import org.shareok.data.kernel.api.exceptions.NoServiceProcessDoiException;
+import org.shareok.data.kernel.api.exceptions.NotFoundServiceBeanException;
+import org.shareok.data.kernel.api.services.dspace.DspaceJournalDataService;
 import org.shareok.data.kernel.api.services.job.DspaceApiJobServiceImpl;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
 import org.shareok.data.redis.job.RedisJob;
@@ -33,7 +43,7 @@ public class ServiceUtil {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ServiceUtil.class);
     
-    private static final Map<String, String> serviceBeanMap = new HashMap<>();
+    public static final Map<String, String> serviceBeanMap = new HashMap<>();
     static {
         for(String job : DataUtil.JOB_TYPES){
             switch(job){
@@ -52,6 +62,10 @@ public class ServiceUtil {
                     break; 
             }
         }
+        serviceBeanMap.put("Public Library of Science (PLoS)", "plosDspaceServiceImpl");
+        serviceBeanMap.put("plos", "plosDspaceServiceImpl");
+        serviceBeanMap.put("sage", "sageDspaceServiceImpl");
+        serviceBeanMap.put("SAGE Publications", "sageDspaceServiceImpl");
     }
     
     public static String getServiceBean(int repoType, int jobType){
@@ -226,5 +240,72 @@ public class ServiceUtil {
             default:
                 return (RedisJobService) context.getBean("redisJobServiceImpl");
         }
+    }
+    
+    public static DspaceJournalDataService getDspaceJournalDataServInstanceByPublisher(String publisher){
+        DspaceJournalDataService obj = null;
+        try {
+            String bean = serviceBeanMap.get(publisher);
+            if(null == bean){
+                throw new NotFoundServiceBeanException("No beans found for publisher "+publisher);
+            }
+            ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
+            return (DspaceJournalDataService)context.getBean(bean);            
+        } catch (NotFoundServiceBeanException ex) {
+            logger.error("Cannot create the instance to get item information by DOI! ", ex);
+        }
+        return obj;
+    }
+    
+    public static String generateDspaceSafPackagesByDois(String[] dois){
+        String safDownloadPaths = null;
+        Map<String, List<String>>doisMap = new HashMap<>();
+        for(String doi : dois){
+            try{
+                String[] doiInfo = DataHandlersUtil.getItemInfoByDoi(doi).split("\\n");
+                if(null == doiInfo || doiInfo.length != 2){
+                    throw new IncorrectDoiResponseException("Cannot get the correct response from crossref for DOI: "+doi);
+                }
+                else if(!doiInfo[0].equals("200")){
+                    throw new IncorrectDoiResponseException("The response code is "+ doiInfo[0] + " from crossref for DOI: "+doi);
+                }
+                else{
+                    JSONObject obj = new JSONObject(doiInfo[1]);
+                    String url = obj.getJSONObject("message").getString("URL");
+                    String publisher = obj.getJSONObject("message").getString("publisher");
+                    String key = ServiceUtil.serviceBeanMap.get(publisher);
+                    List list = doisMap.get(key);
+                    if(null == list){
+                        list = new ArrayList<>();
+                    }
+                    list.add(doi);
+                    doisMap.put(key, list);                                
+                }
+            }
+            catch(IncorrectDoiResponseException ex){
+                logger.error("Cannot get correct response from crossref by doi", ex);
+            }
+        }
+        if(!doisMap.isEmpty()){
+            Date now = new Date();
+            List<String> pathList = new ArrayList<>();
+            ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");        
+            for(String key : doisMap.keySet()){
+                try{
+                    DspaceJournalDataService serviceObj = (DspaceJournalDataService)context.getBean(key);
+                    if(null == serviceObj){
+                        throw new NoServiceProcessDoiException("Cannot find the DOI processing service for bean " + key + "!");
+                    }
+                    String[] doisByPubliser = doisMap.get(key).toArray(new String[doisMap.get(key).size()]);
+                    String safFilePath = serviceObj.getDspaceJournalLoadingFilesByDoi(doisByPubliser, now);
+                    pathList.add(safFilePath);
+                }
+                catch(Exception ex){
+                    logger.error("Cannot get DspaceJournalDataService object to generate SAF package with bean = "+key, ex);
+                }
+            }    
+            safDownloadPaths = DataUtil.getJsonFromStringList(pathList);
+        }
+        return safDownloadPaths;
     }
 }

@@ -7,6 +7,7 @@
 package org.shareok.data.documentProcessor;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -178,6 +179,19 @@ public class FileUtil {
         DocumentBuilder builder = factory.newDocumentBuilder();
         InputSource is = new InputSource(new FileInputStream(xml));
         return builder.parse(is);
+    }
+    
+    /**
+     *
+     * @param xml: xml file content
+     * @return
+     * @throws Exception
+     */
+    public static Document loadXMLFromStringContent(String xml) throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        return builder.parse(new ByteArrayInputStream(xml.getBytes()));
     }
     
     /**

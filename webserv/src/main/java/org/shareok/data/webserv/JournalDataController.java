@@ -8,6 +8,7 @@ package org.shareok.data.webserv;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -22,6 +23,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
+import org.shareok.data.config.DataUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,10 +37,15 @@ import org.springframework.web.servlet.ModelAndView;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
+import org.shareok.data.kernel.api.services.ServiceUtil;
 import org.shareok.data.kernel.api.services.config.ConfigService;
+import org.shareok.data.kernel.api.services.dspace.DspaceJournalDataService;
 import org.shareok.data.kernel.api.services.dspace.DspaceJournalServiceManager;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
+import org.shareok.data.webserv.exceptions.EmptyDoiInformationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
@@ -63,6 +71,24 @@ public class JournalDataController {
     @Autowired
     public void setConfigService(ConfigService configService) {
         this.configService = configService;
+    }
+    
+    @RequestMapping("/dspace/journal/{publisher}/doi")
+    public ModelAndView journalDoi(HttpServletRequest req, @PathVariable("publisher") String publisher) {
+        ModelAndView model = new ModelAndView();
+        try {
+//            String sampleDublinCoreLink = DspaceJournalDataUtil.getJournalSampleDublinCoreLink();          
+            model = WebUtil.getServerList(model, serverService);
+            model.setViewName("journalDoiData");
+            model.addObject("publisher", publisher);
+//            model.addObject("sampleDublinCore", sampleDublinCoreLink);
+            return model;
+        } catch (JsonProcessingException ex) {
+            logger.error("Cannot get the list of the servers", ex);
+            model.addObject("errorMessage", "Cannot get the list of the servers");
+            model.setViewName("serverError");
+            return model;
+        }
     }
     
     @RequestMapping("/dspace/journal/{publisher}")
@@ -203,6 +229,79 @@ public class JournalDataController {
         }
     }
     
+    @RequestMapping(value="/dspace/safpackage/doi/generate", method=RequestMethod.POST)
+    public ModelAndView safPackageGenerateByDois(HttpServletRequest request, RedirectAttributes redirectAttrs, @RequestParam(value="multiDoiUploadFile", required=false) MultipartFile file) {
+        String singleDoi = (String)request.getParameter("singleDoi");
+        String multiDoi = (String)request.getParameter("multiDoi");
+        String safPaths = null;
+        ByteArrayInputStream stream = null;
+        
+        ModelAndView model = new ModelAndView();
+        RedirectView view = new RedirectView();
+        view.setContextRelative(true);
+        
+        if ((null != file && !file.isEmpty()) || null != singleDoi || null != multiDoi) {
+            String safFilePath = null;
+            try {
+                String[] dois;
+                if(null != singleDoi){
+                    String doi = (String)request.getParameter("doiInput");
+                    if(null == doi || doi.equals("")){
+                        throw new EmptyDoiInformationException("Empty information from single DOI submission!");
+                    }
+                    dois = new String[]{doi};
+                }
+                else if(null != multiDoi){
+                    String doi = (String)request.getParameter("multiDoiInput");
+                    if(null == doi || doi.equals("")){
+                        throw new EmptyDoiInformationException("Empty information from multiple DOI submission!");
+                    }
+                    dois = doi.trim().split("\\s*;\\s*");
+                }
+                else if(null != file && !file.isEmpty()){
+                    stream = new   ByteArrayInputStream(file.getBytes());
+                    String doiString = IOUtils.toString(stream, "UTF-8");
+                    dois = doiString.trim().split("\\s*\\r?\\n\\s*");
+                }
+                else {
+                    throw new EmptyDoiInformationException("Empty DOI information from unknown DOI submission!");
+                }
+                if(dois != null && dois.length > 0){
+                    
+                }
+            }
+            catch(Exception ex){
+                logger.error("Cannot generate the SAF packages by the DOIs", ex);
+            }
+            finally{
+                if(null != stream){
+                    try{
+                        stream.close();
+                    }
+                    catch(IOException ex){
+                        logger.error("Cannot close the input stream when reading the file containing the DOIs", ex);
+                    }
+                }
+            }
+            if(null != safFilePath && !safFilePath.equals("")){
+                redirectAttrs.addFlashAttribute("safFilePath", safFilePath);
+                view.setUrl(".jsp");
+                model.setView(view);
+            }
+            else{
+                redirectAttrs.addFlashAttribute("errorMessage", "The saf file path is invalid");
+                view.setUrl("journalDataUpload.jsp");
+                model.setView(view);
+            }
+        }
+        else{
+            redirectAttrs.addFlashAttribute("errorMessage", "The server information is empty");
+            view.setUrl("errors/serverError.jsp");
+            model.setView(view);
+        }
+        return model;
+    }
+    
     @RequestMapping(value="/dspace/safpackage/{publisher}/upload", method=RequestMethod.POST)
     public ModelAndView safPackageDataUpload(RedirectAttributes redirectAttrs, @RequestParam("file") MultipartFile file, @PathVariable("publisher") String publisher) {
        
@@ -274,5 +373,50 @@ public class JournalDataController {
         String downloadPath = configService.getFileDownloadPathByNameKey(DataHandlersUtil.getFileNameKeyForDownloadPath(fileName));
         
         WebUtil.setupFileDownload(response, downloadPath);
+    }
+    
+    @RequestMapping(value="/journal/search/{publisher}/date", method=RequestMethod.GET)
+    public ModelAndView searchJournalArticlesByDatePage(HttpServletRequest request, @PathVariable("publisher") String publisher) {
+        
+        ModelAndView model = new ModelAndView();
+        model.setViewName("journalArticleSearchList");
+        model.addObject("publisher", publisher);
+        model.addObject("institutions", DataUtil.getJsonArrayFromStringArray(DataUtil.INSTITUTIONS));
+        return model;
+    }
+    
+    @RequestMapping(value="/journal/search/{publisher}/date", method=RequestMethod.POST)
+    public ModelAndView searchJournalArticlesByDate(HttpServletRequest request, 
+                                                    RedirectAttributes redirectAttrs, 
+                                                    @RequestParam(value="endDate", required = false) String endDate, 
+                                                    @PathVariable("publisher") String publisher) 
+    {
+        
+        ModelAndView model = new ModelAndView();
+        String startDate = request.getParameter("startDate");
+        String affiliate = request.getParameter("affiliate");
+        DspaceJournalDataService serviceObj = ServiceUtil.getDspaceJournalDataServInstanceByPublisher(publisher);
+        String articlesData = serviceObj.getApiResponseByDatesAffiliate(startDate, endDate, affiliate);
+        
+        RedirectView view = new RedirectView();
+        view.setContextRelative(true);
+        view.setUrl("/journal/search/"+publisher+"/date");
+        model.setView(view);                        
+        redirectAttrs.addFlashAttribute("publisher", publisher);
+        redirectAttrs.addFlashAttribute("startDate", null == startDate ? "" : startDate);
+        redirectAttrs.addFlashAttribute("endDate", null == endDate ? "" : endDate);
+        redirectAttrs.addFlashAttribute("institutions", DataUtil.getJsonArrayFromStringArray(DataUtil.INSTITUTIONS));
+        redirectAttrs.addFlashAttribute("articles", null == articlesData ? "" : articlesData);
+        return model;
+    }
+    
+    @ResponseBody
+    @RequestMapping(value = "/dspace/journal/{publisher}/saf", method=RequestMethod.POST)
+    public String dspaceJournalSafPackageGenerateByDois(@RequestParam("dois") String dois) {
+
+        String[] doisArr = dois.split(";");
+        String path = ServiceUtil.generateDspaceSafPackagesByDois(doisArr);
+        return path;
+
     }
 }

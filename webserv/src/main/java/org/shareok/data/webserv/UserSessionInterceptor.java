@@ -22,7 +22,7 @@ import org.shareok.data.kernel.api.services.config.ConfigService;
 import org.shareok.data.kernel.api.services.user.PasswordAuthenticationService;
 import org.shareok.data.kernel.api.services.user.RedisUserService;
 import org.shareok.data.redis.RedisUser;
-import org.shareok.data.webserv.exceptions.NUllUserException;
+import org.shareok.data.webserv.exceptions.NullUserException;
 import org.shareok.data.webserv.exceptions.NoNewUserRegistrationException;
 import org.shareok.data.webserv.exceptions.NullSessionException;
 import org.shareok.data.webserv.exceptions.RegisterUserInfoExistedException;
@@ -217,7 +217,7 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
                 throw new NullSessionException("The Http Session is NULL!");
             }
             if(null == user){
-                throw new NUllUserException("The User Information is NULL!");
+                throw new NullUserException("The User Information is NULL!");
             }
 
             httpSession.setAttribute("userName", user.getUserName());
@@ -233,7 +233,7 @@ public class UserSessionInterceptor implements HandlerInterceptor  {
         catch (NullSessionException ex){
             Logger.getLogger(UserSessionInterceptor.class.getName()).log(Level.SEVERE, null, ex);
         }
-        catch (NUllUserException ex){
+        catch (NullUserException ex){
             Logger.getLogger(UserSessionInterceptor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

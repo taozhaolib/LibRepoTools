@@ -5,6 +5,7 @@
  */
 package org.shareok.data.kernel.api.services.dspace;
 
+import java.util.Date;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -14,4 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 public interface DspaceJournalDataService {
     public String getDsapceJournalLoadingFiles(MultipartFile file);
     public String getDsapceJournalLoadingFiles(String userFilePath);
+    public String getDspaceJournalLoadingFilesByDoi(String[] dois, Date time);
+    public String getApiResponseByDatesAffiliate(String startDate, String endDate, String affiliate);
 }

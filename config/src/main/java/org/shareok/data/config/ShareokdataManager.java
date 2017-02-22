@@ -62,6 +62,18 @@ public class ShareokdataManager {
         return shareokdataPath;
     }
     
+    public static String getDspaceUploadPath(){
+        if(null == prop){
+            loadProperties();
+        }
+        String dspaceUploadPath = prop.getProperty("dspaceUploadPath");
+        File dspaceUploadPathFile = new File(dspaceUploadPath);
+        if(!dspaceUploadPathFile.exists()){
+            dspaceUploadPathFile.mkdirs();
+        }
+        return dspaceUploadPath;
+    }
+    
     public static String getSageUploadPath(){
         if(null == prop){
             loadProperties();

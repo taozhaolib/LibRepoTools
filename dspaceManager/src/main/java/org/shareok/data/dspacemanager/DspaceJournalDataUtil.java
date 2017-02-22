@@ -15,8 +15,10 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.documentProcessor.FileUtil;
 import org.shareok.data.documentProcessor.FileZipper;
+import org.shareok.data.dspacemanager.exceptions.NonExistingUploadPathException;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -61,6 +63,31 @@ public class DspaceJournalDataUtil {
             Logger.getLogger(DspaceJournalDataUtil.class.getName()).log(Level.SEVERE, null, ex);
         }
         return uploadedFilePath;
+    }
+    
+    /**
+     * Create and return the path of the folder storing the DSpace loading files
+     * 
+     * @param time : time to start the upload
+     * @param publisher : publisher name
+     * @return : path of the created upload folder
+     */
+    public static String getDspaceJournalUploadPath(String publisher, Date time){
+        String timeString = DataHandlersUtil.getTimeString(time);
+        String dspaceUploadPath = ShareokdataManager.getDspaceUploadPath();
+        String dspaceUploadTimePublisherPath =  null;
+        try{
+            String dspaceUploadTimePath = dspaceUploadPath + File.separator + timeString;
+            dspaceUploadTimePublisherPath = dspaceUploadTimePath + File.separator + publisher;
+            File dspaceUploadTimePublisherPathFile = new File(dspaceUploadTimePublisherPath);
+            if(!dspaceUploadTimePublisherPathFile.exists()){
+                dspaceUploadTimePublisherPathFile.mkdirs();
+            }
+        }
+        catch(Exception ex){
+            logger.error(ex);
+        }
+        return dspaceUploadTimePublisherPath;
     }
     
     /**
@@ -141,10 +168,15 @@ public class DspaceJournalDataUtil {
     public static String getDspaceSafPackageDownloadFilePath(String publisher, String folderName, String safDirName, String fileName){
         String downloadPath = null;
         Class noparams[] = {};
-        try{
-            String uploadPathFunction = ShareokdataManager.getUploadPathFunction(publisher);
-            Method method = ShareokdataManager.class.getMethod(uploadPathFunction, noparams);
-            downloadPath = (String)method.invoke(null, (Object[])noparams) + File.separator + folderName + File.separator + safDirName + File.separator + fileName;
+        try{            
+            if(!publisher.equals("journal-search")){
+                String uploadPathFunction = ShareokdataManager.getUploadPathFunction(publisher);
+                Method method = ShareokdataManager.class.getMethod(uploadPathFunction, noparams);
+                downloadPath = (String)method.invoke(null, (Object[])noparams) + File.separator + folderName + File.separator + safDirName + File.separator + fileName;
+            }
+            else{
+                downloadPath = ShareokdataManager.getDspaceUploadPath() + File.separator + folderName + File.separator + safDirName + File.separator + fileName;
+            }
         }
         catch(NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex){
             logger.error(ex.getMessage());
@@ -153,11 +185,11 @@ public class DspaceJournalDataUtil {
     }
     
     
-    public static String packLoadingData(String outputFolder){
+    public static String packLoadingData(String outputFolder, String publisher){
         
         String zipPath = null;
         try{
-            zipPath = FileUtil.getFileContainerPath(outputFolder) + File.separator + "output.zip";
+            zipPath = FileUtil.getFileContainerPath(outputFolder) + File.separator + "output_" + publisher + ".zip";
             FileZipper.zipFolder(outputFolder, zipPath);
         }
         catch(Exception ex){

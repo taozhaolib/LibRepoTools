@@ -5,18 +5,34 @@
  */
 package org.shareok.data.kernel.api.services.dspace;
 
+import java.util.Date;
+import org.shareok.data.plosdata.PlosApiData;
 import org.shareok.data.plosdata.PlosDoiData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
  * @author Tao Zhao
  */
+@Service
+@Configurable
 public class DspacePlosServiceImpl implements DspaceJournalDataService{
+
+    private PlosDoiData pdd;
+    private PlosApiData pad;
     
     @Autowired
-    private PlosDoiData pdd;
+    public void setPdd(PlosDoiData pdd){
+        this.pdd = pdd;
+    }
+    
+    @Autowired
+    public void setPad(PlosApiData pad){
+        this.pad = pad;
+    }
     
     @Override
     public String getDsapceJournalLoadingFiles(MultipartFile file){
@@ -28,6 +44,16 @@ public class DspacePlosServiceImpl implements DspaceJournalDataService{
     @Override
     public String getDsapceJournalLoadingFiles(String userFilePath){
         return null;
+    }
+
+    @Override
+    public String getDspaceJournalLoadingFilesByDoi(String[] dois, Date time) {
+        return pdd.getDspaceJournalLoadingFilesByDoi(dois, time);
+    }
+
+    @Override
+    public String getApiResponseByDatesAffiliate(String startDate, String endDate, String affiliate) {
+        return pad.getApiResponseByDatesAffiliate(startDate, endDate, affiliate);
     }
 
 }

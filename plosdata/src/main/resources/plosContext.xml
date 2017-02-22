@@ -34,4 +34,8 @@
         <property name="plosDataList" ><list><ref bean="plosData" /></list></property>
     </bean>
     
+    <bean id="plosApiDataImpl" class="org.shareok.data.plosdata.PlosApiDataImpl">
+        
+    </bean>
+    
 </beans>

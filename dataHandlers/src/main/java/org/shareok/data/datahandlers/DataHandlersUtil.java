@@ -12,19 +12,27 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import org.apache.commons.io.FilenameUtils;
-import org.aspectj.util.FileUtil;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import static org.shareok.data.config.ShareokdataManager.getShareokdataPath;
 import org.shareok.data.datahandlers.exceptions.SecurityFileDoesNotExistException;
+import org.shareok.data.htmlrequest.HttpRequestHandler;
 import org.shareok.data.redis.job.RedisJob;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  *
  * @author Tao Zhao
  */
 public class DataHandlersUtil {
+    
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DataHandlersUtil.class);
+    
     public static String getJobReportPath(String jobType, long jobId){
         String shareokdataPath = getShareokdataPath();
         String repoType = jobType.split("-")[2];
@@ -79,6 +87,20 @@ public class DataHandlersUtil {
         return domain.startsWith("www.") ? domain.substring(4) : domain;
     }
     
+    public static String getItemInfoByDoi(String doi){
+        String response = null;
+        ApplicationContext context = new ClassPathXmlApplicationContext("htmlRequestContext.xml");
+        HttpRequestHandler handler = (HttpRequestHandler) context.getBean("httpRequestHandler");
+        String url = "http://api.crossref.org/works/" + doi;
+        try{
+            response = handler.sendGet(url);
+        }
+        catch(Exception ex){
+            logger.error("Cannot get item information by Doi", ex);
+        }
+        return response;
+    }
+    
     /**
      * Get the key from file name to retrieve the download path from database
      * 
@@ -87,5 +109,25 @@ public class DataHandlersUtil {
      */
     public static String getFileNameKeyForDownloadPath(String fileName){
         return FilenameUtils.removeExtension(fileName);
+    }
+    
+    /**
+     * Convert "yyyy-MM-dd'T'HH:mm:ss" to "yyyy-MM-dd"
+     * @param dateTime : input date time
+     * @return formatted dateTime
+     */
+    public static String convertPubTimeFormat(String dateTime) throws ParseException{
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd");
+        Date d = sdf.parse(dateTime);
+        return output.format(d);
+    }
+    
+    public static String getCurrentTimeString(){
+        return new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+    }
+    
+    public static String getTimeString(Date time){
+        return new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(time);
     }
 }

@@ -8,11 +8,14 @@ package org.shareok.data.plosdata;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.shareok.data.datahandlers.exceptions.InvalidDoiException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -21,10 +24,21 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * @author Tao Zhao
  */
 public class PlosUtil {
+    
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(PlosDoiDataImpl.class);
+
+    /**
+     * api search example: http://api.plos.org/search?q=author_affiliate%3A%22University+of%20Oklahoma%22 
+     * AND publication_date:[2016-01-01T00:00:00Z%20TO%202016-12-31T23:59:59Z]&rows=500
+     * &fl=affiliate,doi,author,volume,issue,title,journal,publication_date&api_key=mC8TEAzqwfvDWs4eamFh
+     * 
+    **/
     public static final String API_KEY = "mC8TEAzqwfvDWs4eamFh";
+    public static final String API_SEARCH_FACETS = "affiliate,doi,author,volume,issue,title,journal,publication_date";
     public static final String API_SEARCH_PREFIX = "http://api.plos.org/search?q=";
+    public static final String API_SEARCH_ROW = "500";
     public static final String API_FULLTEXT_PDF_PREFIX = "http://dx.plos.org/";
-    public static final String URL_PDF_FULLTEXT_PREIFX = "http://dx.plos.org/";
+    public static final String URL_PDF_FULLTEXT_PREIFX = "http://journals.plos.org/";
     public static final String DOI_PREFIX = "http://dx.doi.org/";    
     public static final String URL_FULLTEXT_PDF_PREFIX = "http:///dx.plos.org/";
     
@@ -44,26 +58,54 @@ public class PlosUtil {
     public static final String PEERREVIEWNOTES_PPAT = "http://www.plospathogens.org/static/editorial#peer";   
     public static final String PEERREVIEWNOTES_PNTD = "http://www.plosntds.org/static/editorial#peer";   
     
+    public static Map<String, String> PLOS_PDF_DOWNLINK_PUB_MAP = new HashMap<>();
+    static {
+        PLOS_PDF_DOWNLINK_PUB_MAP.put("pmed", "plosmedicine");
+        PLOS_PDF_DOWNLINK_PUB_MAP.put("pbio", "plosbiology");
+        PLOS_PDF_DOWNLINK_PUB_MAP.put("pcbi", "ploscompbiol");
+        PLOS_PDF_DOWNLINK_PUB_MAP.put("pgen", "plosgenetics");
+        PLOS_PDF_DOWNLINK_PUB_MAP.put("pntd", "plosntds");
+        PLOS_PDF_DOWNLINK_PUB_MAP.put("ppat", "plospathogens");
+        PLOS_PDF_DOWNLINK_PUB_MAP.put("pone", "plosone");
+    }
+    
     public enum JournalType {        
         PLOSONE, PLOSBIO, PLOSGEN, PLOSMED, PLOSCBI, PLOSPAT, PLOSNTD
     }
     
     //public static final String PLOSONE_DOWNLOAD_PATH = "/Users/zhao0677/Projects/plosOne/importData";
-    //"http://dx.plos.org/10.1371/journal.pone.0041479.pdf";
-    //public static final String URL_FULLTEXT_PREFIX = "http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0115508";
+    //http://journals.plos.org/plosmedicine/article/file?id=10.1371/journal.pmed.1002221&type=printable
+//    http://journals.plos.org/plosbiology/article/file?id=10.1371/journal.pbio.2000942&type=printable
+//    http://journals.plos.org/ploscompbiol/article/file?id=10.1371/journal.pcbi.1005290&type=printable
+//    http://journals.plos.org/plosgenetics/article/file?id=10.1371/journal.pgen.1006505&type=printable
+//    http://journals.plos.org/plosntds/article/file?id=10.1371/journal.pntd.0005132&type=printable
+//    http://journals.plos.org/plospathogens/article/file?id=10.1371/journal.ppat.1006077&type=printable
+//    http://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0167412&type=printable
     
     public static ApplicationContext getPlosContext() {
         ApplicationContext context = new ClassPathXmlApplicationContext("plosContext.xml");
         return context;
     }
-    
+        
     /**
      * 
      * @param doiInfo : in a form of 10.1371/journal.pone.0041479
-     * @param filePath 
      */
-    public static void downLoadFullPDF(String doiInfo, String filePath) {
-        String urlPdf = URL_PDF_FULLTEXT_PREIFX + doiInfo + ".pdf";
+    public static String getPlosPDFUrl(String doiInfo) {
+        String[] doiInfoArr = doiInfo.split("/");
+        
+        try {
+            if(null == doiInfoArr && doiInfoArr.length != 2){
+                throw new InvalidDoiException("The doi "+doiInfo+" is not valid!");
+            }
+//            doiInfo = doiInfoArr[1];
+//            doiInfoArr = doiInfo.split("\\.");
+            String pubType = (String)PLOS_PDF_DOWNLINK_PUB_MAP.get(doiInfoArr[1].split("\\.")[1]);
+            return URL_PDF_FULLTEXT_PREIFX + pubType + "/article/file?id=" + doiInfo + "&type=printable";
+        } catch (InvalidDoiException ex) {
+            logger.error(ex);            
+        }
+        return null;
     }
     
     public static String getPlosAck(String html) {

@@ -9,13 +9,13 @@ package org.shareok.data.webserv.exceptions;
  *
  * @author Tao Zhao
  */
-public class NUllUserException extends Exception {  
+public class EmptyDoiInformationException extends Exception {
+    
     /**
      *
      * @param message
      */
-    public NUllUserException(String message){
+    public EmptyDoiInformationException(String message){
         super(message);
     }
-
 }

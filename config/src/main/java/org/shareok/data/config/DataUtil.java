@@ -47,7 +47,7 @@ public class DataUtil {
         }
     }
     
-    public static final String[] INSTITUTIONS = {"University of Oklahoma", "Oklahoma State University", "Universitoy of Central University"};
+    public static final String[] INSTITUTIONS = {"University of Oklahoma", "Oklahoma State University", "Universitoy of Central Oklahoma"};
     
     public static int getJobTypeIndex(String jobType, String repoType){
         String key = jobType + "-" + repoType;

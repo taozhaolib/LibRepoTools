@@ -8,8 +8,12 @@ $(document).ready(function(){
     
     $(".loading-btn").click(function(){
         $(".spining-class").show();
-        $(this).attr("disabled", true);
+//        $(this).attr("disabled", true);
     });
+    
+    $('form').submit(function() {
+        $(".loading-btn").attr("disabled", true);
+    })
     
     $(".btn-click").click(function(){
         $(".click-show-slow").toggle("slow", function(){});

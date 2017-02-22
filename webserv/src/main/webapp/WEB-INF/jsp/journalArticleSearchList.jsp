@@ -13,7 +13,7 @@
 <div class="container">
         <div class="jumbotron">
             <div class="panel panel-primary">
-            <div class="panel-heading"><h4>Search articles published at ${publisherUpCase} between data range:</h4></div>
+            <div class="panel-heading"><h4>Search articles published at ${publisherUpCase} between date range:</h4></div>
                 
                 <div class="panel-body">
                      

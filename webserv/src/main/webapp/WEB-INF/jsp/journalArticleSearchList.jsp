@@ -31,13 +31,45 @@
                             <%@include file= "institutionsSelect.jsp" %>
                             
                             <br><br><br><br>
-                            <div style="margin-left: 10px;">
+                            <div id="buttonsDiv" style="margin-left: 10px;">
                                 <input type="submit" class="btn btn-form loading-btn" value="Search">&nbsp;&nbsp;&nbsp;&nbsp;
+                                <c:if test="${not empty articles}">
+                                    <script>
+                                        $(document).ready(function(){
+                                            var dois = "";
+                                            var articles = <%= request.getAttribute("articles") %>;
+                                            $.each(articles, function(index, value){
+                                                dois += value.doi.trim();
+                                            });
+                                            $("input[name='btnSearchArticlesSaf']").click(function(){
+                                                $.ajax({
+                                                    method: "POST",
+                                                    url: "/webserv/dspace/journal/${publisher}/saf",
+                                                    data: { dois },
+                                                    success : function(data) {
+                                                        var dataArr = jQuery.parseJSON(data);
+                                                        var paths = new Array(dataArr.length);
+                                                        $.each(dataArr, function(index, value){
+                                                            paths[index] = value.split("/uploads/")[1];
+                                                        });
+                                                        getDownloadLinksVue(paths);
+                                                        $(".spining-class").hide();
+                                                        $(".loading-btn").attr("disabled", false);
+                                                    }
+                                                })
+                                            });
+                                        });
+                                    </script>
+                                    <input type="button"  class="btn btn-form loading-btn" name="btnSearchArticlesSaf" value="Generate SAF Package">&nbsp;&nbsp;&nbsp;&nbsp;
+                                </c:if>
                                 <input type="button"  class="btn btn-form" onclick="location.href='/webserv/home'" value="Back to home page"><BR>                                
                                 <%@ include file="spining.jsp" %> 
                             </div>
                         <br>
                         </div>
+                            
+                        <%@include file="downloadLinks.jsp" %>
+                        
                     </form>
                     
                     <%@include file= "journalArticleList.jsp" %>

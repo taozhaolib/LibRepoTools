@@ -335,7 +335,7 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler {
                 readSourceData();
                 processSourceData();
                 outputMetaData();
-                DspaceJournalDataUtil.packLoadingData(getOutputFilePath());
+                DspaceJournalDataUtil.packLoadingData(getOutputFilePath(), "sage");
             }            
         } catch (Exception ex) {
             Logger.getLogger(SageSourceDataHandlerImpl.class.getName()).log(Level.SEVERE, null, ex);

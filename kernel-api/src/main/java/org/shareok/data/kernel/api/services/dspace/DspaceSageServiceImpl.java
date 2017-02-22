@@ -5,6 +5,7 @@
  */
 package org.shareok.data.kernel.api.services.dspace;
 
+import java.util.Date;
 import org.shareok.data.sagedata.SageSourceDataHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -63,7 +64,7 @@ public class DspaceSageServiceImpl implements DspaceJournalDataService {
     }
 
     @Override
-    public String getDspaceJournalLoadingFilesByDoi(String[] dois) {
+    public String getDspaceJournalLoadingFilesByDoi(String[] dois, Date time) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

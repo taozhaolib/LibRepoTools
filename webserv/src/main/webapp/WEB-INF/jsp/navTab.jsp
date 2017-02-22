@@ -12,7 +12,7 @@
             <span class="caret"></span></a>
             <ul class="dropdown-menu">
                 <li class="mainMenuDrop" id="plosDs"><a href="/webserv/dspace/journal/plos">Import PLOS Publications</a></li>
-                <li class="mainMenuDrop" id="plosDs"><a href="/webserv/dspace/journal/plos/doi">Import PLOS Publications by DOI</a></li>
+                <!-- <li class="mainMenuDrop" id="plosDs"><a href="/webserv/dspace/journal/plos/doi">Import PLOS Publications by DOI</a></li> -->
                 <li class="mainMenuDrop" id="plosDs"><a href="/webserv/journal/search/plos/date">Search PLOS Publications by Dates</a></li>
                 <li class="mainMenuDrop" id="sageDs"><a href="/webserv/dspace/journal/sage">Import SAGE Publications</a></li>
                 <li class="mainMenuDrop" id="sageDs"><a href="/webserv/dspace/journal/ouhistory">Generate SAF Package</a></li>

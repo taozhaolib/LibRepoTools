@@ -5,6 +5,7 @@
  */
 package org.shareok.data.kernel.api.services.dspace;
 
+import java.util.Date;
 import org.shareok.data.plosdata.PlosApiData;
 import org.shareok.data.plosdata.PlosDoiData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +47,8 @@ public class DspacePlosServiceImpl implements DspaceJournalDataService{
     }
 
     @Override
-    public String getDspaceJournalLoadingFilesByDoi(String[] dois) {
-        return pdd.getDspaceJournalLoadingFilesByDoi(dois);
+    public String getDspaceJournalLoadingFilesByDoi(String[] dois, Date time) {
+        return pdd.getDspaceJournalLoadingFilesByDoi(dois, time);
     }
 
     @Override

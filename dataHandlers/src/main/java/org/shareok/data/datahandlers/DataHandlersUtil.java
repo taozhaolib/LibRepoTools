@@ -15,10 +15,7 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
-import org.aspectj.util.FileUtil;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import static org.shareok.data.config.ShareokdataManager.getShareokdataPath;
@@ -124,5 +121,13 @@ public class DataHandlersUtil {
         SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd");
         Date d = sdf.parse(dateTime);
         return output.format(d);
+    }
+    
+    public static String getCurrentTimeString(){
+        return new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
+    }
+    
+    public static String getTimeString(Date time){
+        return new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(time);
     }
 }

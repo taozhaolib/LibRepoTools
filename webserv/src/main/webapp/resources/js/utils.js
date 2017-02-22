@@ -22,3 +22,12 @@ function getVueObjectForList(columns, listData, displaySearch){
         }
     })
 }
+
+function addDownloadLinks(data, containerName){
+    return new Vue({
+        el: containerName,
+        data: {
+          downloadLinkData: data
+        }
+    })
+}

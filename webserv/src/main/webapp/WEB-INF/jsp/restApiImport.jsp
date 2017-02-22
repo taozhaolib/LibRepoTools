@@ -17,6 +17,7 @@
 <c:set var="localFile" value='<%= request.getParameter("file") %>' />
 <c:set var="localFolder" value='<%= request.getParameter("folder") %>' />
 <c:set var="localSafDir" value='<%= request.getParameter("safDir") %>' />
+<c:set var="journalSearch" value='<%= request.getParameter("journalSearch") %>' />
 
 <div class="container">
     
@@ -97,6 +98,7 @@
                         <input type="hidden" value="${localFile}" name="localFile">
                         <input type="hidden" value="${localFolder}" name="localFolder">
                         <input type="hidden" value="${localSafDir}" name="localSafDir">
+                        <input type="hidden" value="${journalSearch}" name="journalSearch">
                      </form>
                     
                 </center>

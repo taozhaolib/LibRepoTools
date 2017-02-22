@@ -5,6 +5,7 @@
  */
 package org.shareok.data.plosdata;
 
+import java.util.Date;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -14,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface PlosDoiData {
     public void getDspaceLoadingData(String fileName) throws Exception;
     public String getDspaceLoadingData(MultipartFile file);    
-    public String getDspaceJournalLoadingFilesByDoi(String[] dois);
+    public String getDspaceJournalLoadingFilesByDoi(String[] dois, Date time);
     public PlosData getDspaceJournalLoadingFilesBySingleDoi(String doi);
 //    public String saveUploadedData(MultipartFile file);
 }

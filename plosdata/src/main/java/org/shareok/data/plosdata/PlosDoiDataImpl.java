@@ -7,6 +7,7 @@
 package org.shareok.data.plosdata;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.io.FileUtils;
 import org.shareok.data.datahandlers.exceptions.NoMatchingRegularExpressionException;
 import org.shareok.data.datahandlers.exceptions.NotFoundPublisherException;
 import org.shareok.data.htmlrequest.HtmlParser;
@@ -227,15 +229,20 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
     }
 
     @Override
-    public String getDspaceJournalLoadingFilesByDoi(String[] dois) {
+    public String getDspaceJournalLoadingFilesByDoi(String[] dois, Date time) {
         String uploadPath = null;
         plosDataList.clear();
-        uploadPath = DspaceJournalDataUtil.getDspaceJournalUploadPath("plos");
-        setOutputPath(uploadPath+File.separator+"output");
+        uploadPath = DspaceJournalDataUtil.getDspaceJournalUploadPath("plos", time);
+        setOutputPath(uploadPath+File.separator+"output_plos");
         for(String doi : dois){
             getDspaceJournalLoadingFilesBySingleDoi(doi);
         }
-        return uploadPath+File.separator+"output.zip";
+        try {
+            FileUtils.deleteDirectory(new File(uploadPath+File.separator+"output_plos"));
+        } catch (IOException ex) {
+            logger.error("Cannot delete the saf folder after being zipped", ex);
+        }
+        return uploadPath+File.separator+"output_plos.zip";
     }
     
     private String getIsPartOfSeriesByCitation(String citation) throws NoMatchingRegularExpressionException{
@@ -364,7 +371,7 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
             PlosUtil.createContentFile(articleOutputFolderPath+File.separator+"contents", doi.split("/")[1]+".pdf");
             plosData.exportXmlByDoiData(articleOutputFolderPath+File.separator+"dublin_core.xml");
             String outputFolderPath = FileUtil.getFileContainerPath(articleOutputFolderPath);
-            DspaceJournalDataUtil.packLoadingData(outputFolderPath);
+            DspaceJournalDataUtil.packLoadingData(outputFolderPath, "plos");
         }
         catch(Exception ex){
             System.out.print("The data processing from doiData to plosData is wrong!\n");

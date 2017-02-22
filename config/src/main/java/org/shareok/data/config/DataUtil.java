@@ -123,4 +123,16 @@ public class DataUtil {
         }
         return json;
     }
+    
+    public static String getJsonFromStringList(List<String> list){
+        String json = null;
+        try{
+            ObjectMapper mapper = new ObjectMapper();
+            json = mapper.writeValueAsString(list);
+        }
+        catch(Exception ex){
+            logger.error("Cannot convert the string list into json!", ex);
+        }
+        return json;
+    }
 }

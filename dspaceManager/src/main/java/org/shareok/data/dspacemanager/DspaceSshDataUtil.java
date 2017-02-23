@@ -7,7 +7,7 @@ package org.shareok.data.dspacemanager;
 
 import java.io.File;
 import org.shareok.data.config.ShareokdataManager;
-import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.ssh.SshExecutor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -32,7 +32,7 @@ public class DspaceSshDataUtil {
      * @return : the path of the uploading folder
      */
     public static String saveUploadedData(MultipartFile file) {
-        return FileUtil.saveMultipartFileByTimePath(file, ShareokdataManager.getSafUploadPath());
+        return DocumentProcessorUtil.saveMultipartFileByTimePath(file, ShareokdataManager.getSafUploadPath());
     }
     
     public static String createSafImportDirectory(){

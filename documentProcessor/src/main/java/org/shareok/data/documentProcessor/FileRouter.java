@@ -41,7 +41,7 @@ public class FileRouter {
             throw new DataTypeException ("non-empty file extension", "emypty string/undefined");
         }
         else {
-            fileTypes = FileUtil.getDataFromXmlByTagName(FileUtil.getFilePathFromResources("filetypes.xml"), type);
+            fileTypes = DocumentProcessorUtil.getDataFromXmlByTagName(DocumentProcessorUtil.getFilePathFromResources("filetypes.xml"), type);
         }
         return fileTypes;
     }

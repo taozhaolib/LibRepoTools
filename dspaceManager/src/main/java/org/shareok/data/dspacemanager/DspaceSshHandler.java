@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.config.DataUtil;
-import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
 import org.shareok.data.ssh.SshExecutor;
@@ -236,11 +236,11 @@ public class DspaceSshHandler implements JobHandler {
     
     public String importUploadedSafDspace(){
         try{                
-            String mapFilePath = FileUtil.getFileContainerPath(filePath) + "mapfile";
+            String mapFilePath = DocumentProcessorUtil.getFileContainerPath(filePath) + "mapfile";
             File uploadFileObj = new File(filePath);
             String uploadFileName = uploadFileObj.getName();
-            String upzippedFilePath = FileUtil.getFileContainerPath(filePath) + FileUtil.getFileNameWithoutExtension(uploadFileName);//.getFileNameWithoutExtension(filePath);
-            String unzipCommand = " bash -c \"unzip -o " + filePath + " -d " + FileUtil.getFileContainerPath(filePath) + "\"";
+            String upzippedFilePath = DocumentProcessorUtil.getFileContainerPath(filePath) + DocumentProcessorUtil.getFileNameWithoutExtension(uploadFileName);//.getFileNameWithoutExtension(filePath);
+            String unzipCommand = " bash -c \"unzip -o " + filePath + " -d " + DocumentProcessorUtil.getFileContainerPath(filePath) + "\"";
             String importCommand = "sudo " + dspaceDirectory + File.separator + "bin" + File.separator +
                                    "dspace import --add " + "--eperson=" + dspaceUser + " --collection=" + collectionId +
                                    " --source=" + upzippedFilePath + " --mapfile=" + mapFilePath;
@@ -270,7 +270,7 @@ public class DspaceSshHandler implements JobHandler {
         if(!reportFile.exists()){
             reportFile.createNewFile();
         }
-            FileUtil.outputStringToFile(sshExec.getReporter(), reportFilePath);
+            DocumentProcessorUtil.outputStringToFile(sshExec.getReporter(), reportFilePath);
         }
         catch(IOException ioex){
             logger.error("Cannot save importing report!");

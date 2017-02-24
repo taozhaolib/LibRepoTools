@@ -123,7 +123,7 @@ public class ExcelHandler implements FileHandler {
             
             FileInputStream file = new FileInputStream(new File(name));
 
-            String extension = FileUtil.getFileExtension(name);
+            String extension = DocumentProcessorUtil.getFileExtension(name);
 
             String[] excelTypes = router.loadOfficeFileType("excel");
             

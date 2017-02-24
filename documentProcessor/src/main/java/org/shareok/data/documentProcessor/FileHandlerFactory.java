@@ -7,7 +7,7 @@ package org.shareok.data.documentProcessor;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static org.shareok.data.documentProcessor.FileUtil.loadXMLFromString;
+import static org.shareok.data.documentProcessor.DocumentProcessorUtil.loadXMLFromString;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.w3c.dom.Document;
@@ -31,7 +31,7 @@ public class FileHandlerFactory {
         String beanName = "";
         
         try {
-            String fileTypePath = FileUtil.getFilePathFromResources("filetypes.xml");
+            String fileTypePath = DocumentProcessorUtil.getFilePathFromResources("filetypes.xml");
             Document fileTypeDoc = loadXMLFromString(fileTypePath);
             fileTypeDoc.getDocumentElement().normalize();
             Element docEle = fileTypeDoc.getDocumentElement();
@@ -54,7 +54,7 @@ public class FileHandlerFactory {
             fh = (FileHandler) context.getBean(beanName);
             
         } catch (Exception ex) {
-            Logger.getLogger(FileUtil.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DocumentProcessorUtil.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         return fh;

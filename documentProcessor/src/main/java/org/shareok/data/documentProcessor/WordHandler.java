@@ -268,7 +268,7 @@ public class WordHandler implements FileHandler {
                 throw new FileNameException("The file types are empty!");
             }
             
-            String extension = FileUtil.getFileExtension(name);
+            String extension = DocumentProcessorUtil.getFileExtension(name);
 
             String[] wordTypes = router.loadOfficeFileType("word");
             

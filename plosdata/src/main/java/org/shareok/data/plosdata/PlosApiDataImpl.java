@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 import javax.activation.DataHandler;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.datahandlers.DataHandlersUtil;
-import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.htmlrequest.HttpRequestHandler;
 import org.shareok.data.plosdata.exception.ErrorPlosApiResponseException;
 import org.shareok.data.plosdata.exception.NoDoiDataException;
@@ -86,8 +86,8 @@ public class PlosApiDataImpl implements PlosApiData {
                 if(null != responseInfoArr[0] && responseInfoArr[0].equals("200")){
                     List <Map<String, String>> articleData = new ArrayList<>();
                     String responseDocs = responseInfoArr[1];
-                    if(!FileUtil.isEmptyString(responseDocs)){
-                        Document doc = FileUtil.loadXMLFromStringContent(responseDocs);
+                    if(!DocumentProcessorUtil.isEmptyString(responseDocs)){
+                        Document doc = DocumentProcessorUtil.loadXMLFromStringContent(responseDocs);
                         NodeList docList = doc.getElementsByTagName("doc");
                         for(int i = 0; i < docList.getLength(); i++){
                             Element item = (Element) docList.item(i);

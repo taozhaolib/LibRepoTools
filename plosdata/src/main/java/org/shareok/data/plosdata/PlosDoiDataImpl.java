@@ -24,7 +24,7 @@ import org.shareok.data.datahandlers.exceptions.NoMatchingRegularExpressionExcep
 import org.shareok.data.datahandlers.exceptions.NotFoundPublisherException;
 import org.shareok.data.htmlrequest.HtmlParser;
 import org.shareok.data.documentProcessor.ExcelHandler;
-import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.shareok.data.plosdata.PlosUtil.JournalType;
 import org.springframework.web.multipart.MultipartFile;
@@ -171,7 +171,7 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
     @Override
     public void importData(String fileName) {
 
-        //String path = FileUtil.getFilePathFromResources(fileName);
+        //String path = DocumentProcessorUtil.getFilePathFromResources(fileName);
         excelHandler.setFileName(fileName);
         try {
             excelHandler.readData();
@@ -191,7 +191,7 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
     public String getDspaceLoadingData(MultipartFile file){
         String filePath = null;
         filePath = DspaceJournalDataUtil.saveUploadedData(file, "plos");
-        setOutputPath(FileUtil.getFileContainerPath(filePath)+File.separator+"output");
+        setOutputPath(DocumentProcessorUtil.getFileContainerPath(filePath)+File.separator+"output");
         try {
             getDspaceLoadingData(filePath);
         } catch (Exception ex) {
@@ -284,7 +284,7 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
         plosData.setUri(PlosUtil.DOI_PREFIX + doi);
         plosData.setAcknowledgements(acknowledgement);
         plosData.setAuthorContributions(contributions);    
-        if(!FileUtil.isEmptyString(citation)){
+        if(!DocumentProcessorUtil.isEmptyString(citation)){
             try {
                 plosData.setIsPartOfSeries(getIsPartOfSeriesByCitation(citation));
             } catch (NoMatchingRegularExpressionException ex) {
@@ -370,7 +370,7 @@ public class PlosDoiDataImpl implements ExcelData, PlosDoiData {
             req.downloadPlosOnePdfByDoi(doi, articleOutputFolderPath);
             PlosUtil.createContentFile(articleOutputFolderPath+File.separator+"contents", doi.split("/")[1]+".pdf");
             plosData.exportXmlByDoiData(articleOutputFolderPath+File.separator+"dublin_core.xml");
-            String outputFolderPath = FileUtil.getFileContainerPath(articleOutputFolderPath);
+            String outputFolderPath = DocumentProcessorUtil.getFileContainerPath(articleOutputFolderPath);
             DspaceJournalDataUtil.packLoadingData(outputFolderPath, "plos");
         }
         catch(Exception ex){

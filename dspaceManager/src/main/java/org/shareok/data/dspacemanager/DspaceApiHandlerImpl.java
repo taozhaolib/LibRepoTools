@@ -19,7 +19,7 @@ import org.shareok.data.config.DataUtil;
 import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.datahandlers.exceptions.IncompleteServerInfoException;
 import org.shareok.data.datahandlers.exceptions.SecurityFileDoesNotExistException;
-import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.documentProcessor.FileZipper;
 import org.shareok.data.dspacemanager.exceptions.EmptyDspaceCredentialInfoException;
 import org.shareok.data.dspacemanager.exceptions.ErrorDspaceApiResponseException;
@@ -514,7 +514,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
             for(String path : paths){
                 String json = "";
                 String dcType = "dc";
-                doc = FileUtil.loadXMLFromString(path);
+                doc = DocumentProcessorUtil.loadXMLFromString(path);
                 if(null != doc){
                     doc.getDocumentElement().normalize();
                     Node dcNode = doc.getDocumentElement();
@@ -574,7 +574,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     @Override
     public Map<String, String> addItemBitstream(String id, String filePath, String fileName, String description) {
         
-        String fileType = FileUtil.getFileExtension(filePath);
+        String fileType = DocumentProcessorUtil.getFileExtension(filePath);
         
         Map<String, String>header = new HashMap<>();
         
@@ -632,7 +632,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
             if(safPath.endsWith(".zip")){
                 String newPath = FileZipper.unzipToDirectory(safPath);
                 // Change the path to be the unzipped folder
-//                safPath = FileUtil.getFileNameWithoutExtension(safPath);
+//                safPath = DocumentProcessorUtil.getFileNameWithoutExtension(safPath);
                 safFile = new File(newPath);
             }
             if(safFile.isDirectory()){
@@ -715,7 +715,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                 }
                             }
                             
-                            List bitstreamFileList = FileUtil.readTextFileIntoList(contentFile.getAbsolutePath());
+                            List bitstreamFileList = DocumentProcessorUtil.readTextFileIntoList(contentFile.getAbsolutePath());
                             ListIterator it = bitstreamFileList.listIterator();
                             while(it.hasNext()){
                                 String bitstreamFileName = (String)it.next();
@@ -830,8 +830,8 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
             logger.error("Cannot create new items with saf package path: " + safPath, ex);
         } 
         finally{
-            FileUtil.outputStringToFile(mapping, FileUtil.getFileContainerPath(reportFilePath)+File.separator+"mapfile");
-            FileUtil.outputStringToFile(output, reportFilePath);
+            DocumentProcessorUtil.outputStringToFile(mapping, DocumentProcessorUtil.getFileContainerPath(reportFilePath)+File.separator+"mapfile");
+            DocumentProcessorUtil.outputStringToFile(output, reportFilePath);
         }
         return importResults;
     }

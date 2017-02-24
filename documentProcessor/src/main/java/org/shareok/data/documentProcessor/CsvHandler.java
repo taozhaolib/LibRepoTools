@@ -26,6 +26,10 @@ import org.apache.commons.csv.CSVRecord;
  * @author Tao Zhao
  */
 public class CsvHandler implements FileHandler {
+    
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(CsvHandler.class);
+    private static final char DEFAULT_SEPARATOR = ',';
+    
     private String fileName;
     private HashMap data;
     private int recordCount;
@@ -361,5 +365,35 @@ public class CsvHandler implements FileHandler {
     @Override
     public void exportMapDataToXml(HashMap map, String filePath) {
         
+    }
+    
+    public void writeCsvLine(FileWriter w, List<String> values) throws IOException {
+
+        boolean first = true;
+
+        StringBuilder sb = new StringBuilder();
+        for (String value : values) {
+            if (!first) {
+                sb.append(DEFAULT_SEPARATOR);
+            }
+            sb.append(followCVSformat(value));
+
+            first = false;
+        }
+        sb.append("\n");
+        w.append(sb.toString());
+    }
+    
+    private String followCVSformat(String value) {
+
+        String result = value;
+        if (result.contains("\"")) {
+            result = result.replace("\"", "\"\"");
+        }
+        if(result.contains(",")){
+            result = "\"" + result + "\"";
+        }
+        return result;
+
     }
 }

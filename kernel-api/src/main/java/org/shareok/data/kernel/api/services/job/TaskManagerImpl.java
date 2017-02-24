@@ -174,7 +174,7 @@ public class TaskManagerImpl implements TaskManager {
                 break;
             default:
                 filePath = jobFilePath + File.separator + "downloaded.zip";
-                ServiceUtil.downloadFile(remoteFilePath, filePath);
+                ServiceUtil.downloadRemoteFile(remoteFilePath, filePath);
                 break;
         }
         return filePath;

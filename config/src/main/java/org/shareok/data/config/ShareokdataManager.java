@@ -307,4 +307,17 @@ public class ShareokdataManager {
         }
         return prop.getProperty("securityFilePath");
     }
+    
+    public static String getJournalSearchResultDownloadPath(){
+        if(null == prop){
+            loadProperties();
+        }
+        String path = prop.getProperty("journalSearchResultDownloadPath");
+        File downloadFile = new File(path);
+        if(!downloadFile.exists()){
+            downloadFile.mkdirs();
+        }
+        return path;
+    }
+        
 }

@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.shareok.data.config.DataUtil;
-import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.shareok.data.dspacemanager.DspaceSshHandler;
 import org.shareok.data.kernel.api.services.dspace.DspaceSshService;
@@ -87,8 +87,8 @@ public class SshDspaceDataController {
                 String uploadFilePath = DspaceJournalDataUtil.getJournalImportFilePath(handler.getFilePath(), publisher);
                 int jobTypeIndex = DataUtil.getJobTypeIndex(action, "dspace"); 
                 handler.setJobType(jobTypeIndex);
-                //RedisJob job = jobHandler.execute(Long.valueOf(userId), "dspace", "ssh-import", handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
-                RedisJob job = taskManager.execute(Long.valueOf(userId), handler, FileUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
+                //RedisJob job = jobHandler.execute(Long.valueOf(userId), "dspace", "ssh-import", handler, DocumentProcessorUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
+                RedisJob job = taskManager.execute(Long.valueOf(userId), handler, DocumentProcessorUtil.getMultiPartFileFromFilePath(uploadFilePath, "application/zip"), safLink);
                 
                 int statusIndex = job.getStatus();
                 String isFinished = (statusIndex == 2 || statusIndex == 6) ? "true" : "false";

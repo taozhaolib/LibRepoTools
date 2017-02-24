@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
+import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.RedisJob;
@@ -149,5 +150,61 @@ public class WebUtil {
         repoTypeListStr = mapper.writeValueAsString(repoTypeMap);
         model.addObject("repoTypeList", repoTypeListStr);
         return model;
+    }
+    
+    public static String getJournalSearchResultDownloadFileName(String publisher, String startDate, String endDate){
+        return ShareokdataManager.getJournalSearchResultDownloadPath() + File.separator + publisher + "_" + startDate + "_" + endDate + "_" + DataHandlersUtil.getCurrentTimeString() + ".csv";
+    }
+    
+    public static String getJournalSearchResultDownloadFilePathLink(String filePath){
+        return File.separator + "webserv" + File.separator + "downloads" + File.separator + filePath.split("downloads" + File.separator)[1];
+    }
+    
+    public static String getJournalSearchResultDownloadFilePathFromFileName(String fileName){
+        return ShareokdataManager.getJournalSearchResultDownloadPath() + File.separator + fileName;
+    }
+    
+    public static void writeCsvData(String csvFilePath, List<List<String>> data){
+        DataHandlersUtil.writeCsvData(csvFilePath, data);
+    }
+    
+    public static void downloadFileFromServer(HttpServletResponse response, String downloadPath){
+        
+        try{
+            File file = new File(downloadPath);
+            if(!file.exists()){
+                 String errorMessage = "Sorry. The file you are looking for does not exist";
+                 System.out.println(errorMessage);
+                 OutputStream outputStream = response.getOutputStream();
+                 outputStream.write(errorMessage.getBytes(Charset.forName("UTF-8")));
+                 outputStream.close();
+                 return;
+            }
+
+            String mimeType= URLConnection.guessContentTypeFromName(file.getName());
+            if(mimeType==null){
+                System.out.println("mimetype is not detectable, will take default");
+                mimeType = "application/octet-stream";
+            }
+
+            response.setContentType(mimeType);
+            /* "Content-Disposition : inline" will show viewable types [like images/text/pdf/anything viewable by browser] right on browser 
+                while others(zip e.g) will be directly downloaded [may provide save as popup, based on your browser setting.]*/
+            response.setHeader("Content-Disposition", String.format("attachment; filename=\"" + file.getName() +"\""));
+
+
+            /* "Content-Disposition : attachment" will be directly download, may provide save as popup, based on your browser setting*/
+            //response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", file.getName()));
+
+            response.setContentLength((int)file.length());
+
+            InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+
+            //Copy bytes from source to destination(outputstream in this example), closes both streams.
+            FileCopyUtils.copy(inputStream, response.getOutputStream());
+        }
+        catch(IOException ioex){
+            logger.error("Cannot download file responding to downloading resquest!", ioex);
+        }
     }
 }

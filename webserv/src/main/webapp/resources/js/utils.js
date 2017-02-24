@@ -4,6 +4,7 @@
  * @param {type} object
  * @returns {undefined}
  */
+var columns = ['title', 'journal', 'author', 'doi'];
 
 function isEmpty(object){
     return (null == object || object == "" || typeof(object) == "undefined");

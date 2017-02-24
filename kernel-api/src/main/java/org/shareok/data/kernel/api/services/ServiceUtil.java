@@ -111,7 +111,7 @@ public class ServiceUtil {
         return uploadedFilePath;
     }
 
-    public static boolean downloadFile(String link, String targetFile) {
+    public static boolean downloadRemoteFile(String link, String targetFile) {
         ByteArrayOutputStream out = null;
         InputStream in = null;
         FileOutputStream fos = null;

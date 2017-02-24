@@ -16,4 +16,6 @@ and open the template in the editor.
     
     <word bean = "wordHandler">docx</word>
     
+    <csv bean = "csvHandler">csv</csv>
+    
 </types>

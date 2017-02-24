@@ -17,6 +17,7 @@ import java.io.OutputStream;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -24,6 +25,8 @@ import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.shareok.data.config.DataUtil;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
@@ -44,6 +47,7 @@ import org.shareok.data.kernel.api.services.dspace.DspaceJournalServiceManager;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.webserv.exceptions.EmptyDoiInformationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -418,5 +422,76 @@ public class JournalDataController {
         String path = ServiceUtil.generateDspaceSafPackagesByDois(doisArr);
         return path;
 
+    }
+    
+    /**
+     *
+     * @param response
+     * @param articleData : example "articlesStr=" + [{ "volume":"12",
+     *                                                  "publication date":"2017-02-13",
+     *                                                  "journal":"PLOS ONE",
+     *                                                  "issue":"2",    
+     *                                                  "author":"Shelly C Wu;  Elizabeth A Bergey;",
+     *                                                  "affiliate":"Department of Biology, University of Oklahoma, Norman, Oklahoma, United States of America;",
+     *                                                  "title":"Diatoms on the carapace of common snapping turtles",
+     *                                                  "doi":"10.1371/journal.pone.0171910;"
+     *                                                }] 
+     *                                              + "&&columns=" + columns 
+     *                                              + "&&startDate=" + startDate 
+     *                                              + "&&endDate=" + endDate;
+     * @param publisher : String
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping(value = "/download/dspace/journal/{publisher}/search", method=RequestMethod.POST)
+    public String downloadDspaceJournalSearchResults(@RequestParam("articleData") String articleData, @PathVariable("publisher") String publisher) {
+
+        String path = "";
+        try{
+            List<String> columns = new ArrayList<>();
+            List<List<String>> articleList = new ArrayList<>();
+            String[] articleDataArr = articleData.split("&&");            
+            String startDate = articleDataArr[1].replaceAll("startDate=", "");
+            String endDate = articleDataArr[2].replaceAll("endDate=", "");
+            String articles = articleDataArr[0].replaceAll("articlesStr=", "");
+            
+            String journalSearchResultDownloadPath = WebUtil.getJournalSearchResultDownloadFileName(publisher, startDate, endDate);
+            File csv = new File(journalSearchResultDownloadPath);
+            if(!csv.exists()){
+                csv.createNewFile();
+            }
+            
+            JSONArray arrJSON = new JSONArray(articles);
+            for(int i = 0; i < arrJSON.length(); i++){
+                List<String> articleRow = new ArrayList<>();
+                JSONObject obj = arrJSON.getJSONObject(i);
+                Iterator<?> keys = obj.keys();
+                while( keys.hasNext() ) {
+                    String key = (String)keys.next();
+                    if(i == 0){
+                        columns.add(key);
+                    }
+                    articleRow.add((String)obj.get(key));
+                }
+                if(i == 0){
+                    articleList.add(columns);
+                }
+                articleList.add(articleRow);
+            }
+            
+            WebUtil.writeCsvData(journalSearchResultDownloadPath, articleList);
+            path = WebUtil.getJournalSearchResultDownloadFilePathLink(journalSearchResultDownloadPath);
+        }
+        catch(Exception ex){
+            logger.error("Error in processing the article research results!", ex);
+        }        
+        return path;
+
+    }
+    
+    @RequestMapping("/downloads/journal/search/{fileName}/")
+    public void downloadDspaceJournalSearchResults(HttpServletResponse response, @PathVariable("fileName") String fileName) {
+        String path = WebUtil.getJournalSearchResultDownloadFilePathFromFileName(fileName);
+        WebUtil.downloadFileFromServer(response, path);
     }
 }

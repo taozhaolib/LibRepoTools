@@ -3,8 +3,7 @@
     Created on : Feb 16, 2017, 9:36:08 AM
     Author     : Tao Zhao
 --%>
-<script>
-    var columns = ['title', 'journal', 'author', 'doi'];
+<script>    
     var listData = ${articles};
     var displaySearch = true;
 </script>

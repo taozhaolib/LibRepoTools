@@ -38,9 +38,9 @@ import org.xml.sax.InputSource;
  *
  * @author Tao Zhao
  */
-public class FileUtil {
+public class DocumentProcessorUtil {
 
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(FileUtil.class);
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DocumentProcessorUtil.class);
     
     /**
      * Get the path of the file in the resources folder 
@@ -51,7 +51,7 @@ public class FileUtil {
     public static String getFilePathFromResources(String fileName) {
         String path = null;
         try{
-            URL url = FileUtil.class.getClassLoader().getResource(fileName);
+            URL url = DocumentProcessorUtil.class.getClassLoader().getResource(fileName);
             path = url.getPath();
         }
         catch(Exception ex){
@@ -293,8 +293,8 @@ public class FileUtil {
         String uploadedFilePath = null;
         try{
             String oldFileName = file.getOriginalFilename();
-            String extension = FileUtil.getFileExtension(oldFileName);
-            oldFileName = FileUtil.getFileNameWithoutExtension(oldFileName);
+            String extension = DocumentProcessorUtil.getFileExtension(oldFileName);
+            oldFileName = DocumentProcessorUtil.getFileNameWithoutExtension(oldFileName);
             //In the future the new file name will also has the user name
             String time = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
             String newFileName = oldFileName + "." + extension;
@@ -314,7 +314,7 @@ public class FileUtil {
             file.transferTo(uploadedFile);
         }
         catch(Exception ex){
-            Logger.getLogger(FileUtil.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DocumentProcessorUtil.class.getName()).log(Level.SEVERE, null, ex);
         }
         return uploadedFilePath;
     }
@@ -332,10 +332,10 @@ public class FileUtil {
             op.close();
         }
         catch(FileNotFoundException ex){
-            Logger.getLogger(FileUtil.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DocumentProcessorUtil.class.getName()).log(Level.SEVERE, null, ex);
         }
         catch(IOException ex){
-            Logger.getLogger(FileUtil.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DocumentProcessorUtil.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

@@ -32,12 +32,16 @@
                             
                             <br><br><br><br>
                             <div id="buttonsDiv" style="margin-left: 10px;">
-                                <input type="submit" class="btn btn-form loading-btn" value="Search">&nbsp;&nbsp;&nbsp;&nbsp;
-                                <c:if test="${not empty articles}">
+                                <input type="submit" class="btn btn-form loading-btn" value="Search">&nbsp;&nbsp;&nbsp;&nbsp;                                  
+                                <c:if test="${not empty articles}">                                                                       
+                                    <input type="button"  class="btn btn-form loading-btn" name="btnSaveArticlesSearch" value="Download Search Results">&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <a id="download_hidden_link" href="#" target="_blank" style="display:none;">download</a>
                                     <script>
                                         $(document).ready(function(){
                                             var dois = "";
                                             var articles = <%= request.getAttribute("articles") %>;
+                                            var articlesStr = '<%= request.getAttribute("articles") %>';
+                                            var articleData = "articlesStr=" + articlesStr + "&&startDate=" + startDate + "&&endDate=" + endDate;
                                             $.each(articles, function(index, value){
                                                 dois += value.doi.trim();
                                             });
@@ -46,13 +50,36 @@
                                                     method: "POST",
                                                     url: "/webserv/dspace/journal/${publisher}/saf",
                                                     data: { dois },
-                                                    success : function(data) {
+                                                    beforeSend: function(xhr){
+                                                        $(".loading-btn").attr("disabled", true);
+                                                    },
+                                                    success: function(data) {  
                                                         var dataArr = jQuery.parseJSON(data);
                                                         var paths = new Array(dataArr.length);
                                                         $.each(dataArr, function(index, value){
                                                             paths[index] = value.split("/uploads/")[1];
                                                         });
-                                                        getDownloadLinksVue(paths);
+                                                        getDownloadLinksVue(paths);                                                     
+                                                        $(".spining-class").hide();
+                                                        $(".loading-btn").attr("disabled", false);
+                                                    }
+                                                })
+                                            });
+                                            $("input[name='btnSaveArticlesSearch']").click(function(){
+                                                $.ajax({
+                                                    async:  false,
+                                                    method: "POST",
+                                                    url: "/webserv/download/dspace/journal/${publisher}/search",
+                                                    data: { articleData },
+                                                    beforeSend: function(xhr){
+                                                        $(".loading-btn").attr("disabled", true);
+                                                    },
+                                                    success: function(data) {  
+//                                                        alert(data); 
+                                                        var hiddenLink = $("#download_hidden_link");
+                                                        hiddenLink.attr("href", data + "/");
+//                                                        hiddenLink.show();
+                                                        document.getElementById('download_hidden_link').click();
                                                         $(".spining-class").hide();
                                                         $(".loading-btn").attr("disabled", false);
                                                     }

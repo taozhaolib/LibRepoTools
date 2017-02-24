@@ -7,6 +7,7 @@ package org.shareok.data.datahandlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,11 +16,17 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import static org.shareok.data.config.ShareokdataManager.getShareokdataPath;
 import org.shareok.data.datahandlers.exceptions.SecurityFileDoesNotExistException;
+import org.shareok.data.documentProcessor.CsvHandler;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
+import org.shareok.data.documentProcessor.FileHandlerFactory;
 import org.shareok.data.htmlrequest.HttpRequestHandler;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.context.ApplicationContext;
@@ -129,5 +136,26 @@ public class DataHandlersUtil {
     
     public static String getTimeString(Date time){
         return new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(time);
+    }
+    
+        
+    public static void writeCsvData(String csvFilePath, List<List<String>> data){
+        FileWriter writer = null;
+        try {
+            String extension = DocumentProcessorUtil.getFileExtension(csvFilePath);
+            CsvHandler handler = (CsvHandler)FileHandlerFactory.getFileHandlerByFileExtension(extension);
+            writer = new FileWriter(csvFilePath);
+            for(List<String> row : data){
+                handler.writeCsvLine(writer, row);
+            }
+        } catch (IOException ex) {
+            logger.error("Cannot write data into csv file at "+csvFilePath, ex);
+        } finally {
+            try {
+                writer.close();
+            } catch (IOException ex) {
+                logger.error("Cannot close the file write for csv file at "+csvFilePath, ex);
+            }
+        }
     }
 }

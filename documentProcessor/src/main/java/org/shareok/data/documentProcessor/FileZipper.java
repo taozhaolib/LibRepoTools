@@ -124,8 +124,8 @@ public class FileZipper {
                     continue;
                 }
                 if (!entry.isDirectory()) {
-                    if(!FileUtil.isEmptyString(FileUtil.getFileContainerPath(filePath))){
-                        File folderFile = new File(FileUtil.getFileContainerPath(filePath));
+                    if(!DocumentProcessorUtil.isEmptyString(DocumentProcessorUtil.getFileContainerPath(filePath))){
+                        File folderFile = new File(DocumentProcessorUtil.getFileContainerPath(filePath));
                         folderFile.mkdirs();
                     }
                     extractFile(zipIn, filePath);

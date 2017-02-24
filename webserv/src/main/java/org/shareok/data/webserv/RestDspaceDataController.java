@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.datahandlers.DataHandlersUtil;
-import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.dspacemanager.DspaceDataUtil;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
 import org.shareok.data.kernel.api.services.ServiceUtil;
@@ -102,14 +102,14 @@ public class RestDspaceDataController {
         try{
             if(null == file || file.isEmpty()){
                 String localFile = (String)request.getParameter("localFile");
-                if(!FileUtil.isEmptyString(localFile)){
+                if(!DocumentProcessorUtil.isEmptyString(localFile)){
                     filePath = localFile;
                     String safDir = (String)request.getParameter("localSafDir");
-                    if(!FileUtil.isEmptyString(safDir)){
+                    if(!DocumentProcessorUtil.isEmptyString(safDir)){
                         filePath = safDir + File.separator + filePath;
                     }
                     String folder = (String)request.getParameter("localFolder");
-                    if(!FileUtil.isEmptyString(folder)){
+                    if(!DocumentProcessorUtil.isEmptyString(folder)){
                         filePath = folder + File.separator + filePath;
                     }
                     String journalSearch = (String)request.getParameter("journalSearch");

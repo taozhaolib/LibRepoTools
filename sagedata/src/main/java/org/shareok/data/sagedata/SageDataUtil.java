@@ -6,7 +6,7 @@
 package org.shareok.data.sagedata;
 
 import java.util.HashMap;
-import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -22,8 +22,8 @@ public class SageDataUtil {
         
         HashMap journalMap = new HashMap<String, String>();
         try{
-            String journalXml = FileUtil.getFilePathFromResources("sageJournals.xml");
-            Document journalXmlDoc = FileUtil.loadXMLFromString(journalXml);
+            String journalXml = DocumentProcessorUtil.getFilePathFromResources("sageJournals.xml");
+            Document journalXmlDoc = DocumentProcessorUtil.loadXMLFromString(journalXml);
             journalXmlDoc.getDocumentElement().normalize();
             Element docEle = journalXmlDoc.getDocumentElement();
             NodeList nl = docEle.getChildNodes();

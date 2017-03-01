@@ -80,6 +80,7 @@ public class S3Util {
     public static final long COMPRESSOIN_TARGET_SIZE_MEDIUM = 60000000;
     
     public static final String S3_SMALL_DERIVATIVE_OUTPUT = "/var/local/librepotools/librepotools-data/s3_small_derivatives";
+    public static final String S3_TIFF_METADATA_PROCESS_OUTPUT = "/var/local/librepotools/librepotools-data/s3_tiff_metadata_copy";
     public static final String S3_NO_NUMBER_ENDDING_TIFF_PATTERN = "^(.*)(\\d+)(.tiff|.tif)$";
     
     /**

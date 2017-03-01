@@ -14,6 +14,7 @@ import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.S3Object;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import oulib.aws.s3.S3BookInfo;
+import oulib.aws.s3.S3TiffMetadataProcessorThread;
 import oulib.aws.s3.S3TiffProcessorThread;
 import oulib.aws.s3.S3Util;
 
@@ -106,16 +108,21 @@ public class Main {
             }
             System.out.println("arg0 = "+args[0]+" arg1 = "+args[1]+" arg2 = "+args[2]+ " arg3 = "+args[3]);
             ExecutorService executor = Executors.newFixedThreadPool(threadMaxCount);
-            List<String> tiffDiff = S3Util.getS3BucketFolderObjDiff(s3Client, args[0], bookName+"/data", args[1], bookName+"/data");
+            List<String> tiffDiff = S3Util.getBucketObjectKeyList(bookInfo.getBucketSourceName(), args[2], s3Client);//.getS3BucketFolderObjDiff(s3Client, args[0], bookName+"/data", args[1], bookName+"/data");
             int diff = tiffDiff.size();
             if(diff > 0){
                 System.out.println("There are totally "+String.valueOf(diff)+" tiff images to process.\nStart processing at "+(new java.util.Date()).toString());
                 AwsDataProcessorThreadFactory threadFactory = new AwsDataProcessorThreadFactory();                
                 for(int i = 0; i <= 10; i++){
-                    S3TiffProcessorThread s3TiffProcessorThread = new S3TiffProcessorThread(s3Client, bookInfo, String.valueOf(i)+".tif", tiffDiff);
+//                    S3TiffProcessorThread s3TiffProcessorThread = new S3TiffProcessorThread(s3Client, bookInfo, String.valueOf(i)+".tif", tiffDiff);
+//                    threadFactory.setIndex(i);
+//                    threadFactory.setJobType("small-tiff-" + bookName);
+//                    executor.execute(threadFactory.newThread(s3TiffProcessorThread));
+//                    System.out.println("obj has path = "+bookInfo.getBucketSourceName() + tiffDiff.get(i));
+                    S3TiffMetadataProcessorThread thread = new S3TiffMetadataProcessorThread(s3Client, bookInfo, String.valueOf(i)+".tif", tiffDiff);
                     threadFactory.setIndex(i);
-                    threadFactory.setJobType("small-tiff-" + bookName);
-                    executor.execute(threadFactory.newThread(s3TiffProcessorThread));
+                    threadFactory.setJobType("tiff-metadata-" + bookName);
+                    executor.execute(threadFactory.newThread(thread));
                 }
             }
             else{

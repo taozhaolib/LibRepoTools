@@ -80,6 +80,7 @@ public class S3Util {
     public static final long COMPRESSOIN_TARGET_SIZE_MEDIUM = 60000000;
     
     public static final String S3_SMALL_DERIVATIVE_OUTPUT = "/var/local/librepotools/librepotools-data/s3_small_derivatives";
+    public static final String S3_TIFF_METADATA_PROCESS_OUTPUT = "/var/local/librepotools/librepotools-data/s3_tiff_metadata_copy";
     public static final String S3_NO_NUMBER_ENDDING_TIFF_PATTERN = "^(.*)(\\d+)(.tiff|.tif)$";
     
     /**
@@ -123,6 +124,33 @@ public class S3Util {
         } while(result.isTruncated() == true ); 
         
         return keyMap;
+    }
+    
+    /**
+     * 
+     * @param bucketName : bucket name
+     * @param folderName : a unique folder name or partial path in the bucket
+     * @param client : s3 client
+     * @return : a list of keys
+     */
+    public static List<String> getBucketObjectKeyList(String bucketName, String folderName, AmazonS3 client){
+        final ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(bucketName);
+        ListObjectsV2Result result;
+        List<String> keyList = new ArrayList<>();
+            
+        do {               
+            result = client.listObjectsV2(req);
+
+            for (S3ObjectSummary objectSummary : result.getObjectSummaries()) {                
+                String key = objectSummary.getKey();
+                if(key.contains(folderName)){
+                    keyList.add(key);
+                }
+            }            
+            req.setContinuationToken(result.getNextContinuationToken());
+        } while(result.isTruncated() == true ); 
+        
+        return keyList;
     }
     
     /**
@@ -325,7 +353,7 @@ public class S3Util {
     	S3ObjectInputStream content1 = null;
     	S3ObjectInputStream content2 = null;
         String targetBucketName = obj2.getBucketName();
-        String outputKey = obj2.getKey();
+        String outputKey = obj2.getKey().split(".tif")[0]+"-copied.tif";
     	
     	ImageMetadata metadata1, metadata2;
     	TiffImageMetadata tiffMetadata1, tiffMetadata2;

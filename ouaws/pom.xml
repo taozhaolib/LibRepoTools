@@ -68,9 +68,9 @@
                     <!-- target bucket -->
                     <argument>ul-ir-workspace</argument>
                     <!-- bag name -->
-                    <argument>Borelli_1680_1681</argument>
+                    <argument>source-bags/Baldi_1706</argument>
                     <!-- max thread number -->
-                    <argument>5</argument>
+                    <argument>3</argument>
                 </arguments>  
             </configuration>  
         </plugin>  

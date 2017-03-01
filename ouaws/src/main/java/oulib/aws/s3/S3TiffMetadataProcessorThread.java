@@ -114,12 +114,13 @@ public class S3TiffMetadataProcessorThread implements Runnable{
                 S3Util.createFolder(targetBucketName, bookName, s3client);
             }
 
-                for (String key : tiffList) {
-                    if(key.contains(".tif") && matchS3ObjKeyWithFilter(key, filter) && targetBucketKeyMap.containsKey(key+".tif")){
+                for (String key : tiffList) {                   
+                    if(key.contains(".tif") && matchS3ObjKeyWithFilter(key, filter) && targetBucketKeyMap.containsKey(key) 
+                            && !targetBucketKeyMap.containsKey(key.split(".tif")[0]+"-copied.tif")){
                         S3Object objectSource = s3client.getObject(new GetObjectRequest(sourceBucketName, key));
                         S3Object objectTarget = s3client.getObject(new GetObjectRequest(targetBucketName, key));
-                        output += ("Start to copy metadata from the source object "+sourceBucketName + key+" to target object "+ targetBucketName + key + "\n");
-                        System.out.println("Start to copy metadata from the source object "+sourceBucketName + key+" to target object "+ targetBucketName + key + "\n");
+                        output += ("Start to copy metadata from the source object "+sourceBucketName + "/" + key+" to target object "+ targetBucketName + "/" + key + "\n");
+                        System.out.println("Start to copy metadata from the source object "+sourceBucketName + "/" + key+" to target object "+ targetBucketName + "/" + key + "\n");
                         S3Util.copyS3ObjectTiffMetadata(s3client, objectSource, objectTarget); 
                         System.out.println("Finished copy metadata for the object with key="+key+"\n");
                         output += "Finished copy metadata for the object with key="+key+"\n";
@@ -129,7 +130,7 @@ public class S3TiffMetadataProcessorThread implements Runnable{
                         } catch (IOException ex) {
                             Logger.getLogger(S3TiffProcessorThread.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                    }
+                    }                    
                 }
                 System.out.println(Thread.currentThread().getName() + "'s job is done!");
 	        

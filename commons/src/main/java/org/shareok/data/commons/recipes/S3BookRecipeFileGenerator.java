@@ -23,7 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.shareok.data.commons.CommonsUtil;
 import org.shareok.data.commons.uuid.S3BookUUIDGenerator;
-import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import oulib.aws.s3.S3Util;
@@ -103,7 +103,7 @@ public class S3BookRecipeFileGenerator extends RecipeFileGeneratorAbstract {
             String col = keyInfo[0];
             String row = keyInfo[1];
             String value = (String)data.get(key);
-            if(FileUtil.isEmptyString(row) || FileUtil.isEmptyString(col) || FileUtil.isEmptyString(value)){
+            if(DocumentProcessorUtil.isEmptyString(row) || DocumentProcessorUtil.isEmptyString(col) || DocumentProcessorUtil.isEmptyString(value)){
                 continue;
             }
             if(col.startsWith("File name")){

@@ -127,6 +127,33 @@ public class S3Util {
     }
     
     /**
+     * 
+     * @param bucketName : bucket name
+     * @param folderName : a unique folder name or partial path in the bucket
+     * @param client : s3 client
+     * @return : a list of keys
+     */
+    public static List<String> getBucketObjectKeyList(String bucketName, String folderName, AmazonS3 client){
+        final ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(bucketName);
+        ListObjectsV2Result result;
+        List<String> keyList = new ArrayList<>();
+            
+        do {               
+            result = client.listObjectsV2(req);
+
+            for (S3ObjectSummary objectSummary : result.getObjectSummaries()) {                
+                String key = objectSummary.getKey();
+                if(key.contains(folderName)){
+                    keyList.add(key);
+                }
+            }            
+            req.setContinuationToken(result.getNextContinuationToken());
+        } while(result.isTruncated() == true ); 
+        
+        return keyList;
+    }
+    
+    /**
      * Creates an AWS S3 folder
      * 
      * @param bucketName
@@ -326,7 +353,7 @@ public class S3Util {
     	S3ObjectInputStream content1 = null;
     	S3ObjectInputStream content2 = null;
         String targetBucketName = obj2.getBucketName();
-        String outputKey = obj2.getKey();
+        String outputKey = obj2.getKey().split(".tif")[0]+"-copied.tif";
     	
     	ImageMetadata metadata1, metadata2;
     	TiffImageMetadata tiffMetadata1, tiffMetadata2;

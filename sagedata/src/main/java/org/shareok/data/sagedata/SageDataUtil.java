@@ -18,6 +18,9 @@ import org.w3c.dom.NodeList;
  */
 public class SageDataUtil {
     
+    public static final String SAGE_HTTP_PREFIX = "http://journals.sagepub.com";
+    public static final String API_SEARCH_PREFIX = "http://journals.sagepub.com/action/doSearch?";
+    
     public static HashMap getJournalListWithBeans(){
         
         HashMap journalMap = new HashMap<String, String>();

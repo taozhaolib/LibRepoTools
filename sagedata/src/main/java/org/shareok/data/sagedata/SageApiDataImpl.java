@@ -9,15 +9,13 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.shareok.data.config.DataUtil;
 import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.htmlrequest.HtmlParser;
@@ -37,48 +35,54 @@ public class SageApiDataImpl implements SageApiData {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(SageApiDataImpl.class);
     
-    private HttpRequestHandler reqHandler;
-    private HtmlParser parser;
-
-    @Autowired
-    public void setReqHandler(HttpRequestHandler reqHandler) {
-        this.reqHandler = reqHandler;
-    }
-
-    @Autowired
-    public void setParser(HtmlParser parser) {
-        this.parser = parser;
-    }
-    
     @Override
     public String getApiResponseByDatesAffiliate(String startDate, String endDate, String affiliate) {
-        String json = null;
-        String response = null;
+        String json;
         String query = getApiQuery(startDate, endDate, affiliate);
         System.out.println("query = " + query);
         List<Map<String, String>>articleList = new ArrayList<>();
+        int currentIndex = -1;
+        int total = -1;
+        int page = 0;
         try {
-            Document doc = getApiResponseByQuery(query);
-            int total = getTotalArticlesFound(doc);
-            int currentIndex = getCurrentArticleIndex(doc);
-            getArticleInfoFromDoc(articleList, doc);
-            int count = 1;
+            while(currentIndex < total || total == -1){
+                if(currentIndex != -1){
+                    query = getApiQuery(startDate, endDate, affiliate, String.valueOf(page));
+                }
+                Document doc = getApiResponseByQuery(query);
+                if(total == -1){
+                    total = getTotalArticlesFound(doc);
+                }
+                currentIndex = getCurrentArticleIndex(doc);            
+                getArticleInfoFromDoc(articleList, doc);
+                page++;
+            }
+            
+            int count = 0;
+            List<Integer> removeList = new ArrayList<>();
             for(Map<String, String> articleInfo : articleList){
-                System.out.println("This is No "+String.valueOf(count) + " article");
-                for(String key : articleInfo.keySet()){
-                    System.out.println(key + " = " + articleInfo.get(key));
+                String pubDate = articleInfo.get("publication date");
+                if(DataHandlersUtil.datesCompare(startDate, pubDate) > 0 || DataHandlersUtil.datesCompare(pubDate, endDate) > 0){
+                    removeList.add(count);
                 }
                 count++;
             }
-//            Map<String, ArrayList<String>> data = parseSageSearchResponse(response);
-//            System.out.println("data size = "+String.valueOf(data.size()));
+            
+            int length = removeList.size();
+            for(int i = length - 1; i >= 0; i--){
+                articleList.remove((int)removeList.get(i));
+            }
+            
+            json = DataUtil.getJsonFromListOfMap(articleList);
         } catch (ErrorResponseCodeException | ErrorHandlingResponseException ex) {
             logger.error("Cannot get response sage data after http get request wiht query = "+query, ex);
             return null;
         } catch (NoSageSearchTotalRecordsException ex) {
             logger.error("Cannot get total records!", ex);
+            return null;
         } catch (NoSageSearchCurrentArticleIndexException ex) {
             logger.error("Cannot get index of current article!", ex);
+            return null;
         }
         
         return json;
@@ -90,12 +94,16 @@ public class SageApiDataImpl implements SageApiData {
     }
     
     private String getApiQuery(String startDate, String endDate, String affiliate){
+        return getApiQuery(startDate, endDate, affiliate, "0");
+    }
+    
+    private String getApiQuery(String startDate, String endDate, String affiliate, String startPage){
         
         try {
             String startYear = DataHandlersUtil.getYearFromSimpleDateString(startDate);
             String endYear = DataHandlersUtil.getYearFromSimpleDateString(endDate);
             
-            return SageDataUtil.API_SEARCH_PREFIX + "field1=Affiliation&text1=" + URLEncoder.encode(affiliate, "UTF-8")+ "&field2=AllField&text2=&Ppub=&Ppub=&AfterYear=" + startYear + "&BeforeYear=" + endYear + "&access=&pageSize=20&startPage=0&";
+            return SageDataUtil.API_SEARCH_PREFIX + "field1=Affiliation&text1=\"" + URLEncoder.encode(affiliate, "UTF-8")+ "\"&field2=AllField&text2=&Ppub=&Ppub=&AfterYear=" + startYear + "&BeforeYear=" + endYear + "&access=&pageSize=20&startPage=" + startPage + "&";
         } catch (Exception ex) {
             logger.error("Cannot encode the query parameters!", ex);
         }
@@ -106,9 +114,9 @@ public class SageApiDataImpl implements SageApiData {
 
         Document doc = null;
         try {
-            doc = Jsoup.connect("http://journals.sagepub.com/action/doSearch?field1=Affiliation&text1=University+of+Oklahoma&AfterYear=2017&BeforeYear=2017&access=&")
+            doc = Jsoup.connect(query)
                     .data("query", "Java")
-                    .userAgent("Mozilla")
+                    .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36")
                     .cookie("auth", "token")
                     .timeout(3000)
                     .get();
@@ -116,12 +124,6 @@ public class SageApiDataImpl implements SageApiData {
             logger.error("Cannot get the SAGE pub search results by the query: "+query, ex);
         }
         return doc;
-    }
-    
-    private Map<String,ArrayList<String>> parseSageSearchResponse(String response){
-//        Element paginationDiv = parser.
-        Map<String,ArrayList<String>> data = parser.metaDataParser(response);
-        return data;
     }
     
     private int getTotalArticlesFound(Document doc) throws NoSageSearchTotalRecordsException{
@@ -192,17 +194,35 @@ public class SageApiDataImpl implements SageApiData {
                         articleInfoMap.put("title", titleLink.text().trim());
 
                         Element tocDeliverFormatsLinks = article.select("div.tocDeliverFormatsLinks").get(0);
-                        Element absLink = tocDeliverFormatsLinks.select("a.abstract").get(0);
-                        String abstractLink = SageDataUtil.SAGE_HTTP_PREFIX + absLink.attr("href").trim();
-                        articleInfoMap.put("abstractLink", abstractLink);
+                        Elements absLinkElements = tocDeliverFormatsLinks.select("a.abstract");
+                        String abstractLink = "";
+                        if(absLinkElements.size()>0){
+                            Element absElement = absLinkElements.get(0);
+                            abstractLink = SageDataUtil.SAGE_HTTP_PREFIX + absElement.attr("href").trim();
+                            articleInfoMap.put("abstract link", abstractLink);
+                        }
+                        else{
+                            articleInfoMap.put("abstract link", "");
+                        }
 
                         Element pdfLink = tocDeliverFormatsLinks.select("a.pdf").get(0);
                         String pdfLinkStr = SageDataUtil.SAGE_HTTP_PREFIX + pdfLink.attr("href").trim();
-                        articleInfoMap.put("pdfLink", pdfLinkStr);
+                        articleInfoMap.put("PDF link", pdfLinkStr);
+                        try{
+                            articleInfoMap.put("Doi", pdfLinkStr.split("pdf/")[1]);
+                        }
+                        catch(Exception ex){
+                            try{
+                                articleInfoMap.put("DOI", abstractLink.split("doi/abs/")[1]);
+                            }
+                            catch(Exception ex2){
+                                articleInfoMap.put("DOI", "");
+                            }
+                        }
 
                         Element pubDate = article.select("span.maintextleft").get(0);
                         String pubDateStr = pubDate.text().split("Published ")[1].trim().split("\\.")[0];
-                        articleInfoMap.put("pubDate", pubDateStr);
+                        articleInfoMap.put("publication date", DataHandlersUtil.convertFullMonthDateStringFormat(pubDateStr));
 
                         articleList.add(articleInfoMap);
                     }      

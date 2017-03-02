@@ -21,7 +21,7 @@ import org.apache.poi.util.IOUtils;
 
 import org.shareok.data.documentProcessor.FileHandler;
 import org.shareok.data.documentProcessor.FileHandlerFactory;
-import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.sagedata.exceptions.EmptyFilePathException;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
@@ -106,7 +106,7 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler {
 
         String filePath = sourceFilePath;
         try {
-            String fileExtension = FileUtil.getFileExtension(filePath);
+            String fileExtension = DocumentProcessorUtil.getFileExtension(filePath);
             FileHandler fh = FileHandlerFactory.getFileHandlerByFileExtension(fileExtension);
             if (null == fh) {
                 return;
@@ -293,8 +293,8 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler {
         String uploadedFilePath = null;
         try{
             String oldFileName = file.getOriginalFilename();
-            String extension = FileUtil.getFileExtension(oldFileName);
-            oldFileName = FileUtil.getFileNameWithoutExtension(oldFileName);
+            String extension = DocumentProcessorUtil.getFileExtension(oldFileName);
+            oldFileName = DocumentProcessorUtil.getFileNameWithoutExtension(oldFileName);
             //In the future the new file name will also has the user name
             String time = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
             String newFileName = oldFileName + "--" + time + "." + extension;
@@ -331,7 +331,7 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler {
             filePath = DspaceJournalDataUtil.saveUploadedData(file, "sage");
             if(null != filePath){
                 setSourceFilePath(filePath);
-                setOutputFilePath(FileUtil.getFileContainerPath(filePath) + "output");
+                setOutputFilePath(DocumentProcessorUtil.getFileContainerPath(filePath) + "output");
                 readSourceData();
                 processSourceData();
                 outputMetaData();

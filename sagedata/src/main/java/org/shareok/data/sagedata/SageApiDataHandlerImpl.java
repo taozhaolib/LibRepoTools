@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,22 +20,20 @@ import org.jsoup.select.Elements;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.documentProcessor.DocumentProcessorUtil;
-import org.shareok.data.htmlrequest.HtmlParser;
-import org.shareok.data.htmlrequest.HttpRequestHandler;
 import org.shareok.data.htmlrequest.exceptions.ErrorHandlingResponseException;
 import org.shareok.data.htmlrequest.exceptions.ErrorResponseCodeException;
 import org.shareok.data.sagedata.exceptions.EmptyArticleTypeInfoException;
 import org.shareok.data.sagedata.exceptions.NoSageSearchCurrentArticleIndexException;
 import org.shareok.data.sagedata.exceptions.NoSageSearchTotalRecordsException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.shareok.data.sagedata.exceptions.NullResponseBySageSearchRequestException;
 
 /**
  *
  * @author Tao Zhao
  */
-public class SageApiDataImpl implements SageApiData {
+public class SageApiDataHandlerImpl implements SageApiDataHandler {
     
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(SageApiDataImpl.class);
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(SageApiDataHandlerImpl.class);
     
     @Override
     public String getApiResponseByDatesAffiliate(String startDate, String endDate, String affiliate) {
@@ -50,6 +50,14 @@ public class SageApiDataImpl implements SageApiData {
                     query = getApiQuery(startDate, endDate, affiliate, String.valueOf(page));
                 }
                 Document doc = getApiResponseByQuery(query);
+                if(null == doc){
+                    try {
+                        throw new NullResponseBySageSearchRequestException("Get null response with query = "+query);
+                    } catch (NullResponseBySageSearchRequestException ex) {
+                        logger.error(ex);
+                        continue;
+                    }
+                }
                 if(total == -1){
                     total = getTotalArticlesFound(doc);
                 }
@@ -118,7 +126,7 @@ public class SageApiDataImpl implements SageApiData {
                     .data("query", "Java")
                     .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36")
                     .cookie("auth", "token")
-                    .timeout(3000)
+                    .timeout(300000)
                     .get();
         } catch (IOException ex) {
             logger.error("Cannot get the SAGE pub search results by the query: "+query, ex);
@@ -209,20 +217,31 @@ public class SageApiDataImpl implements SageApiData {
                         String pdfLinkStr = SageDataUtil.SAGE_HTTP_PREFIX + pdfLink.attr("href").trim();
                         articleInfoMap.put("PDF link", pdfLinkStr);
                         try{
-                            articleInfoMap.put("Doi", pdfLinkStr.split("pdf/")[1]);
+                            articleInfoMap.put("doi", pdfLinkStr.split("pdf/")[1]+";");
                         }
                         catch(Exception ex){
                             try{
-                                articleInfoMap.put("DOI", abstractLink.split("doi/abs/")[1]);
+                                articleInfoMap.put("doi", abstractLink.split("doi/abs/")[1]+";");
                             }
                             catch(Exception ex2){
-                                articleInfoMap.put("DOI", "");
+                                articleInfoMap.put("doi", "");
                             }
                         }
 
                         Element pubDate = article.select("span.maintextleft").get(0);
                         String pubDateStr = pubDate.text().split("Published ")[1].trim().split("\\.")[0];
                         articleInfoMap.put("publication date", DataHandlersUtil.convertFullMonthDateStringFormat(pubDateStr));
+                        
+                        Element journal = article.select("span.journal-title").get(0);
+                        String journalStr = journal.text();
+                        articleInfoMap.put("journal", journalStr);
+                        
+                        Elements authors = article.select("a.entryAuthor");
+                        String authorsStr = "";
+                        for(Element author : authors){
+                            authorsStr += author.text() + ";";
+                        }
+                        articleInfoMap.put("author", authorsStr);
 
                         articleList.add(articleInfoMap);
                     }      

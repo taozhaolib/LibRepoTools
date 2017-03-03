@@ -46,6 +46,7 @@
                                                 dois += value.doi.trim();
                                             });
                                             $("input[name='btnSearchArticlesSaf']").click(function(){
+                                                $(".spining-class").show();
                                                 $.ajax({
                                                     method: "POST",
                                                     url: "/webserv/dspace/journal/${publisher}/saf",
@@ -66,6 +67,7 @@
                                                 })
                                             });
                                             $("input[name='btnSaveArticlesSearch']").click(function(){
+                                                $(".spining-class").show();
                                                 $.ajax({
                                                     async:  false,
                                                     method: "POST",

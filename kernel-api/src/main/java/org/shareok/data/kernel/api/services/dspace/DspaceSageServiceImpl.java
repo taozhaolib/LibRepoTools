@@ -6,6 +6,7 @@
 package org.shareok.data.kernel.api.services.dspace;
 
 import java.util.Date;
+import org.shareok.data.sagedata.SageApiDataHandler;
 import org.shareok.data.sagedata.SageSourceDataHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -22,10 +23,16 @@ import org.springframework.web.multipart.MultipartFile;
 public class DspaceSageServiceImpl implements DspaceJournalDataService {
     
     private SageSourceDataHandler ssd;
+    private SageApiDataHandler sad;
     
     @Autowired
     public void setSageSourceDataHandler(SageSourceDataHandler ssd){
         this.ssd = ssd;
+    }
+    
+    @Autowired
+    public void setSageApiDataHandler(SageApiDataHandler sad){
+        this.sad = sad;
     }
     
     /**
@@ -65,11 +72,11 @@ public class DspaceSageServiceImpl implements DspaceJournalDataService {
 
     @Override
     public String getDspaceJournalLoadingFilesByDoi(String[] dois, Date time) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return ssd.getDspaceJournalLoadingFilesByDoi(dois, time);
     }
 
     @Override
     public String getApiResponseByDatesAffiliate(String startDate, String endDate, String affiliate) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return sad.getApiResponseByDatesAffiliate(startDate, endDate, affiliate);
     }
 }

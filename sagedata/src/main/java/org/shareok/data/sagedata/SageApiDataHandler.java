@@ -9,7 +9,7 @@ package org.shareok.data.sagedata;
  *
  * @author Tao Zhao
  */
-public interface SageApiData {
+public interface SageApiDataHandler {
     public String getApiResponseByDatesAffiliate(String startDate, String endDate, String affiliate);
     public String outputResponse();
 }

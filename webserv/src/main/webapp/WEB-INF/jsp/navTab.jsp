@@ -15,6 +15,7 @@
                 <!-- <li class="mainMenuDrop" id="plosDs"><a href="/webserv/dspace/journal/plos/doi">Import PLOS Publications by DOI</a></li> -->
                 <li class="mainMenuDrop" id="plosDs"><a href="/webserv/journal/search/plos/date">Search PLOS Publications by Dates</a></li>
                 <li class="mainMenuDrop" id="sageDs"><a href="/webserv/dspace/journal/sage">Import SAGE Publications</a></li>
+                <li class="mainMenuDrop" id="plosDs"><a href="/webserv/journal/search/sage/date">Search SAGE Publications by Dates</a></li>
                 <li class="mainMenuDrop" id="sageDs"><a href="/webserv/dspace/journal/ouhistory">Generate SAF Package</a></li>
                 <!-- 
                 <li class="mainMenuDrop" id="dsSafImport"><a href="/webserv/ssh/dspace/saf/page/ssh-upload">Upload Simple Archive Format Package</a></li>

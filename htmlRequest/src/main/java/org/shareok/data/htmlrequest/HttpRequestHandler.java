@@ -30,7 +30,10 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
 import org.shareok.data.htmlrequest.exceptions.ErrorConnectionOutputStreamException;
 import org.shareok.data.htmlrequest.exceptions.ErrorHandlingResponseException;
 import org.shareok.data.htmlrequest.exceptions.ErrorOpenConnectionException;
@@ -152,6 +155,24 @@ public class HttpRequestHandler {
         }
         catch(Exception e){
             e.printStackTrace();
+        }
+    }
+    
+    public void getPdfWithJsoupByUrl(String urlString, String filePath) {
+        
+        try{
+            Connection.Response response = Jsoup.connect(urlString)
+                    .ignoreContentType(true)
+                    .data("query", "Java")
+                    .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36")
+                    .cookie("auth", "token")
+                    .timeout(300000)
+                    .execute();
+            
+            FileUtils.writeByteArrayToFile(new File(filePath), response.bodyAsBytes());
+        }
+        catch(Exception e){
+            logger.error("Cannot download PDF file from "+urlString, e);
         }
     }
     

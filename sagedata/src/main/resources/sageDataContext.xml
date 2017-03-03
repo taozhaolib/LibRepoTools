@@ -50,5 +50,9 @@
         <property name="rightsRequestable" value="false" />
         <property name="type" value="Research Article" />
     </bean>
+    
+    <bean id="sageApiDataHandlerImpl" class="org.shareok.data.sagedata.SageApiDataHandlerImpl" >
+        
+    </bean>
 </beans>
 

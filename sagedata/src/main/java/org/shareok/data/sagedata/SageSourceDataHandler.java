@@ -6,6 +6,7 @@
 package org.shareok.data.sagedata;
 
 import java.io.File;
+import java.util.Date;
 import java.util.HashMap;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,4 +22,6 @@ public interface SageSourceDataHandler {
     public String getDspaceLoadingData(String filePath);
     public String getDspaceLoadingData(MultipartFile file);
     public String saveUploadedData(MultipartFile file);
+    public String getDspaceJournalLoadingFilesByDoi(String[] dois, Date time);
+    public SageJournalData getDspaceJournalLoadingFilesBySingleDoi(String doi);
 }

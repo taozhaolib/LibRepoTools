@@ -13,10 +13,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
@@ -130,6 +132,24 @@ public class DataHandlersUtil {
         return output.format(d);
     }
     
+    public static String convertFullMonthDateStringFormat(String date) throws ParseException{
+        DateFormat fmt = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        Date d;
+        try {
+            d = fmt.parse(date);
+        } catch (ParseException ex) {
+            fmt = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
+            try {
+                d = fmt.parse(date);
+            } catch (ParseException ex1) {
+                fmt = new SimpleDateFormat("MMMM dd yyyy", Locale.US);
+                d = fmt.parse(date);
+            }
+        }
+        SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd");
+        return output.format(d);
+    }
+    
     public static String getCurrentTimeString(){
         return new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date());
     }
@@ -138,6 +158,41 @@ public class DataHandlersUtil {
         return new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(time);
     }
     
+    /**
+     * 
+     * @param dateStr1 : yyyy-MM-dd
+     * @param dateStr2 : yyyy-MM-dd
+     * @return : is dateStr1 before dateStr2
+     */
+    public static Integer datesCompare(String dateStr1, String dateStr2){
+        Integer isBefore = null;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date date1 = sdf.parse(dateStr1);
+            Date date2 = sdf.parse(dateStr2);
+            isBefore = date1.compareTo(date2);
+        } catch (ParseException ex) {
+            logger.error(ex);
+        }
+        return isBefore;
+    }
+    
+    /**
+     * 
+     * @param date : yyyy-MM-dd
+     * @return : yyyy
+     */
+    public static String getYearFromSimpleDateString(String date){
+        try {
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            Date newDate = format.parse(date);
+            SimpleDateFormat df = new SimpleDateFormat("yyyy");
+            return df.format(newDate);
+        } catch (ParseException ex) {
+            logger.error("Cannot get year from date string", ex);
+        }
+        return null;
+    }
         
     public static void writeCsvData(String csvFilePath, List<List<String>> data){
         FileWriter writer = null;

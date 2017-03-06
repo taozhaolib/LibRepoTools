@@ -55,7 +55,7 @@ public class SageDataUtil {
     }
     
     public static String getArticleUrlByDoi(String doi){
-        return SAGE_FULL_TEXT_HTTP_PREFIX + "10.1177/1477971416672328";
+        return SAGE_FULL_TEXT_HTTP_PREFIX + doi;
     }
     
     public static boolean hasFullAccess(Document doc) throws NoHtmlComponentsFoundException{

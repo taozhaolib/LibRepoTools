@@ -8,7 +8,7 @@ package org.shareok.data.ouhistory;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
-import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.ouhistory.exceptions.FileAlreadyExistsException;
 import org.shareok.data.ouhistory.exceptions.NonCsvFileException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,18 +37,18 @@ public class OuHistoryJournalDataProcessorImpl implements OuHistoryJournalDataPr
     public String processSafpackage() {
         try{
             String csvPath = journalData.getFilePath();
-            String extension = FileUtil.getFileExtension(journalData.getFilePath());
+            String extension = DocumentProcessorUtil.getFileExtension(journalData.getFilePath());
             if(null == extension || !extension.contains("csv")){
                 throw new NonCsvFileException("The uploaded file is not a CSV file!");
             }
             SAFPackage safPackageInstance = new SAFPackage();
             safPackageInstance.processMetaPack(csvPath, true);
-            String csvDirectoryPath = FileUtil.getFileContainerPath(csvPath);
+            String csvDirectoryPath = DocumentProcessorUtil.getFileContainerPath(csvPath);
             File csv = new File(csvPath);
             File safPackage = new File(csvDirectoryPath + File.separator + "SimpleArchiveFormat.zip");
             File newPackage = null;
             if(safPackage.exists()){
-                newPackage = new File(csvDirectoryPath + File.separator + FileUtil.getFileNameWithoutExtension(csv.getName()) + ".zip");
+                newPackage = new File(csvDirectoryPath + File.separator + DocumentProcessorUtil.getFileNameWithoutExtension(csv.getName()) + ".zip");
                 if(!newPackage.exists()){
                     safPackage.renameTo(newPackage);
                 }

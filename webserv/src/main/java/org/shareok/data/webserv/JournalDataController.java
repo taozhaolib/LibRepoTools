@@ -403,6 +403,7 @@ public class JournalDataController {
         String articlesData = serviceObj.getApiResponseByDatesAffiliate(startDate, endDate, affiliate);
         // ** escape the single quote as the jquery might have problem in parsing the data  **
         articlesData = articlesData.replace('\'', '\\');
+        articlesData = articlesData.replace("’", "'");
         
         RedirectView view = new RedirectView();
         view.setContextRelative(true);

@@ -43,7 +43,7 @@
                                             var articlesStr = '<%= request.getAttribute("articles") %>';
                                             var articleData = "articlesStr=" + articlesStr + "&&startDate=" + startDate + "&&endDate=" + endDate;
                                             $.each(articles, function(index, value){
-                                                dois += value.doi.trim();
+                                                dois += value.doi.trim() + ";";
                                             });
                                             $("input[name='btnSearchArticlesSaf']").click(function(){
                                                 $(".spining-class").show();

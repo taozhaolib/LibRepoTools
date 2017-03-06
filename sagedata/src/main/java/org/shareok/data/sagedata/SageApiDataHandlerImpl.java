@@ -217,11 +217,11 @@ public class SageApiDataHandlerImpl implements SageApiDataHandler {
                         String pdfLinkStr = SageDataUtil.SAGE_HTTP_PREFIX + pdfLink.attr("href").trim();
                         articleInfoMap.put("PDF link", pdfLinkStr);
                         try{
-                            articleInfoMap.put("doi", pdfLinkStr.split("pdf/")[1]+";");
+                            articleInfoMap.put("doi", pdfLinkStr.split("pdf/")[1]);
                         }
                         catch(Exception ex){
                             try{
-                                articleInfoMap.put("doi", abstractLink.split("doi/abs/")[1]+";");
+                                articleInfoMap.put("doi", abstractLink.split("doi/abs/")[1]);
                             }
                             catch(Exception ex2){
                                 articleInfoMap.put("doi", "");
@@ -236,12 +236,12 @@ public class SageApiDataHandlerImpl implements SageApiDataHandler {
                         String journalStr = journal.text();
                         articleInfoMap.put("journal", journalStr);
                         
-                        Elements authors = article.select("a.entryAuthor");
+                        Elements authorSpans = article.select("div.author").get(0).select("span.contribDegrees");
                         String authorsStr = "";
-                        for(Element author : authors){
-                            authorsStr += author.text() + ";";
+                        for(Element authorSpan : authorSpans){
+                            authorsStr += authorSpan.select("a.entryAuthor").get(0).text() + ";";
                         }
-                        articleInfoMap.put("author", authorsStr);
+                        articleInfoMap.put("author", authorsStr.substring(0, authorsStr.length()-2));
 
                         articleList.add(articleInfoMap);
                     }      

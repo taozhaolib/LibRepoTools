@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
 import org.shareok.data.datahandlers.JobHandler;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
-import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.JobDao;
 import org.shareok.data.redis.job.RedisJob;
@@ -240,7 +240,7 @@ public class IslandoraSshHandler implements JobHandler {
             if(!reportFile.exists()){
                 reportFile.createNewFile();
             }
-            FileUtil.outputStringToFile(sshExec.getReporter(), reportFilePath);
+            DocumentProcessorUtil.outputStringToFile(sshExec.getReporter(), reportFilePath);
         }
         catch(IOException ioex){
             logger.error("Cannot save importing report!");

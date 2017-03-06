@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
-import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.documentProcessor.FileZipper;
 import org.shareok.data.documentProcessor.exceptions.FileTypeException;
 import org.shareok.data.dspacemanager.DspaceJournalDataUtil;
@@ -54,7 +54,7 @@ public class OuHistoryJournalDataHandlerImpl implements OuHistoryJournalDataHand
                 data.setFilePath(file.getAbsolutePath());
                 processor.setJournalData(data);
                 String safPath = processor.processSafpackage();
-                if(!FileUtil.isEmptyString(safPath)){
+                if(!DocumentProcessorUtil.isEmptyString(safPath)){
                     safPackagePathList.add(safPath);
                 }
             }
@@ -72,7 +72,7 @@ public class OuHistoryJournalDataHandlerImpl implements OuHistoryJournalDataHand
         try {
             String filePath = DspaceJournalDataUtil.saveUploadedData(file, "ouhistory");
             if(null != filePath){
-                String extension = FileUtil.getFileExtension(filePath);
+                String extension = DocumentProcessorUtil.getFileExtension(filePath);
                 if(null == extension || !extension.contains("zip")){
                     throw new FileTypeException("The uploaded file is NOT a zip file");
                 }

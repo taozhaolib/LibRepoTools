@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.shareok.data.documentProcessor.CsvHandler;
-import org.shareok.data.documentProcessor.FileUtil;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.lawlibrary.exceptions.DateReformatException;
 import org.springframework.beans.factory.annotation.Autowired;
 import safbuilder.SAFPackage;
@@ -25,7 +25,7 @@ import safbuilder.SAFPackage;
  */
 public class LawLibDataHandlerImpl implements LawLibDataHandler{
     
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(LawLibDataHandlerImpl.class);
+//    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(LawLibDataHandlerImpl.class);
     
     private static final String SERIAL_A_REGX = "^(.*)(-Serial-)(\\d+).pdf$";
     public static final String[] COULUMNS_TO_BE_DELETED = {"Maps", "Fold-Out Charts", "collection name (repeatable)", "Special Collection (repeatable)", "rights (repeatable)", "media_type (repeatable)", "file_format (repeatable)"};
@@ -174,7 +174,7 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
             int newRecordCount = 0;
             for(int i = 1; i < csv.getRecordCount(); i++){
                 String key = "file_location-" + String.valueOf(i);
-                String csvFileName = FileUtil.getFileNameWithoutExtension((String)data.get(key));
+                String csvFileName = DocumentProcessorUtil.getFileNameWithoutExtension((String)data.get(key));
                 if(csvFileName.toLowerCase().endsWith(".pdf")){
                     csvFileName = csvFileName.replace(".pdf", "");
                     csvFileName = csvFileName.replace(".PDF", "");
@@ -237,8 +237,8 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
             csv.setFileHeadMapping(newHeadingsArray);
             csv.setRecordCount(newRecordCount);
             outputCsvFilePath = csv.outputData(outputFilePath + File.separator + "metadata.csv");
-            FileUtil.outputStringToFile(String.join("\n", matchedPdfFileList), new File(outputFilePath).getPath() + File.separator + "matchedPdfFiles.txt");
-            FileUtil.outputStringToFile(String.join("\n", getUnmatchedFileList()), new File(outputFilePath).getPath() + File.separator + "unmatchedPdfFiles.txt");
+            DocumentProcessorUtil.outputStringToFile(String.join("\n", matchedPdfFileList), new File(outputFilePath).getPath() + File.separator + "matchedPdfFiles.txt");
+            DocumentProcessorUtil.outputStringToFile(String.join("\n", getUnmatchedFileList()), new File(outputFilePath).getPath() + File.separator + "unmatchedPdfFiles.txt");
         }
         catch(Exception ex){
             logger.error("Cannot clean up the data.", ex);
@@ -286,11 +286,11 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
     }
     
     public void getPdfFileListFromTextFile(String filePath){
-        setPdfFileList(FileUtil.readTextFileIntoList(filePath));
+        setPdfFileList(DocumentProcessorUtil.readTextFileIntoList(filePath));
     }
     
     public void getMatchedFileListFromTextFile(String filePath){
-        setMatchedPdfFileList(FileUtil.readTextFileIntoList(filePath));
+        setMatchedPdfFileList(DocumentProcessorUtil.readTextFileIntoList(filePath));
     }
     
     /**
@@ -303,7 +303,7 @@ public class LawLibDataHandlerImpl implements LawLibDataHandler{
             String name = file.getName();
             String parent = file.getParent();
             if(file.getPath().toLowerCase().endsWith(".pdf")){                
-                String nameWithoutExtension = FileUtil.getFileNameWithoutExtension(name);
+                String nameWithoutExtension = DocumentProcessorUtil.getFileNameWithoutExtension(name);
                 if(nameWithoutExtension.toLowerCase().endsWith(".pdf")){
                     nameWithoutExtension = nameWithoutExtension.replaceAll(".pdf", "");
                     nameWithoutExtension = nameWithoutExtension.replaceAll(".PDF", "");

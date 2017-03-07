@@ -38,11 +38,11 @@
                         <div class="form-group">
                             <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="serverName">${repository2} server name:</label>
                             <div class="col-lg-6 col-md-8 col-sm-8">
-                              <input type="text" class="form-control" name="serverName">
+                              <input type="text" class="form-control server-info" name="serverName">
                             </div>
                             <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="serverId">${repository2} server ID:</label>
                             <div class="col-lg-2 col-md-8 col-sm-8">
-                              <input type="text" class="form-control" name="serverId">
+                              <input type="text" class="form-control server-info" name="serverId">
                             </div>
                             <br><br><br>                                                   
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="parentPid">Parent Collection PID:</label>

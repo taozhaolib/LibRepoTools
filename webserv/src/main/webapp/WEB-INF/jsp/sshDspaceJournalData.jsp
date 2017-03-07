@@ -42,12 +42,12 @@
                         <c:if test="${jobType == 'ssh-importloaded'}">
                             <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="saf-online">Path to the Uploaded Package on the Server:</label>
                                 <div class="col-lg-4 col-md-8 col-sm-8">
-                                    <input type="text" class="file-input" name="saf-online" />
+                                    <input type="text" class="file-input server-info" name="saf-online" />
                                 </div>
                             <div class="form-group">
                                 <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="old-jobId">ID of the Uploading Job:</label>
                                 <div class="col-lg-4 col-md-8 col-sm-8">
-                                  <input type="text" class="form-control" name="old-jobId">
+                                  <input type="text" class="form-control server-info" name="old-jobId">
                                 </div>
                             </div>
                         </c:if>
@@ -60,23 +60,23 @@
                         <div class="form-group">
                             <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="serverName">Dspace server name:</label>
                             <div class="col-lg-6 col-md-8 col-sm-8">
-                              <input type="text" class="form-control" name="serverName">
+                              <input type="text" class="form-control server-info" name="serverName">
                             </div>
                             <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="serverId">Dspace server ID:</label>
                             <div class="col-lg-2 col-md-8 col-sm-8">
-                              <input type="text" class="form-control" name="serverId">
+                              <input type="text" class="form-control server-info" name="serverId">
                             </div>
                         </div>
                             <br><br>
                         <div class="form-group">
                             <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="dspaceDirectory">DSpace Installation Directory:</label>
                             <div class="col-lg-4 col-md-8 col-sm-8">
-                              <input type="text" class="form-control" name="dspaceDirectory" placeholder="">
+                              <input type="text" class="form-control server-info" name="dspaceDirectory" placeholder="">
                             </div>
                             <div class="form-group">
                                 <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="uploadDst">DSpace Upload Directory:</label>
                                 <div class="col-lg-4 col-md-8 col-sm-8">
-                                  <input type="text" class="form-control" name="uploadDst" placeholder="">
+                                  <input type="text" class="form-control server-info" name="uploadDst" placeholder="">
                                 </div>
                             </div>
                         </div>
@@ -84,11 +84,11 @@
                         <div class="form-group">
                             <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="dspaceUser">DSpace User Name:</label>
                             <div class="col-lg-4 col-md-8 col-sm-8">
-                              <input type="text" class="form-control" name="dspaceUser" placeholder="">
+                              <input type="text" class="form-control server-info" name="dspaceUser" placeholder="">
                             </div>
                             <label class="control-label col-lg-2 col-md-4 col-sm-4 text-left" for="collectionId">Collection Id:</label>
                             <div class="col-lg-4 col-md-8 col-sm-8">
-                              <input type="text" class="form-control" name="collectionId" placeholder="">
+                              <input type="text" class="form-control server-info" name="collectionId" placeholder="">
                             </div>
                         </div>
                         <br/><br/><br/>

@@ -44,9 +44,10 @@
             });
             $(".server-link").click(function(){
                 var id = $(this).attr("id").split("server-")[1];
+                $("input.server-info").val("");
                 for(var key in serverParser[id]){
                     if(serverParser[id].hasOwnProperty(key)){
-                        //alert("key = "+key+" value ="+serverParser[id][key]);
+                        //alert("key = "+key+" value ="+serverParser[id][key]);                        
                         switch(key){
                             case "serverId":
                                 $("input[name='serverId']").val(serverParser[id][key]);
@@ -86,6 +87,9 @@
                                 break;
                             case "address":
                                 $("input[name='address']").val(serverParser[id][key]);
+                                break;
+                            case "prefix":
+                                $("input[name='prefix']").val(serverParser[id][key]);
                                 break;
                             case "repoType":
                                 var repoType = serverParser[id][key];

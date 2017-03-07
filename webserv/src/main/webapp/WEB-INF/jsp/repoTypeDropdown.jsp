@@ -30,6 +30,10 @@
                                                 "<div class=\"col-lg-4 col-sm-8\">" +          
                                                     "<input type=\"text\" class=\"form-control\" name=\"dspaceUploadPath\">" +
                                                 "</div><br><br>" +
+                                                "<label class=\"control-label col-lg-2 col-sm-4 text-left\" for=\"prefix\">Handle ID Prefix:</label>" +
+                                                "<div class=\"col-lg-4 col-sm-8\">" +          
+                                                    "<input type=\"text\" class=\"form-control\" name=\"prefix\">" +
+                                                "</div><br><br>" +
                                                 "<br></fieldset><br></div>");
                         break;
                     case "2":

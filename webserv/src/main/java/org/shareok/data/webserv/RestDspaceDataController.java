@@ -22,6 +22,7 @@ import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.redis.RedisUtil;
 import org.shareok.data.redis.job.DspaceApiJob;
 import org.shareok.data.redis.job.RedisJob;
+import org.shareok.data.redis.server.DspaceRepoServer;
 import org.shareok.data.webserv.exceptions.JobProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -135,9 +136,10 @@ public class RestDspaceDataController {
             return model;
         }
         
+        DspaceRepoServer server = (DspaceRepoServer)serverService.findServerById(job.getServerId());
         String userId = String.valueOf(request.getSession().getAttribute("userId"));
         job.setUserId(Long.valueOf(userId));
-        job.setCollectionId(DspaceDataUtil.DSPACE_REPOSITORY_HANDLER_ID_PREFIX + job.getCollectionId());
+        job.setCollectionId(server.getPrefix() + "/" + job.getCollectionId());
         job.setRepoType(DataUtil.getRepoTypeIndex(repoTypeStr));
         job.setType(DataUtil.getJobTypeIndex(jobType, repoTypeStr));
         job.setStatus(Arrays.asList(RedisUtil.REDIS_JOB_STATUS).indexOf("created"));

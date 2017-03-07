@@ -418,13 +418,14 @@ public class RepoServerDaoImpl implements RepoServerDao {
         return null;
     }
     
+    @Override
     public String[] getRepoTypeServerFields(int repoType){
         
         String[] fields = null;
         
         switch(repoType){
             case 1:
-                fields = new String[]{"dspacePath","dspaceUploadPath"};
+                fields = new String[]{"dspacePath","dspaceUploadPath", "prefix"};
                 break;
             case 2:
                 fields = new String[]{"islandoraUploadPath","drupalPath","tempFilePath"};

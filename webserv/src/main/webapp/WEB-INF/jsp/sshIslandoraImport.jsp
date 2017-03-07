@@ -50,11 +50,11 @@
                         <div class="form-group">
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="serverName">Islandora server name:</label>
                             <div class="col-lg-6 col-sm-8">
-                              <input type="text" class="form-control" name="serverName">
+                              <input type="text" class="form-control server-info" name="serverName">
                             </div>
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="serverId">Islandora server ID:</label>
                             <div class="col-lg-2 col-sm-8">
-                              <input type="text" class="form-control" name="serverId">
+                              <input type="text" class="form-control server-info" name="serverId">
                             </div>
                         </div>
                         <br><br>                        

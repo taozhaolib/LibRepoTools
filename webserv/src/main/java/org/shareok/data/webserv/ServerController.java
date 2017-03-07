@@ -71,8 +71,7 @@ public class ServerController {
     
     @RequestMapping("/server/update")
     public ModelAndView serverUpdate(RedirectAttributes redirectAttrs, HttpServletRequest request, @ModelAttribute("SpringWeb")RepoServer server){
-        
-        HttpSession session = request.getSession();
+
         ModelAndView model = new ModelAndView();
         RedirectView view = new RedirectView();
         view.setContextRelative(true);

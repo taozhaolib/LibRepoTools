@@ -10,8 +10,13 @@ package org.shareok.data.redis.server;
  * @author Tao Zhao
  */
 public class DspaceRepoServer extends RepoServer {
+    private String prefix;
     private String dspacePath;
     private String dspaceUploadPath;
+
+    public String getPrefix() {
+        return prefix;
+    }
 
     public String getDspacePath() {
         return dspacePath;
@@ -19,6 +24,10 @@ public class DspaceRepoServer extends RepoServer {
 
     public String getDspaceUploadPath() {
         return dspaceUploadPath;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
     }
 
     public void setDspacePath(String dspacePath) {

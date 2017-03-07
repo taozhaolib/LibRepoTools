@@ -24,42 +24,42 @@
                     <div class="form-group">
                         <label class="control-label col-lg-2 col-sm-4 text-left" for="serverName">Server Name: </label>
                         <div class="col-lg-6 col-sm-8">
-                          <input type="text" class="form-control" name="serverName" placeholder="">
+                          <input type="text" class="form-control server-info" name="serverName" placeholder="">
                         </div>
                         <label class="control-label col-lg-2 col-sm-4 text-left" for="port">Port Number:</label>
                         <div class="col-lg-2 col-sm-8">
-                          <input type="text" class="form-control" name="port" placeholder="22">
+                          <input type="text" class="form-control server-info" name="port" placeholder="22">
                         </div>
                     </div>
                         <br><br><br>
                     <div class="form-group">
                         <label class="control-label col-lg-2 col-sm-4 text-left" for="host">Host:</label>
                         <div class="col-lg-4 col-sm-8">
-                          <input type="text" class="form-control" name="host" placeholder="Domain or IP address">
+                          <input type="text" class="form-control server-info" name="host" placeholder="Domain or IP address">
                         </div>
                         <label class="control-label col-lg-2 col-sm-4 text-left" for="userName">Server User Name:</label>
                         <div class="col-lg-4 col-sm-8">
-                          <input type="text" class="form-control" name="userName" placeholder="">
+                          <input type="text" class="form-control server-info" name="userName" placeholder="">
                         </div>
                     </div>
                     <br/><br/><br/>
                     <div class="form-group">
                         <label class="control-label col-lg-2 col-sm-4 text-left" for="rsaKey">RSA Key File:</label>
                         <div class="col-lg-4 col-sm-8">
-                          <input type="text" class="form-control" name="rsaKey" placeholder="">
+                          <input type="text" class="form-control server-info" name="rsaKey" placeholder="">
                         </div>   
                         <label class="control-label col-lg-2 col-sm-2 text-left" for="password">User Password:</label>
                         <div class="col-lg-4 col-sm-6">          
-                            <input type="password" class="form-control" name="password" placeholder="Enter password">
+                            <input type="password" class="form-control server-info" name="password" placeholder="Enter password">
                         </div>
                     </div>
                     <br/><br/>
                     <div class="form-group">
                         <label class="control-label col-lg-2 col-sm-4 text-left" for="address">Web address:</label>
                         <div class="col-lg-4 col-sm-8">
-                          <input type="text" class="form-control" name="address" placeholder="">
+                          <input type="text" class="form-control server-info" name="address" placeholder="">
                         </div>   
-                        
+                          
                     </div>
                     <br/><br/>
                     <div class="col-lg-6 col-sm-12">
@@ -69,11 +69,11 @@
                     <div class="form-group click-show-slow">
                         <label class="control-label col-lg-2 col-sm-4 text-left" for="proxyHost">Proxy Host:</label>
                         <div class="col-lg-6 col-sm-8">
-                          <input type="text" class="form-control" name="proxyHost" placeholder="Domain or IP address">
+                          <input type="text" class="form-control server-info" name="proxyHost" placeholder="Domain or IP address">
                         </div>
                         <label class="control-label col-lg-2 col-sm-4 text-left" for="proxyPort">Proxy Port Number:</label>
                         <div class="col-lg-2 col-sm-8">
-                          <input type="text" class="form-control" name="proxyPort" placeholder="22">
+                          <input type="text" class="form-control server-info" name="proxyPort" placeholder="22">
                         </div>
                         <br><br><br>
                     </div>
@@ -81,16 +81,16 @@
                     <div class="form-group click-show-slow">
                         <label class="control-label col-lg-2 col-sm-4 text-left" for="proxyUserName">Proxy Server User Name:</label>
                         <div class="col-lg-4 col-sm-8">
-                          <input type="text" class="form-control" name="proxyUserName" placeholder="">
+                          <input type="text" class="form-control server-info" name="proxyUserName" placeholder="">
                         </div>
                         <label class="control-label col-lg-2 col-sm-4 text-left" for="proxyPassword">Proxy Password:</label>
                         <div class="col-lg-4 col-sm-8">          
-                            <input type="password" class="form-control" name="proxyPassword" placeholder="Enter password">
+                            <input type="password" class="form-control server-info" name="proxyPassword" placeholder="Enter password">
                         </div>
                         <br><br><br>
                         <label class="control-label col-lg-2 col-sm-4 text-left" for="passPhrase">Passphrase:</label>
                         <div class="col-lg-4 col-sm-8">          
-                            <input type="password" class="form-control" name="passPhrase" placeholder="Enter password">
+                            <input type="password" class="form-control server-info" name="passPhrase" placeholder="Enter password">
                         </div>                        
                         <br><br>                     
                     </div>

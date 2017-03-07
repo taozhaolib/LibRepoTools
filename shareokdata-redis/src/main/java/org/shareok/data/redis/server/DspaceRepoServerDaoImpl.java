@@ -29,6 +29,7 @@ public class DspaceRepoServerDaoImpl implements RepoTypeServerDao {
                 throw new IncompleteServerInformationException("Server repository type information is missing!");
             }
             dServer = (DspaceRepoServer) getRepoTypeServerFromAbstract(server);
+            dServer.setPrefix((String)serverOps.get("prefix"));
             dServer.setDspacePath((String)serverOps.get("dspacePath"));
             dServer.setDspaceUploadPath((String)serverOps.get("dspaceUploadPath"));
         }

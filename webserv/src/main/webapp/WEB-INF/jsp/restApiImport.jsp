@@ -55,11 +55,11 @@
                             </div>
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="serverName">${repoType2} server name:</label>
                             <div class="col-lg-6 col-sm-8">
-                              <input type="text" class="form-control" name="serverName">
+                              <input type="text" class="form-control server-info" name="serverName">
                             </div>
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="serverId">${repoType2} server ID:</label>
                             <div class="col-lg-2 col-sm-8">
-                              <input type="number" class="form-control" name="serverId">
+                              <input type="number" class="form-control server-info" name="serverId">
                             </div>
                         </div>
                         <br><br>
@@ -79,7 +79,7 @@
                         <div class="form-group">                            
                             <label class="control-label col-lg-2 col-sm-4 text-left" for="collectionId">Collection ID (exclude the prefix):</label>
                             <div class="col-lg-4 col-sm-8">
-                              <input type="text" class="form-control" name="collectionId" placeholder="">
+                              <input type="text" class="form-control server-info" name="collectionId" placeholder="">
                             </div>
                         </div>
                         <br/><br/>

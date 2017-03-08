@@ -21,18 +21,22 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import org.apache.poi.util.IOUtils;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 /**
  *
@@ -117,9 +121,9 @@ public class DocumentProcessorUtil {
     
     /**
      *
-     * @param filePath
-     * @param tagName
-     * @return
+     * @param filePath : file path
+     * @param tagName : tag name
+     * @return : value of the elements
      */
     public static String[] getDataFromXmlByTagName(String filePath, String tagName) {
         String[] data = null;
@@ -162,8 +166,61 @@ public class DocumentProcessorUtil {
             data = new String[size];
             data = dataList.toArray(data);
             
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (ParserConfigurationException | SAXException | IOException | DOMException ex) {
+            logger.error("Cannot get the data from file at "+filePath+" by tag name "+tagName, ex);
+        }
+        return data;
+    }
+    
+    /**
+     *
+     * @param filePath : file path
+     * @param tagName : tag name
+     * @param attributeMap : the map of attribute name-value map. Note: no null value contained in this map
+     * @return : value of the elements
+     */
+    public static String[] getDataFromXmlByTagNameAndAttributes(String filePath, String tagName, Map<String, String>attributeMap) {
+        String[] data = null;
+        try {
+            File file = new File(filePath);
+
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(file);
+            doc.getDocumentElement().normalize();
+
+            NodeList nList = doc.getElementsByTagName(tagName);
+            
+            int length = nList.getLength();
+            
+            if(length == 0){
+                return null;
+            }
+
+            List<String> dataList = new ArrayList<>();
+            for (int temp = 0; temp < length; temp++) {
+                    Node nNode = nList.item(temp);
+                    if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+                        boolean attrMatched = true;
+                        Element eElement = (Element) nNode;
+                        for(String att : attributeMap.keySet()){
+                            String val = attributeMap.get(att);
+                            if(!eElement.hasAttribute(att) || !val.equals(eElement.getAttribute(att))){
+                                attrMatched= false;
+                            }
+                        }
+                        if(attrMatched == true){
+                            dataList.add(eElement.getTextContent());
+                        }
+                    }
+            }
+            
+            int size = dataList.size();
+            data = new String[size];
+            data = dataList.toArray(data);
+            
+        } catch (ParserConfigurationException | SAXException | IOException | DOMException ex) {
+            logger.error("Cannot get the data from file at "+filePath+" by tag name "+tagName+" and attributes map", ex);
         }
         return data;
     }

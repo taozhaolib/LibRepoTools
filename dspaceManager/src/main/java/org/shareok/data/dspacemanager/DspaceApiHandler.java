@@ -54,6 +54,8 @@ public interface DspaceApiHandler extends JobHandler {
     public void deleteItemById(String id);
     public void deleteItemsByCollectionId(String id);
     
+    public boolean checkDuplicatesByDoi(String doi, String collectionHandle, String dspaceApiUrl);
+    
     @Override
     public void setJob(RedisJob job);
     @Override

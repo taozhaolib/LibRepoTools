@@ -756,6 +756,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         Map<String, List<String>> importResults = new HashMap<>();
         String collectionHandle = job.getCollectionId();
         String safPath = job.getFilePath();
+        String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
         
         try{            
             File safFile = new File(safPath);
@@ -766,6 +767,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                 safFile = new File(newPath);
             }
             if(safFile.isDirectory()){
+                mainLoop:
                 for(File file : safFile.listFiles()){
                     if(null != file && file.isDirectory()){
                         
@@ -788,13 +790,22 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                 contentFile = itemFile;
                             }
                             else if(METADATA_FILE_NAMES_LIST.contains(fileName.replaceAll(".xml", ""))){
+                                // Check if there are some duplicates based on doi
+                                if(fileName.contains("dublin")){
+                                    String doi = findDoiFromDublin(itemFile.getAbsolutePath());
+                                    if(null != doi && checkDuplicatesByDoi(doi, collectionHandle, dspaceApiUrl)){
+                                        logger.debug("Duplication detected:in collection "+collectionHandle+" there has already been an item with doi="+doi);
+                                        output += "Duplication detected:in collection \"+collectionHandle+\" there has already been an item with doi="+doi+".\n\n";
+                                        continue mainLoop;
+                                    }
+                                }
                                 containsMetadataFile = true;
                                 metadataFileList.add(itemFile);
                             }
                         }
                         if(containsContentsFile == true && containsMetadataFile == true){
                             // Create the new item now:
-                            Map newItemInfo = createEmptyItem(getObjectIdByHandler(collectionHandle));
+                            Map newItemInfo = createEmptyItem(getObjectIdByHandler(collectionHandle, dspaceApiUrl));
                             String newItemId = String.valueOf(newItemInfo.get("id"));
                             String newItemHandle = (String)newItemInfo.get("handle");
                             logger.debug("A new item with handle = "+newItemHandle+" has been added to collection "+collectionHandle+".");
@@ -1014,5 +1025,27 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     @Override
     public String getRepoType() {
         return DataUtil.REPO_TYPES[job.getRepoType()];
+    }
+
+    @Override
+    public boolean checkDuplicatesByDoi(String doi, String collectionHandle, String dspaceApiUrl){
+        Map<String, String> dois = getItemDoisByCollectionHandler(collectionHandle, dspaceApiUrl);
+        return dois.containsKey(doi);
+    }
+    
+    /**
+     * Dig out the doi from dublin.xml file
+     * @param dublin : file path of dublin.xml. 
+     *  an example: <dcvalue element="identifier" language="en_US" qualifier="doi">10.1177/0194599816689660</dcvalue> 
+     * @return : doi value
+     */
+    private String findDoiFromDublin(String dublinPath){
+        Map<String, String>attrMap = new HashMap<>();
+        attrMap.put("qualifier", "doi");
+        String doi[] = DocumentProcessorUtil.getDataFromXmlByTagNameAndAttributes(dublinPath, "dcvalue", attrMap);
+        if(null != doi && doi.length > 0){
+            return doi[0];
+        }
+        return null;
     }
 }

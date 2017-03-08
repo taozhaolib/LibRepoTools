@@ -128,5 +128,10 @@ public class DspaceRestServiceImpl implements DspaceRestService {
     public Map<String, String> getItemDoisByCollectionHandler(String handle, String dspaceApiUrl) {
         return handler.getItemDoisByCollectionHandler(handle, dspaceApiUrl);
     }
+
+    @Override
+    public boolean checkDuplicatesByDoi(String doi, String collectionHandle, String dspaceApiUrl) {
+        return handler.checkDuplicatesByDoi(doi, collectionHandle, dspaceApiUrl);
+    }
     
 }

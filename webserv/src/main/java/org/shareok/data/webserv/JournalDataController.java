@@ -401,9 +401,9 @@ public class JournalDataController {
         String affiliate = request.getParameter("affiliate");
         DspaceJournalDataService serviceObj = ServiceUtil.getDspaceJournalDataServInstanceByPublisher(publisher);
         String articlesData = serviceObj.getApiResponseByDatesAffiliate(startDate, endDate, affiliate);
-        // ** escape the single quote as the jquery might have problem in parsing the data  **
-        articlesData = articlesData.replace('\'', '\\');
+        // ** escape the single quote as the jquery might have problem in parsing the data  **        
         articlesData = articlesData.replace("’", "'");
+        articlesData = articlesData.replaceAll("\\'", "\\\\'");
         
         RedirectView view = new RedirectView();
         view.setContextRelative(true);

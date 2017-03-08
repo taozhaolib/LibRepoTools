@@ -140,8 +140,9 @@ public class PlosApiDataImpl implements PlosApiData {
                 else{
                     val = node.getTextContent();
                 }
-                if(val.endsWith(";  ")){
-                    val = val.substring(0, val.length()-2);
+                val = val.trim();
+                if(val.endsWith(";")){
+                    val = val.substring(0, val.length()-1);
                 }
                 if(attributeVal.equals("publication_date")){
                     attributeVal = "publication date";

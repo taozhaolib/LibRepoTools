@@ -24,20 +24,31 @@ public interface DspaceApiHandler extends JobHandler {
     public Map<String, String> addItemBitstream(String id, String filePath, String fileName, String description);
     
     public int getItemCountByCollectionHandler(String handle);
+    public int getItemCountByCollectionHandler(String handle, String dspaceApiUrl);
     public int getItemCountByCollectionId(String id);
+    public int getItemCountByCollectionId(String id, String dspaceApiUrl);
     
     public String getTokenFromServer();
     public String getItemsInfoByCollectionId(String id);
     public String getItemsInfoByCollectionHandler(String handle);
     public String getObjectInfoByHandler(String handle);
+    public String getObjectInfoByHandler(String handle, String dspaceApiUrl);
     public String getObjectIdByHandler(String handle);    
+    public String getObjectIdByHandler(String handle, String dspaceApiUrl);
     public String addItemMetadata(String id, String data);
     
     public String[] getItemIdsByCollectionId(String id);
+    public String[] getItemIdsByCollectionId(String id, String dspaceApiUrl);
     public String[] getItemIdsByCollectionHandler(String handle);
-    public String[] getMetadataValuesByKey(String itemId, String key);    
+    public String[] getItemIdsByCollectionHandler(String handle, String dspaceApiUrl);
+    
+    public Map<String, String> getItemDoisByCollectionHandler(String handle, String dspaceApiUrl);
+    
+    public String[] getMetadataValuesByKey(String itemId, String key); 
+    public String[] getMetadataValuesByKey(String itemId, String key, String dspaceApiUrl);
     
     public List<Map<String, Object>> getItemMetadataById(String id);
+    public List<Map<String, Object>> getItemMetadataById(String id, String dspaceApiUrl);
             
     public void updateItemMetadata(String id, List<Map<String, String>> data);
     public void deleteItemById(String id);

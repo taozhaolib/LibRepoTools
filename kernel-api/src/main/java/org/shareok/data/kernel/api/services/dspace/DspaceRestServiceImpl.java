@@ -123,5 +123,10 @@ public class DspaceRestServiceImpl implements DspaceRestService {
             logger.error("Incomplete handler information for the DSpace Rest API request");
         }
     }
+
+    @Override
+    public Map<String, String> getItemDoisByCollectionHandler(String handle, String dspaceApiUrl) {
+        return handler.getItemDoisByCollectionHandler(handle, dspaceApiUrl);
+    }
     
 }

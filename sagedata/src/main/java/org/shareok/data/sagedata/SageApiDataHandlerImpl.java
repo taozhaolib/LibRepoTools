@@ -42,10 +42,11 @@ public class SageApiDataHandlerImpl implements SageApiDataHandler {
         System.out.println("query = " + query);
         List<Map<String, String>>articleList = new ArrayList<>();
         int currentIndex = -1;
-        int total = -1;
+        int total = -1;        
         int page = 0;
         try {
-            while(currentIndex < total || total == -1){
+            int count = 0;
+            while((currentIndex < total && count < total) || total == -1){
                 if(currentIndex != -1){
                     query = getApiQuery(startDate, endDate, affiliate, String.valueOf(page));
                 }
@@ -63,17 +64,18 @@ public class SageApiDataHandlerImpl implements SageApiDataHandler {
                 }
                 currentIndex = getCurrentArticleIndex(doc);            
                 getArticleInfoFromDoc(articleList, doc);
+                count += 20;
                 page++;
             }
             
-            int count = 0;
+            int index = 0;
             List<Integer> removeList = new ArrayList<>();
             for(Map<String, String> articleInfo : articleList){
                 String pubDate = articleInfo.get("publication date");
                 if(DataHandlersUtil.datesCompare(startDate, pubDate) > 0 || DataHandlersUtil.datesCompare(pubDate, endDate) > 0){
-                    removeList.add(count);
+                    removeList.add(index);
                 }
-                count++;
+                index++;
             }
             
             int length = removeList.size();
@@ -111,7 +113,7 @@ public class SageApiDataHandlerImpl implements SageApiDataHandler {
             String startYear = DataHandlersUtil.getYearFromSimpleDateString(startDate);
             String endYear = DataHandlersUtil.getYearFromSimpleDateString(endDate);
             
-            return SageDataUtil.API_SEARCH_PREFIX + "field1=Affiliation&text1=\"" + URLEncoder.encode(affiliate, "UTF-8")+ "\"&field2=AllField&text2=&Ppub=&Ppub=&AfterYear=" + startYear + "&BeforeYear=" + endYear + "&access=&pageSize=20&startPage=" + startPage + "&";
+            return SageDataUtil.API_SEARCH_PREFIX + "field1=Affiliation&text1=\"" + URLEncoder.encode(affiliate, "UTF-8")+ "\"&field2=AllField&text2=&content=articlesChapters&Ppub=&Ppub=&AfterYear=" + startYear + "&BeforeYear=" + endYear + "&access=user&pageSize=20&startPage=" + startPage + "&";
         } catch (Exception ex) {
             logger.error("Cannot encode the query parameters!", ex);
         }
@@ -179,20 +181,21 @@ public class SageApiDataHandlerImpl implements SageApiDataHandler {
                         }
                     }
                     boolean fullAccess = false;
-                    Elements accessIcons = article.select("img.freeAccess");
+                    Elements accessIcons = article.select("img.accessIcon");
                     if(null != accessIcons && accessIcons.size() > 0){
                         Element accessIconElement = accessIcons.get(0);
-                        if(accessIconElement.attr("title").equals("Free Access")){
+                        String imgTitle = accessIconElement.attr("title");
+                        if(null != imgTitle && (imgTitle.equals("Full Access") || imgTitle.equals("Open Access"))){
                             fullAccess = true;
                         }
                     }
-                    else{
-                        accessIcons = article.select("img.fullAccess");
-                        if(null != accessIcons && accessIcons.size() > 0){
-                            Element accessIconElement = accessIcons.get(0);
-                            if(accessIconElement.attr("title").equals("Full Access")){
-                                fullAccess = true;
-                            }
+                    if(fullAccess == false){
+                        Element tocDeliverFormatsLinks = article.select("div.tocDeliverFormatsLinks").get(0);
+                        Elements absLinkElements = tocDeliverFormatsLinks.select("a.abstract");
+                        String abstractLink = "";
+                        if(absLinkElements.size()>0){
+                            Element absElement = absLinkElements.get(0);
+                            abstractLink = SageDataUtil.SAGE_HTTP_PREFIX + absElement.attr("href").trim();
                         }
                     }
                     if(fullAccess == true){
@@ -239,7 +242,10 @@ public class SageApiDataHandlerImpl implements SageApiDataHandler {
                         Elements authorSpans = article.select("div.author").get(0).select("span.contribDegrees");
                         String authorsStr = "";
                         for(Element authorSpan : authorSpans){
-                            authorsStr += authorSpan.select("a.entryAuthor").get(0).text() + ";";
+                            Elements entryAuthorEles = authorSpan.select("a.entryAuthor");
+                            if(null != entryAuthorEles && entryAuthorEles.size() > 0){
+                                authorsStr += entryAuthorEles.get(0).text() + ";";
+                            }
                         }
                         articleInfoMap.put("author", authorsStr.substring(0, authorsStr.length()-1));
 

@@ -241,7 +241,7 @@ public class SageApiDataHandlerImpl implements SageApiDataHandler {
                         for(Element authorSpan : authorSpans){
                             authorsStr += authorSpan.select("a.entryAuthor").get(0).text() + ";";
                         }
-                        articleInfoMap.put("author", authorsStr.substring(0, authorsStr.length()-2));
+                        articleInfoMap.put("author", authorsStr.substring(0, authorsStr.length()-1));
 
                         articleList.add(articleInfoMap);
                     }      

@@ -211,6 +211,35 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         return null;
     }
     
+    public String getTokenByUserCredentials(String dspaceApiUrl, String userName, String password){
+        String token = null;
+        try{
+            if(null == userName || "".equals(userName) || null == password || "".equals(password)){
+                throw new EmptyDspaceCredentialInfoException("The DSpace username or DSpace password information is missing!");
+            }
+        
+            Map<String, String> headerInfo = new HashMap<>();
+            headerInfo.put("Content-Type", "application/json");            
+            String response = httpRequestHandler.requestWithHeaderInfo(dspaceApiUrl+"/login", "POST", headerInfo, "{\"email\":\""+userName+"\",\"password\":\""+password+"\"}").toString();
+            String[]responseInfo = response.split("\\n");
+            if(null != responseInfo[0]){
+                if(responseInfo[0].equals("code:200")){
+                    token = responseInfo[1];
+                    return token;
+                }
+                else{
+                    throw new ErrorDspaceApiResponseException("Got response code "+responseInfo[0]);
+                }
+            }
+        }
+        catch(EmptyDspaceCredentialInfoException empEx){
+            logger.error("Missing DSpace log in information", empEx);
+        } catch (ErrorDspaceApiResponseException ex) {
+            logger.error("Missing DSpace logging in information", ex);
+        }
+        return token;
+    }
+    
     @Override
     public boolean isAuthorizedUser(){
         Map<String, Object> userInfo = getUserInfoByToken();
@@ -267,10 +296,16 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
 
     @Override
     public String getObjectIdByHandler(String handle) {
-        if(null == token || "".equals(token)){
-            token = getTokenFromServer();
-        }
         Map map = DataUtil.getMapFromJson(getObjectInfoByHandler(handle));
+        if(null != map.get("id")){
+            return String.valueOf(map.get("id"));
+        }
+        return null;
+    }
+    
+    @Override
+    public String getObjectIdByHandler(String handle, String dspaceApiUrl) {
+        Map map = DataUtil.getMapFromJson(getObjectInfoByHandler(handle, dspaceApiUrl));
         if(null != map.get("id")){
             return String.valueOf(map.get("id"));
         }
@@ -281,6 +316,17 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     public String getObjectInfoByHandler(String handle){
         try{
             String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+            return getObjectInfoByHandler(handle, dspaceApiUrl);
+        }
+        catch(Exception ex){
+            logger.error("Cannot get object infor by its handle" , ex);
+        }
+        return null;
+    }
+    
+    @Override
+    public String getObjectInfoByHandler(String handle, String dspaceApiUrl){
+        try{            
             String objectInfo = httpRequestHandler.sendGet(dspaceApiUrl + "/handle/" + handle);
             String[] objectInfoArr = objectInfo.split("\\n");
             if(null != objectInfoArr[0] && objectInfoArr[0].equals("200")){
@@ -300,7 +346,18 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     public String[] getItemIdsByCollectionId(String id) {
         try{
             String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
-            String itemCount = String.valueOf(getItemCountByCollectionId(id));
+            return getItemIdsByCollectionId(id, dspaceApiUrl);
+        }
+        catch(Exception ex){
+            logger.error("Cannot get object infor by its handle" , ex);
+        }
+        return null;
+    }
+    
+    @Override
+    public String[] getItemIdsByCollectionId(String id, String dspaceApiUrl) {
+        try{            
+            String itemCount = String.valueOf(getItemCountByCollectionId(id, dspaceApiUrl));
             String itemsInfo = httpRequestHandler.sendGet(dspaceApiUrl + "/collections/" + id + "/items?limit="+itemCount);
             String[] itemsInfoArr = itemsInfo.split("\\n");
             if(null != itemsInfoArr[0] && itemsInfoArr[0].equals("200")){
@@ -338,10 +395,39 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     }
     
     @Override
+    public String[] getItemIdsByCollectionHandler(String handle, String dspaceApiUrl) {
+        return getItemIdsByCollectionId(getObjectIdByHandler(handle, dspaceApiUrl), dspaceApiUrl);
+    }
+    
+    @Override
+    public Map<String, String> getItemDoisByCollectionHandler(String handle, String dspaceApiUrl){
+        Map<String, String> doiMap = new HashMap<>();
+        String[] ids = getItemIdsByCollectionHandler("11244/37263", dspaceApiUrl);
+        for(String id : ids){
+            String[] doi = getMetadataValuesByKey(id, "dc.identifier.doi", dspaceApiUrl);
+            if(null != doi && doi.length > 0){
+                doiMap.put(doi[0], doi[0]);
+            }
+        }
+        return doiMap;
+    }
+    
+    @Override
     public List<Map<String, Object>> getItemMetadataById(String id){
-        String metadataInfo;
+        List<Map<String, Object>> metadataInfo = null;
         try{
             String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+            metadataInfo = getItemMetadataById(id, dspaceApiUrl);
+        }catch(Exception ex){
+            logger.error("Cannot get the item metadata!", ex);
+        }
+        return metadataInfo;
+    }
+    
+    @Override
+    public List<Map<String, Object>> getItemMetadataById(String id, String dspaceApiUrl){
+        String metadataInfo;
+        try{            
             String url = dspaceApiUrl + "/items/" + id + "/metadata";
             String metadataJson = httpRequestHandler.sendGet(url);
             String[] metadataJsonArr = metadataJson.split("\\n");
@@ -378,14 +464,58 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     }
     
     @Override
+    public String[] getMetadataValuesByKey(String itemId, String key, String dspaceApiUrl){
+        List<String> values = new ArrayList<>();
+        try{
+            List<Map<String, Object>> metadata = getItemMetadataById(itemId, dspaceApiUrl);
+            ListIterator it = metadata.listIterator();
+            while(it.hasNext()){
+                Map itemMap = (HashMap)it.next();
+                if(key.equals((String)itemMap.get("key"))){
+                    values.add((String)itemMap.get("value"));
+                }
+            }
+        }
+        catch(Exception ex){
+            logger.error("Cannot get the item metadata values by key!", ex);
+        }
+        return (values.toArray(new String[values.size()]));
+    }
+    
+    @Override
     public int getItemCountByCollectionHandler(String handle){
         return getItemCountByCollectionId(getObjectIdByHandler(handle));
+    }
+    
+    @Override
+    public int getItemCountByCollectionHandler(String handle, String dspaceApiUrl){
+        return getItemCountByCollectionId(getObjectIdByHandler(handle, dspaceApiUrl), dspaceApiUrl);
     }
     
     @Override
     public int getItemCountByCollectionId(String id){
         try{
             String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+            String itemsInfo = httpRequestHandler.sendGet(dspaceApiUrl + "/collections/" + id);
+            String[] itemsInfoArr = itemsInfo.split("\\n");
+            if(null != itemsInfoArr[0] && itemsInfoArr[0].equals("200")){
+                    itemsInfo = itemsInfoArr[1];
+            }
+            else{
+                throw new ErrorDspaceApiResponseException("Got the response code "+itemsInfoArr[0]);
+            }
+            Map<String, Object> itemsList = DataUtil.getMapFromJson(itemsInfo);
+            return (int) itemsList.get("numberItems");
+        }
+        catch(ErrorDspaceApiResponseException ex){
+            logger.error("Cannot get object infor by its handle" , ex);
+        }
+        return -1;
+    }
+    
+    @Override
+    public int getItemCountByCollectionId(String id, String dspaceApiUrl){
+        try{            
             String itemsInfo = httpRequestHandler.sendGet(dspaceApiUrl + "/collections/" + id);
             String[] itemsInfoArr = itemsInfo.split("\\n");
             if(null != itemsInfoArr[0] && itemsInfoArr[0].equals("200")){
@@ -626,6 +756,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         Map<String, List<String>> importResults = new HashMap<>();
         String collectionHandle = job.getCollectionId();
         String safPath = job.getFilePath();
+        String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
         
         try{            
             File safFile = new File(safPath);
@@ -636,6 +767,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                 safFile = new File(newPath);
             }
             if(safFile.isDirectory()){
+                mainLoop:
                 for(File file : safFile.listFiles()){
                     if(null != file && file.isDirectory()){
                         
@@ -658,13 +790,22 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                 contentFile = itemFile;
                             }
                             else if(METADATA_FILE_NAMES_LIST.contains(fileName.replaceAll(".xml", ""))){
+                                // Check if there are some duplicates based on doi
+                                if(fileName.contains("dublin")){
+                                    String doi = findDoiFromDublin(itemFile.getAbsolutePath());
+                                    if(null != doi && checkDuplicatesByDoi(doi, collectionHandle, dspaceApiUrl)){
+                                        logger.debug("Duplication detected:in collection "+collectionHandle+" there has already been an item with doi="+doi);
+                                        output += "Duplication detected:in collection \"+collectionHandle+\" there has already been an item with doi="+doi+".\n\n";
+                                        continue mainLoop;
+                                    }
+                                }
                                 containsMetadataFile = true;
                                 metadataFileList.add(itemFile);
                             }
                         }
                         if(containsContentsFile == true && containsMetadataFile == true){
                             // Create the new item now:
-                            Map newItemInfo = createEmptyItem(getObjectIdByHandler(collectionHandle));
+                            Map newItemInfo = createEmptyItem(getObjectIdByHandler(collectionHandle, dspaceApiUrl));
                             String newItemId = String.valueOf(newItemInfo.get("id"));
                             String newItemHandle = (String)newItemInfo.get("handle");
                             logger.debug("A new item with handle = "+newItemHandle+" has been added to collection "+collectionHandle+".");
@@ -884,5 +1025,27 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     @Override
     public String getRepoType() {
         return DataUtil.REPO_TYPES[job.getRepoType()];
+    }
+
+    @Override
+    public boolean checkDuplicatesByDoi(String doi, String collectionHandle, String dspaceApiUrl){
+        Map<String, String> dois = getItemDoisByCollectionHandler(collectionHandle, dspaceApiUrl);
+        return dois.containsKey(doi);
+    }
+    
+    /**
+     * Dig out the doi from dublin.xml file
+     * @param dublin : file path of dublin.xml. 
+     *  an example: <dcvalue element="identifier" language="en_US" qualifier="doi">10.1177/0194599816689660</dcvalue> 
+     * @return : doi value
+     */
+    private String findDoiFromDublin(String dublinPath){
+        Map<String, String>attrMap = new HashMap<>();
+        attrMap.put("qualifier", "doi");
+        String doi[] = DocumentProcessorUtil.getDataFromXmlByTagNameAndAttributes(dublinPath, "dcvalue", attrMap);
+        if(null != doi && doi.length > 0){
+            return doi[0];
+        }
+        return null;
     }
 }

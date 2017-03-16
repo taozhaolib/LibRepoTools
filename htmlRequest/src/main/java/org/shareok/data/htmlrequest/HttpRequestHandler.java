@@ -21,15 +21,9 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Connection;
@@ -39,9 +33,7 @@ import org.shareok.data.htmlrequest.exceptions.ErrorHandlingResponseException;
 import org.shareok.data.htmlrequest.exceptions.ErrorOpenConnectionException;
 import org.shareok.data.htmlrequest.exceptions.ErrorResponseCodeException;
 import org.shareok.data.htmlrequest.exceptions.ReadResponseInputStreamException;
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /**
  *
@@ -174,6 +166,20 @@ public class HttpRequestHandler {
         catch(Exception e){
             logger.error("Cannot download PDF file from "+urlString, e);
         }
+    }
+    
+    public org.jsoup.nodes.Document getHtmlDocByJsoup(String urlString){
+        try {
+            return Jsoup.connect("http://journals.sagepub.com/action/showPublications?pageSize=20&startPage=199")
+                    .data("query", "Java")
+                    .userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36")
+                    .cookie("auth", "token")
+                    .timeout(300000)
+                    .get();
+        } catch (IOException ex) {
+            logger.error("Cannot get the html document from "+urlString+" using jsoup!", ex);
+        }
+        return null;
     }
     
     /**

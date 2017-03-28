@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -69,9 +70,34 @@ public class SageApiDataHandlerImpl implements SageApiDataHandler {
             }
             
             int index = 0;
+            SageJournalIssueDateProcessor processor = new SageJournalIssueDateProcessor();
+            Map<String, Map<String, String>> map = processor.getSavedSageJournalVolIssueDateInformation();
             List<Integer> removeList = new ArrayList<>();
-            for(Map<String, String> articleInfo : articleList){
-                String pubDate = articleInfo.get("publication date");
+            for(Map<String, String> articleInfo : articleList){                
+                String pubDate = "";
+                
+                String journal = articleInfo.get("journal");
+                String volume = articleInfo.get("volume");
+                String issue = articleInfo.get("issue");
+                if(null != volume && null != issue && !volume.equals("0") && !issue.equals("0")){
+                    Map<String, String> journalMap = map.get(journal);
+                    if(null != journalMap){
+                        String datesData = journalMap.get("data");                        
+                        if(null != datesData){
+                            JSONObject datesDataObj = new JSONObject(datesData);
+                            if(datesDataObj.has(volume)){
+                                JSONObject volDataObj = datesDataObj.getJSONObject(volume);
+                                if(volDataObj.has(issue)){
+                                    pubDate = volDataObj.getString(issue);
+                                    articleInfo.put("publication date", pubDate);
+                                }
+                            }                            
+                        }
+                    }
+                }
+                if(pubDate.equals("")){
+                    pubDate = articleInfo.get("publication date");
+                }
                 if(DataHandlersUtil.datesCompare(startDate, pubDate) > 0 || DataHandlersUtil.datesCompare(pubDate, endDate) > 0){
                     removeList.add(index);
                 }
@@ -229,6 +255,25 @@ public class SageApiDataHandlerImpl implements SageApiDataHandler {
                             catch(Exception ex2){
                                 articleInfoMap.put("doi", "");
                             }
+                        }
+                        
+                        Elements volIssueInfoElements = article.select("span.issue-meta-volume-issue");
+                        if(volIssueInfoElements.size() > 0){
+                            Element volIssueInfoEle = volIssueInfoElements.get(0);
+                            String volIssueInfo = volIssueInfoEle.text();
+                            String[] volIssueInfoArr = volIssueInfo.split("vol.");
+                            volIssueInfo = volIssueInfoArr[1].trim();
+                            volIssueInfoArr = volIssueInfo.split("\\, ");
+                            String volume = volIssueInfoArr[0];
+                            String issue = volIssueInfoArr[1];
+                            articleInfoMap.put("volume", volume);
+                            articleInfoMap.put("issue", issue);
+                        }
+                        else{
+                            String volume = "0";
+                            String issue = "0";
+                            articleInfoMap.put("volume", volume);
+                            articleInfoMap.put("issue", issue);
                         }
 
                         Element pubDate = article.select("span.maintextleft").get(0);

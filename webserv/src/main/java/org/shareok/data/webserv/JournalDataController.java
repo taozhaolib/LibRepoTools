@@ -429,7 +429,6 @@ public class JournalDataController {
     
     /**
      *
-     * @param response
      * @param articleData : example "articlesStr=" + [{ "volume":"12",
      *                                                  "publication date":"2017-02-13",
      *                                                  "journal":"PLOS ONE",

@@ -319,5 +319,17 @@ public class ShareokdataManager {
         }
         return path;
     }
+    
+    public static String getSageJournalIssueDateInfoFilePath() throws IOException{
+        if(null == prop){
+            loadProperties();
+        }
+        String path = prop.getProperty("sageJournalIssueDateInfoFilePath");
+        File downloadFile = new File(path);
+        if(!downloadFile.exists()){
+            downloadFile.createNewFile();
+        }
+        return path;
+    }
         
 }

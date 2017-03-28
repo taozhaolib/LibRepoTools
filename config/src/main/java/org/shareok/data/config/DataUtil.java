@@ -7,12 +7,18 @@ package org.shareok.data.config;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
 
 /**
  *
@@ -95,6 +101,20 @@ public class DataUtil {
     }
     
     /**
+     * 
+     * @param jsonObj : has to be jsonobject of jsonobjects
+     * @return : map of string maps
+     */
+    public static Map<String, Map<String, String>> getMapOfStringMapFromJsonObject(JSONObject jsonObj){
+        Map<String, Map<String, String>> map = new HashMap<>();
+        for(String key : jsonObj.keySet()){
+            JSONObject obj = jsonObj.getJSONObject(key);
+            map.put(key, getMapFromJson(obj.toString()));
+        }
+        return map;
+    }
+    
+    /**
      * Converts an array like json string into a list
      * 
      * @param json : like a Sting [{info1:val1}, {info2:val2}]
@@ -146,5 +166,23 @@ public class DataUtil {
             logger.error("Cannot convert the string list into json!", ex);
         }
         return json;
+    }
+    
+    /**
+     * 
+     * @param filePath : file containing json text
+     * @return : JSONObject
+     * @throws FileNotFoundException
+     * @throws IOException 
+     */
+    public static JSONObject getJsonObjectFromFile(String filePath) throws FileNotFoundException, IOException{
+        File f = new File(filePath);
+        if (f.exists()){
+            InputStream is = new FileInputStream(filePath);
+            String jsonTxt = IOUtils.toString(is);
+            JSONObject json = new JSONObject(jsonTxt);  
+            return json;
+        }
+        return null;
     }
 }

@@ -19,12 +19,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.config.ShareokdataManager;
 import static org.shareok.data.config.ShareokdataManager.getShareokdataPath;
+import org.shareok.data.datahandlers.exceptions.InvalidDoiException;
 import org.shareok.data.datahandlers.exceptions.SecurityFileDoesNotExistException;
 import org.shareok.data.documentProcessor.CsvHandler;
 import org.shareok.data.documentProcessor.DocumentProcessorUtil;
@@ -96,16 +95,14 @@ public class DataHandlersUtil {
         return domain.startsWith("www.") ? domain.substring(4) : domain;
     }
     
-    public static String getItemInfoByDoi(String doi){
+    public static String getItemInfoByDoi(String doi) throws InvalidDoiException{
         String response = null;
         ApplicationContext context = new ClassPathXmlApplicationContext("htmlRequestContext.xml");
         HttpRequestHandler handler = (HttpRequestHandler) context.getBean("httpRequestHandler");
         String url = "http://api.crossref.org/works/" + doi;
-        try{
-            response = handler.sendGet(url);
-        }
-        catch(Exception ex){
-            logger.error("Cannot get item information by Doi", ex);
+        response = handler.sendGet(url);
+        if(null == response){
+            throw new InvalidDoiException("Cannot get article information by this doi: "+doi+" from crossref!");
         }
         return response;
     }
@@ -142,8 +139,14 @@ public class DataHandlersUtil {
             try {
                 d = fmt.parse(date);
             } catch (ParseException ex1) {
-                fmt = new SimpleDateFormat("MMMM dd yyyy", Locale.US);
-                d = fmt.parse(date);
+                try{
+                    fmt = new SimpleDateFormat("MMMM dd yyyy", Locale.US);
+                    d = fmt.parse(date);
+                }
+                catch(ParseException ex2){
+                    fmt = new SimpleDateFormat("dd MMMM, yyyy", Locale.US);
+                    d = fmt.parse(date);
+                }
             }
         }
         SimpleDateFormat output = new SimpleDateFormat("yyyy-MM-dd");

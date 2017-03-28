@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import org.json.JSONObject;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.datahandlers.DataHandlersUtil;
+import org.shareok.data.datahandlers.exceptions.InvalidDoiException;
 import org.shareok.data.kernel.api.exceptions.IncorrectDoiResponseException;
 import org.shareok.data.kernel.api.exceptions.NoServiceProcessDoiException;
 import org.shareok.data.kernel.api.exceptions.NotFoundServiceBeanException;
@@ -284,6 +285,8 @@ public class ServiceUtil {
             }
             catch(IncorrectDoiResponseException ex){
                 logger.error("Cannot get correct response from crossref by doi", ex);
+            } catch (InvalidDoiException ex) {
+                logger.error(ex);
             }
         }
         if(!doisMap.isEmpty()){

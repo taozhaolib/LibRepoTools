@@ -1,10 +1,10 @@
 # LibRepoTools
-LibRepoTools provides a UI to handle data packaging (e.g. SAF package), date migration and data importing from local files and remote storages, e.g. AWS S3 buckets, into digital repositories, e.g. DSpace and Islandora. 
+LibRepoTools provides the UI and command line execution approaches to handle data packaging (e.g. SAF package), date migration and data importing into digital repositories, e.g. DSpace and Islandora. 
 
-##Installation:
+##Installation for development:
 
-1. Install Java 8 (required), Tomcat 7.0.69 (do NOT use very old version Tomcat 7), Maven 3.
-2. Install and run Redis 3.0 or higher with default settings.
+1. Install Java 8 (required), Tomcat 7.0.69 or newer, Maven 3.
+2. Install and run Redis 3.0 or newer with default settings.
 3. Git clone this repository and run: mvn install.
 4. At Tomcat home directory: /config/Catalina/localhost, add the file webserv.xml
 5. Start Tomcat and go to: http://localhost:8080/webserv/home to get the home page.
@@ -20,14 +20,6 @@ Java 8(required), Maven 3, Tomcat 7, Spring Core, Spring Data, Spring Session, S
 
 ##Project web site:
 https://libtools.repository.ou.edu/webserv/home
-
-##Configuration:
-1. The config module under the LibRepoTools installation directory contains all the configuration information. 
-
-##Projects:
-1. DSpace data processing through the REST API.
-2. Data package, exporting from and importing into Islandora/Fedora repository.
-3. Data package and transformation in AWS S3 buckets.
 
 ##Please give us your suggestions, comments, and ideas to help us improve this software.
 

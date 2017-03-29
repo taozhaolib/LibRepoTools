@@ -50,7 +50,7 @@
                                                 $.ajax({
                                                     method: "POST",
                                                     url: "/webserv/dspace/journal/${publisher}/saf",
-                                                    data: { dois },
+                                                    data: { articleData },
                                                     beforeSend: function(xhr){
                                                         $(".loading-btn").attr("disabled", true);
                                                     },

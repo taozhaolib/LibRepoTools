@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.datahandlers.exceptions.InvalidDoiException;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.kernel.api.exceptions.IncorrectDoiResponseException;
 import org.shareok.data.kernel.api.exceptions.NoServiceProcessDoiException;
 import org.shareok.data.kernel.api.exceptions.NotFoundServiceBeanException;
@@ -259,6 +260,10 @@ public class ServiceUtil {
     }
     
     public static String generateDspaceSafPackagesByDois(String[] dois){
+        return generateDspaceSafPackagesByDois(dois, null, null);
+    }
+    
+    public static String generateDspaceSafPackagesByDois(String[] dois, String startDate, String endDate){
         String safDownloadPaths = null;
         Map<String, List<String>>doisMap = new HashMap<>();
         for(String doi : dois){
@@ -289,9 +294,9 @@ public class ServiceUtil {
                 logger.error(ex);
             }
         }
+        List<String> pathList = new ArrayList<>();
         if(!doisMap.isEmpty()){
-            Date now = new Date();
-            List<String> pathList = new ArrayList<>();
+            Date now = new Date();            
             ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");        
             for(String key : doisMap.keySet()){
                 try{
@@ -306,9 +311,39 @@ public class ServiceUtil {
                 catch(Exception ex){
                     logger.error("Cannot get DspaceJournalDataService object to generate SAF package with bean = "+key, ex);
                 }
-            }    
-            safDownloadPaths = DataUtil.getJsonFromStringList(pathList);
+            }                
         }
+        
+        // Now reset the SAF package file name based on start date and end date:
+        if(null != startDate && null != endDate){    
+            for(int i = 0; i < pathList.size(); i++){
+                String safPath = pathList.get(i);
+                File saf = new File(safPath);
+                String safFilePath = saf.getAbsolutePath();
+                String safFileName = saf.getName();
+                String safFileNameBase = DocumentProcessorUtil.getFileNameWithoutExtension(safFileName);
+                String safFileNameExtension = DocumentProcessorUtil.getFileExtension(safFileName);
+                String safFileContainer = DocumentProcessorUtil.getFileContainerPath(safFilePath);
+                safFileNameBase += "_" + startDate + "_" + endDate;
+                String newFileName = safFileContainer+safFileNameBase+"."+safFileNameExtension;
+                try{
+                    boolean rename = DocumentProcessorUtil.renameFile(safFilePath, newFileName);
+                    if(rename){
+                    pathList.set(i, newFileName);
+                    }
+                    else{
+                        pathList.set(i, safFileName+" cannot be renamed to "+newFileName);
+                    }
+                }
+                catch(IOException ex){
+                    pathList.set(i, safFileName+" cannot be renamed to "+newFileName+": "+ex.getMessage());
+                }
+            }
+            
+        }
+        
+        safDownloadPaths = DataUtil.getJsonFromStringList(pathList);
+        
         return safDownloadPaths;
     }
 }

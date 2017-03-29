@@ -758,6 +758,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         String safPath = job.getFilePath();
         String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
         
+        if(DocumentProcessorUtil.isEmptyString(token)){
+            getTokenFromServer();
+        }
+        
         try{            
             File safFile = new File(safPath);
             if(safPath.endsWith(".zip")){

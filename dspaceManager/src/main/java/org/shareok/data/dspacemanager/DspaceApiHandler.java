@@ -60,5 +60,7 @@ public interface DspaceApiHandler extends JobHandler {
     public void setJob(RedisJob job);
     @Override
     public DspaceApiJob getJob();
+    
     public Map<String, List<String>> loadItemsFromSafPackage();
+    public Map<String, List<String>> loadItemsFromSafPackage(String safPath, String collectionHandle, String dspaceApiUrl);
 }

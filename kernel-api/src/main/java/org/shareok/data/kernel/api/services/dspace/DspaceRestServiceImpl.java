@@ -20,11 +20,13 @@ import org.shareok.data.redis.job.DspaceApiJob;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 /**
  *
  * @author Tao Zhao
  */
+@Service
 public class DspaceRestServiceImpl implements DspaceRestService {
     
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DspaceRestServiceImpl.class);
@@ -55,6 +57,18 @@ public class DspaceRestServiceImpl implements DspaceRestService {
     public String loadItemsFromSafPackage() {
         String loadJson = null;
         Map<String, List<String>>loadResultMap = handler.loadItemsFromSafPackage();
+        try {        
+            loadJson = new ObjectMapper().writeValueAsString(loadResultMap);
+        } catch (JsonProcessingException ex) {
+            logger.error("Cannot convert the Map of loading results into JSON String", ex);
+        }
+        return loadJson;
+    }
+    
+    @Override
+    public String loadItemsFromSafPackage(String safPath, String collectionHandle, String dspaceApiUrl){
+        String loadJson = null;
+        Map<String, List<String>>loadResultMap = handler.loadItemsFromSafPackage(safPath, collectionHandle, dspaceApiUrl);
         try {        
             loadJson = new ObjectMapper().writeValueAsString(loadResultMap);
         } catch (JsonProcessingException ex) {

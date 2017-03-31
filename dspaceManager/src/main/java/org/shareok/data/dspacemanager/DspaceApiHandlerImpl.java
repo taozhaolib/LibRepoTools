@@ -782,7 +782,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
             dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
         }
         
-        Map<String, List<String>> importResults = loadItemsFromSafPackage(safPath, collectionHandle, dspaceApiUrl);
+        Map<String, List<String>> importResults = new HashMap<>();
         
         if(DocumentProcessorUtil.isEmptyString(token)){
             getTokenFromServer();

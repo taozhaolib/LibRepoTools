@@ -19,14 +19,56 @@
                 <groupId>org.codehaus.mojo</groupId>  
                 <artifactId>exec-maven-plugin</artifactId>  
                 <version>1.5.0</version>  
-                <configuration>  
-                    <executable>java</executable> 
-                    <arguments>  
-                        <argument>-classpath</argument>
-                        <classpath/>
-                        <argument>org.shareok.data.kernel.api.services.Main</argument>
-                    </arguments>  
-                </configuration>  
+                <executions>
+                    <execution>
+                        <id>journal-search</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase></phase>
+                        <configuration>
+                            <executable>java</executable> 
+                            <arguments>  
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>org.shareok.data.kernel.api.services.Main</argument>
+                                <argument>${data}</argument>
+                            </arguments>  
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>journal-saf</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase></phase>
+                        <configuration>
+                            <executable>java</executable> 
+                            <arguments>  
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>org.shareok.data.kernel.api.services.Main</argument>
+                                <argument>${data}</argument>
+                            </arguments>  
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>journal-import</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase></phase>
+                        <configuration>
+                            <executable>java</executable> 
+                            <arguments>  
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>org.shareok.data.kernel.api.services.Main</argument>
+                                <argument>${data}</argument>
+                            </arguments>  
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>  
         </plugins>
     </build>

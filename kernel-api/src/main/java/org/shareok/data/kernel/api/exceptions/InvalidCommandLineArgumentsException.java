@@ -9,13 +9,13 @@ package org.shareok.data.kernel.api.exceptions;
  *
  * @author Tao Zhao
  */
-public class IncorrectDoiResponseException extends Exception {
+public class InvalidCommandLineArgumentsException extends Exception {
     
     /**
      *
      * @param message
      */
-    public IncorrectDoiResponseException(String message){
+    public InvalidCommandLineArgumentsException(String message){
         super(message);
     }
 }

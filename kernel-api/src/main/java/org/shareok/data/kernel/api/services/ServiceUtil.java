@@ -19,16 +19,16 @@ import org.shareok.data.config.DataUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.JSONObject;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.datahandlers.exceptions.InvalidDoiException;
-import org.shareok.data.kernel.api.exceptions.IncorrectDoiResponseException;
+import org.shareok.data.documentProcessor.DocumentProcessorUtil;
+import org.shareok.data.kernel.api.exceptions.InvalidCommandLineArgumentsException;
 import org.shareok.data.kernel.api.exceptions.NoServiceProcessDoiException;
 import org.shareok.data.kernel.api.exceptions.NotFoundServiceBeanException;
 import org.shareok.data.kernel.api.services.dspace.DspaceJournalDataService;
+import org.shareok.data.kernel.api.services.dspace.DspaceRestServiceImpl;
 import org.shareok.data.kernel.api.services.job.DspaceApiJobServiceImpl;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
 import org.shareok.data.redis.job.RedisJob;
@@ -259,16 +259,20 @@ public class ServiceUtil {
     }
     
     public static String generateDspaceSafPackagesByDois(String[] dois){
+        return generateDspaceSafPackagesByDois(dois, null, null);
+    }
+    
+    public static String generateDspaceSafPackagesByDois(String[] dois, String startDate, String endDate){
         String safDownloadPaths = null;
         Map<String, List<String>>doisMap = new HashMap<>();
         for(String doi : dois){
             try{
                 String[] doiInfo = DataHandlersUtil.getItemInfoByDoi(doi).split("\\n");
                 if(null == doiInfo || doiInfo.length != 2){
-                    throw new IncorrectDoiResponseException("Cannot get the correct response from crossref for DOI: "+doi);
+                    throw new InvalidDoiException("Cannot get the correct response from crossref for DOI: "+doi);
                 }
                 else if(!doiInfo[0].equals("200")){
-                    throw new IncorrectDoiResponseException("The response code is "+ doiInfo[0] + " from crossref for DOI: "+doi);
+                    throw new InvalidDoiException("The response code is "+ doiInfo[0] + " from crossref for DOI: "+doi);
                 }
                 else{
                     JSONObject obj = new JSONObject(doiInfo[1]);
@@ -282,16 +286,15 @@ public class ServiceUtil {
                     list.add(doi);
                     doisMap.put(key, list);                                
                 }
-            }
-            catch(IncorrectDoiResponseException ex){
-                logger.error("Cannot get correct response from crossref by doi", ex);
             } catch (InvalidDoiException ex) {
-                logger.error(ex);
+                String error = "error: cannot get correct response from crossref by doi="+doi;
+                logger.error(error, ex);
+                return error;
             }
         }
+        List<String> pathList = new ArrayList<>();
         if(!doisMap.isEmpty()){
-            Date now = new Date();
-            List<String> pathList = new ArrayList<>();
+            Date now = new Date();            
             ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");        
             for(String key : doisMap.keySet()){
                 try{
@@ -306,9 +309,116 @@ public class ServiceUtil {
                 catch(Exception ex){
                     logger.error("Cannot get DspaceJournalDataService object to generate SAF package with bean = "+key, ex);
                 }
-            }    
-            safDownloadPaths = DataUtil.getJsonFromStringList(pathList);
+            }                
         }
+        
+        // Now reset the SAF package file name based on start date and end date:
+        if(null != startDate && null != endDate){    
+            for(int i = 0; i < pathList.size(); i++){
+                String safPath = pathList.get(i);
+                File saf = new File(safPath);
+                String safFilePath = saf.getAbsolutePath();
+                String safFileName = saf.getName();
+                String safFileNameBase = DocumentProcessorUtil.getFileNameWithoutExtension(safFileName);
+                String safFileNameExtension = DocumentProcessorUtil.getFileExtension(safFileName);
+                String safFileContainer = DocumentProcessorUtil.getFileContainerPath(safFilePath);
+                safFileNameBase += "_" + startDate + "_" + endDate;
+                String newFileName = safFileContainer+safFileNameBase+"."+safFileNameExtension;
+                try{
+                    boolean rename = DocumentProcessorUtil.renameFile(safFilePath, newFileName);
+                    if(rename){
+                    pathList.set(i, newFileName);
+                    }
+                    else{
+                        pathList.set(i, safFileName+" cannot be renamed to "+newFileName);
+                    }
+                }
+                catch(IOException ex){
+                    pathList.set(i, safFileName+" cannot be renamed to "+newFileName+": "+ex.getMessage());
+                }
+            }
+            
+        }
+        
+        safDownloadPaths = DataUtil.getJsonFromStringList(pathList);
+        
         return safDownloadPaths;
+    }
+    
+    public static void executeCommandLineTask(String data) throws InvalidCommandLineArgumentsException{
+        if(DocumentProcessorUtil.isEmptyString(data)){
+            throw new InvalidCommandLineArgumentsException("The data argument is null or empty string: data="+data);
+        }
+        String taskType = "";
+        String startDate;
+        String endDate;
+        JSONObject argumentsObj;
+        JSONObject dataObj = new JSONObject(data);
+        for(String key : dataObj.keySet()){
+            taskType = key;
+        }
+        if(DocumentProcessorUtil.isEmptyString(taskType)){
+            throw new InvalidCommandLineArgumentsException("The data argument does not specify task type!");
+        }
+
+        switch(taskType){
+            case "journal-search":
+                argumentsObj = dataObj.getJSONObject(taskType);
+                String publisher = argumentsObj.getString("publisher");
+                startDate = argumentsObj.getString("startDate");
+                endDate = argumentsObj.getString("endDate");
+                String affiliate = argumentsObj.getString("affiliate");
+                if(DocumentProcessorUtil.isEmptyString(publisher) || DocumentProcessorUtil.isEmptyString(publisher) || 
+                    DocumentProcessorUtil.isEmptyString(publisher) || DocumentProcessorUtil.isEmptyString(publisher)){
+                    throw new InvalidCommandLineArgumentsException("Cannot get specific items from command line data argument");
+                }
+                DspaceJournalDataService serviceObj = ServiceUtil.getDspaceJournalDataServInstanceByPublisher(publisher);
+                String articlesData = serviceObj.getApiResponseByDatesAffiliate(startDate, endDate, affiliate);
+                articlesData = articlesData.replace("’", "'");
+//                articlesData = articlesData.replaceAll("'", "\\\\\\'");
+                System.out.println("article data = "+articlesData);
+                break;
+            case "journal-saf":         
+                String[] dois;
+                try {
+                    argumentsObj = dataObj.getJSONObject(taskType);
+                    startDate = argumentsObj.getString("startDate");
+                    endDate = argumentsObj.getString("endDate");
+                    dois = argumentsObj.getString("dois").split(";");                        
+                } catch (Exception ex) {
+                    logger.error(ex);
+                    throw new InvalidCommandLineArgumentsException("Cannot get specific items from command line data argument");
+                }     
+                try{
+                    String path = ServiceUtil.generateDspaceSafPackagesByDois(dois, startDate, endDate);
+                    if(path.startsWith("error")){
+                        System.out.println("error message received: "+path);
+                    }
+                    else{
+                        System.out.println("The SAF package has been stored at path="+path);
+                    }
+                }
+                catch(Exception ex){
+                    logger.error(ex);
+                    ex.printStackTrace();
+                }
+                break;
+            case "journal-import":
+                try{
+                    argumentsObj = dataObj.getJSONObject(taskType);
+                    String safPath = argumentsObj.getString("safPath");
+                    String collectionHandle = argumentsObj.getString("collectionHandle");
+                    String dspaceApiUrl = argumentsObj.getString("dspaceApiUrl");
+                    DspaceRestServiceImpl ds = (DspaceRestServiceImpl)getDataService("rest-import-dspace");
+                    String loadResults = ds.loadItemsFromSafPackage(safPath, collectionHandle, dspaceApiUrl);                    
+                }
+                catch(Exception ex){
+                    ex.printStackTrace();
+                    System.out.println("error: the loading process throws exception: "+ex.getMessage());
+                }
+                break;
+            default:
+                throw new InvalidCommandLineArgumentsException("The command line task type is valid!");
+        }
     }
 }

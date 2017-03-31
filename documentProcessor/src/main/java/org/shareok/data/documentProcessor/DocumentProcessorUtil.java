@@ -440,6 +440,19 @@ public class DocumentProcessorUtil {
         }
     }
     
+    public static boolean renameFile(String oldName, String newName) throws IOException{
+        return renameFile(oldName, newName, false);
+    }
+    
+    public static boolean renameFile(String oldName, String newName, boolean replaceExistingFile) throws IOException{
+        File oldFile = new File(oldName);
+        File newFile = new File(newName);
+        if(newFile.exists() && replaceExistingFile == false){
+            throw new IOException("The target file has already existed!");
+        }
+        return oldFile.renameTo(newFile);
+    }
+    
     /**
      * Used to tell if a string is null or empty
      * @param str

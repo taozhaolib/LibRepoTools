@@ -6,8 +6,6 @@
 package org.shareok.data.sagedata;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,8 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -407,7 +403,7 @@ public class SageJournalIssueDateProcessor {
             DocumentProcessorUtil.outputStringToFile(json, ShareokdataManager.getSageJournalIssueDateInfoFilePath());
             System.out.println("processed journals = "+mapper.writeValueAsString(processedJournals));
         } catch (Exception ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("Cannot process the issue dates.", ex);
         }
     }
     
@@ -424,7 +420,7 @@ public class SageJournalIssueDateProcessor {
             }
             
         } catch (IOException ex) {
-            Logger.getLogger(SageJournalIssueDateProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("Cannot get saved sage journal volume issue date information", ex);
         }
         return null;
     }
@@ -692,9 +688,9 @@ public class SageJournalIssueDateProcessor {
             System.out.println("This data "+data+" for journal "+journalName+" gives null pointer exception");
             ex.printStackTrace();
         } catch (JsonProcessingException ex) {
-            Logger.getLogger(SageJournalIssueDateProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("JSON processing exception", ex);
         } catch (IOException ex) {
-            Logger.getLogger(SageJournalIssueDateProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("IO exception", ex);
         }
     }
     

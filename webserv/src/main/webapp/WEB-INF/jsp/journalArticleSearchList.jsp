@@ -45,22 +45,28 @@
                                             $.each(articles, function(index, value){
                                                 dois += value.doi.trim() + ";";
                                             });
+                                            var articleSafData = "articlesStr=" + dois + "&&startDate=" + startDate + "&&endDate=" + endDate;
                                             $("input[name='btnSearchArticlesSaf']").click(function(){
                                                 $(".spining-class").show();
                                                 $.ajax({
                                                     method: "POST",
                                                     url: "/webserv/dspace/journal/${publisher}/saf",
-                                                    data: { articleData },
+                                                    data: { articleSafData },
                                                     beforeSend: function(xhr){
                                                         $(".loading-btn").attr("disabled", true);
                                                     },
                                                     success: function(data) {  
-                                                        var dataArr = jQuery.parseJSON(data);
-                                                        var paths = new Array(dataArr.length);
-                                                        $.each(dataArr, function(index, value){
-                                                            paths[index] = value.split("/uploads/")[1];
-                                                        });
-                                                        getDownloadLinksVue(paths);                                                     
+                                                        if(!data.startsWith('error')){
+                                                            var dataArr = jQuery.parseJSON(data);
+                                                            var paths = new Array(dataArr.length);
+                                                            $.each(dataArr, function(index, value){
+                                                                paths[index] = value.split("/uploads/")[1];
+                                                            });
+                                                            getDownloadLinksVue(paths);                
+                                                        }      
+                                                        else{
+                                                            alert(data);
+                                                        }
                                                         $(".spining-class").hide();
                                                         $(".loading-btn").attr("disabled", false);
                                                     }

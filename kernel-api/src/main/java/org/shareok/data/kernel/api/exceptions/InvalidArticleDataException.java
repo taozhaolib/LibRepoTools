@@ -9,13 +9,13 @@ package org.shareok.data.kernel.api.exceptions;
  *
  * @author Tao Zhao
  */
-public class IncorrectDoiResponseException extends Exception {
+public class InvalidArticleDataException extends Exception {
     
     /**
      *
      * @param message
      */
-    public IncorrectDoiResponseException(String message){
+    public InvalidArticleDataException(String message){
         super(message);
     }
 }

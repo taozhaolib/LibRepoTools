@@ -15,6 +15,7 @@ import org.shareok.data.kernel.api.services.DataService;
  */
 public interface DspaceRestService extends DataService {
     public String loadItemsFromSafPackage();
+    public String loadItemsFromSafPackage(String safPath, String collectionHandle, String dspaceApiUrl);
     public Map<String, String> getItemDoisByCollectionHandler(String handle, String dspaceApiUrl);
     public boolean checkDuplicatesByDoi(String doi, String collectionHandle, String dspaceApiUrl);
 }

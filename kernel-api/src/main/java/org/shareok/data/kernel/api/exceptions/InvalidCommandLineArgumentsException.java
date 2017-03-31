@@ -3,19 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.shareok.data.webserv.exceptions;
+package org.shareok.data.kernel.api.exceptions;
 
 /**
  *
  * @author Tao Zhao
  */
-public class InvalidArticleDataException extends Exception {
+public class InvalidCommandLineArgumentsException extends Exception {
     
     /**
      *
      * @param message
      */
-    public InvalidArticleDataException(String message){
+    public InvalidCommandLineArgumentsException(String message){
         super(message);
     }
 }

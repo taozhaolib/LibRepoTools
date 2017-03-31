@@ -47,7 +47,7 @@ import org.shareok.data.kernel.api.services.dspace.DspaceJournalDataService;
 import org.shareok.data.kernel.api.services.dspace.DspaceJournalServiceManager;
 import org.shareok.data.kernel.api.services.server.RepoServerService;
 import org.shareok.data.webserv.exceptions.EmptyDoiInformationException;
-import org.shareok.data.webserv.exceptions.InvalidArticleDataException;
+import org.shareok.data.kernel.api.exceptions.InvalidArticleDataException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -426,29 +426,23 @@ public class JournalDataController {
      */
     @ResponseBody
     @RequestMapping(value = "/dspace/journal/{publisher}/saf", method=RequestMethod.POST)
-    public String dspaceJournalSafPackageGenerateByDois(@RequestParam("articleData") String articleData) {
+    public String dspaceJournalSafPackageGenerateByDois(@RequestParam("articleSafData") String articleSafData) {
         
         String startDate = null;
         String endDate = null;
-        List<String> doiList = new ArrayList<>();
         String[] doisArr = null;
         try{
-            if(DocumentProcessorUtil.isEmptyString(articleData)){
+            if(DocumentProcessorUtil.isEmptyString(articleSafData)){
                 throw new InvalidArticleDataException("The article data string is empty!");
             }
-            String[] articleDataArr = articleData.split("&&");
+            String[] articleDataArr = articleSafData.split("&&");
             if(articleDataArr.length != 3){
                 throw new InvalidArticleDataException("The article data string does NOT contain three parts!");
             }           
             try{
                 startDate = articleDataArr[1].split("=")[1];
-                endDate = articleDataArr[2].split("=")[1];
-                JSONArray articlesObjArr = new JSONArray(articleDataArr[0].split("=")[1]);
-                for(Object obj : articlesObjArr){
-                    JSONObject article = (JSONObject)obj;
-                    doiList.add(article.getString("doi"));
-                }
-                doisArr = doiList.toArray(new String[doiList.size()]);
+                endDate = articleDataArr[2].split("=")[1];                
+                doisArr = articleDataArr[0].split("=")[1].split(";");
             }
             catch(Exception ex){
                 throw new InvalidArticleDataException("The article data string cannot be correctly parsed! "+ex.getMessage());

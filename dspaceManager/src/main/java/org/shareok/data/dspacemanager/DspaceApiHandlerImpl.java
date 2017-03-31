@@ -106,6 +106,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     private String reportFilePath;
     private String mapping;
     private String output;
+    private String dspaceApiUrl;
     private HttpRequestHandler httpRequestHandler;
 
     @Override
@@ -133,6 +134,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         return output;
     }
 
+    public String getDspaceApiUrl() {
+        return dspaceApiUrl;
+    }
+
     @Autowired
     @Qualifier("dspaceApiJob")
     public void setJob(RedisJob job) {
@@ -151,6 +156,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         this.output = output;
     }
 
+    public void setDspaceApiUrl(String dspaceApiUrl) {
+        this.dspaceApiUrl = dspaceApiUrl;
+    }
+
     @Autowired
     public void setHttpRequestHandler(HttpRequestHandler httpRequestHandler) {
         this.httpRequestHandler = httpRequestHandler;
@@ -161,7 +170,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         
         String dspaceUserName = null;
         String dspacePassword = null;
-        String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+        if(DocumentProcessorUtil.isEmptyString(dspaceApiUrl)){
+            dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+        }
+        
 	String[] credential = null;
 	
 	try {
@@ -402,11 +414,13 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     @Override
     public Map<String, String> getItemDoisByCollectionHandler(String handle, String dspaceApiUrl){
         Map<String, String> doiMap = new HashMap<>();
-        String[] ids = getItemIdsByCollectionHandler("11244/37263", dspaceApiUrl);
-        for(String id : ids){
-            String[] doi = getMetadataValuesByKey(id, "dc.identifier.doi", dspaceApiUrl);
-            if(null != doi && doi.length > 0){
-                doiMap.put(doi[0], doi[0]);
+        String[] ids = getItemIdsByCollectionHandler(handle, dspaceApiUrl);
+        if(null != ids && ids.length > 0){
+            for(String id : ids){
+                String[] doi = getMetadataValuesByKey(id, "dc.identifier.doi", dspaceApiUrl);
+                if(null != doi && doi.length > 0){
+                    doiMap.put(doi[0], doi[0]);
+                }
             }
         }
         return doiMap;
@@ -574,7 +588,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         header.put("Accept", "application/json");
         header.put("rest-dspace-token", token);
         
-        String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+        if(DocumentProcessorUtil.isEmptyString(dspaceApiUrl)){
+            dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+        }
+        
         String response = httpRequestHandler.requestWithHeaderInfo(dspaceApiUrl + "/collections/" + collectionId +"/items", "POST", header, json).toString();
         String[] userInfoResponseArr = response.split("\\n");
         if(null != userInfoResponseArr[0] && userInfoResponseArr[0].equals("code:200")){
@@ -608,7 +625,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         header.put("Accept", "application/json");
         header.put("rest-dspace-token", token);
         
-        String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+        if(DocumentProcessorUtil.isEmptyString(dspaceApiUrl)){
+            dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+        }
+        
         String response = httpRequestHandler.requestWithHeaderInfo(dspaceApiUrl + "/items/" + id +"/metadata", "POST", header, data).toString();
         String[] userInfoResponseArr = response.split("\\n");
         if(null != userInfoResponseArr[0] && userInfoResponseArr[0].equals("code:200")){
@@ -714,7 +734,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         
         String response = null;
         try {
-            String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+            if(DocumentProcessorUtil.isEmptyString(dspaceApiUrl)){
+                dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+            }
+            
             response = httpRequestHandler.uploadFileByHttpClient(dspaceApiUrl + "/items/" + id +"/bitstreams?name="
                     +fileName+"&description="+description, filePath, header).toString();
         } catch (ErrorOpenConnectionException | ErrorConnectionOutputStreamException | ErrorResponseCodeException | ErrorHandlingResponseException | ReadResponseInputStreamException ex) {
@@ -753,10 +776,13 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     @Override
     public Map<String, List<String>> loadItemsFromSafPackage(){
         
-        Map<String, List<String>> importResults = new HashMap<>();
         String collectionHandle = job.getCollectionId();
         String safPath = job.getFilePath();
-        String dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+        if(DocumentProcessorUtil.isEmptyString(dspaceApiUrl)){
+            dspaceApiUrl = RedisUtil.getServerDaoInstance().findServerById(job.getServerId()).getAddress();
+        }
+        
+        Map<String, List<String>> importResults = loadItemsFromSafPackage(safPath, collectionHandle, dspaceApiUrl);
         
         if(DocumentProcessorUtil.isEmptyString(token)){
             getTokenFromServer();
@@ -978,6 +1004,235 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
             DocumentProcessorUtil.outputStringToFile(mapping, DocumentProcessorUtil.getFileContainerPath(reportFilePath)+File.separator+"mapfile");
             DocumentProcessorUtil.outputStringToFile(output, reportFilePath);
         }
+        
+        return importResults;
+    }
+    
+    @Override
+    public Map<String, List<String>> loadItemsFromSafPackage(String safPath, String collectionHandle, String dspaceApiUrl){
+        Map<String, List<String>> importResults = new HashMap<>();
+        this.dspaceApiUrl = dspaceApiUrl;
+        
+        if(DocumentProcessorUtil.isEmptyString(token)){
+            getTokenFromServer();
+        }
+        
+        try{            
+            File safFile = new File(safPath);
+            if(safPath.endsWith(".zip")){
+                String newPath = FileZipper.unzipToDirectory(safPath);
+                // Change the path to be the unzipped folder
+//                safPath = DocumentProcessorUtil.getFileNameWithoutExtension(safPath);
+                safFile = new File(newPath);
+            }
+            if(safFile.isDirectory()){
+                mainLoop:
+                for(File file : safFile.listFiles()){
+                    if(null != file && file.isDirectory()){
+                        
+                        File[] fileList = file.listFiles();
+                        boolean containsContentsFile = false;                        
+                        boolean containsMetadataFile = false;
+                        
+                        List<File> metadataFileList = new ArrayList<>();
+                        File contentFile = null;
+                        
+                        for(File itemFile : fileList){    
+                            
+                            if(null == itemFile){
+                                continue;
+                            }
+                            
+                            String fileName = itemFile.getName();
+                            if("contents".equals(fileName)){
+                                containsContentsFile = true;
+                                contentFile = itemFile;
+                            }
+                            else if(METADATA_FILE_NAMES_LIST.contains(fileName.replaceAll(".xml", ""))){
+                                // Check if there are some duplicates based on doi
+                                if(fileName.contains("dublin")){
+                                    String doi = findDoiFromDublin(itemFile.getAbsolutePath());
+                                    if(null != doi && checkDuplicatesByDoi(doi, collectionHandle, dspaceApiUrl)){
+                                        logger.debug("Duplication detected:in collection "+collectionHandle+" there has already been an item with doi="+doi);
+                                        System.out.println("Duplication detected:in collection \"+collectionHandle+\" there has already been an item with doi="+doi+".\n\n");
+                                        continue mainLoop;
+                                    }
+                                }
+                                containsMetadataFile = true;
+                                metadataFileList.add(itemFile);
+                            }
+                        }
+                        if(containsContentsFile == true && containsMetadataFile == true){
+                            // Create the new item now:
+                            Map newItemInfo = createEmptyItem(getObjectIdByHandler(collectionHandle, dspaceApiUrl));
+                            String newItemId = String.valueOf(newItemInfo.get("id"));
+                            String newItemHandle = (String)newItemInfo.get("handle");
+                            logger.debug("A new item with handle = "+newItemHandle+" has been added to collection "+collectionHandle+".");
+                            System.out.println("A new item with handle = "+newItemHandle+" has been added to collection "+collectionHandle+".\n\n");
+                            mapping += file.getName() + "   " + newItemHandle+"\n";
+                            
+                            // Add the metadata to the new item:
+                            String[] paths = new String[metadataFileList.size()];
+                            ListIterator metadataIt = metadataFileList.listIterator();
+                            while(metadataIt.hasNext()){
+                                File metadataFile = (File)metadataIt.next();
+                                paths[metadataIt.nextIndex()-1] = metadataFile.getAbsolutePath();
+                            }
+                            Map<String, String> metadataStrings = getMetadataFromXmlFiles(paths);
+                            for(String path : metadataStrings.keySet()){
+                                String metadata = metadataStrings.get(path);                                
+                                logger.debug(" adding metadata file " + metadata +" now with file name : "+file.getName());
+                                System.out.println(" adding metadata file " + metadata +" now with file name : "+file.getName()+"\n\n");
+                                try{
+                                String metadataInfo = addItemMetadata(newItemId, metadata);
+                                if(null == metadataInfo || metadataInfo.equals("")){
+                                    if(null == importResults.get("metadata-imported")){
+                                        importResults.put("metadata-imported", new ArrayList<String>());
+                                    }
+                                    List metadataUnimportedList = (ArrayList)importResults.get("metadata-imported");
+                                    metadataUnimportedList.add(newItemId + "---" + path);
+                                    logger.debug("Failed to add the metadata into item "+newItemHandle+".\n");
+                                    System.out.println("Failed to add the metadata into item "+newItemHandle+".\n\n");
+                                }
+                                else{
+                                    if(null == importResults.get("metadata-imported")){
+                                        importResults.put("metadata-imported", new ArrayList<String>());
+                                    }
+                                    List metadataImportedList = (ArrayList)importResults.get("metadata-imported");
+                                    metadataImportedList.add(newItemId + "---" + path);
+                                    logger.debug("A new set of metadata entries have been added to the item "+newItemHandle+". \n");
+                                    System.out.println("A new set of metadata entries have been added to the item "+newItemHandle+". \n\n");
+                                }
+                                }
+                                catch(Exception ex){
+                                    if(null == importResults.get("metadata-imported")){
+                                        importResults.put("metadata-imported", new ArrayList<String>());
+                                    }
+                                    List metadataUnimportedList = (ArrayList)importResults.get("metadata-imported");
+                                    metadataUnimportedList.add(newItemId + "---" + path);
+                                    logger.debug("Failed to add metadata into item "+newItemHandle+"\n"+ex.getMessage());
+                                    System.out.println("Failed to add metadata into item "+newItemHandle+"\n"+ex.getMessage()+"\n\n");
+                                }
+                            }
+                            
+                            List bitstreamFileList = DocumentProcessorUtil.readTextFileIntoList(contentFile.getAbsolutePath());
+                            ListIterator it = bitstreamFileList.listIterator();
+                            while(it.hasNext()){
+                                String bitstreamFileName = (String)it.next();
+                                File bitstreamFile = new File(file.getAbsoluteFile() + File.separator + bitstreamFileName);
+                                if(!bitstreamFile.exists()){
+                                    logger.debug("The bitstream file "+bitstreamFileName+" does not exist in the saf package "+safPath+"!\n");
+                                    System.out.println("The bitstream file "+bitstreamFileName+" does not exist in the saf package "+safPath+"!\n\n");
+                                }
+                                else{
+                                    String newName = bitstreamFile.getName().replace(" ", "_");
+                                    try{
+                                        Map bitstreamInfo = addItemBitstream(newItemId, bitstreamFile.getAbsolutePath(), newName, newName);
+                                        if(null != bitstreamInfo){
+                                            if(null == importResults.get("bitstream-imported")){
+                                                importResults.put("bitstream-imported", new ArrayList<String>());
+                                            }
+                                            List bitstreamImportedList = (ArrayList)importResults.get("bitstream-imported");
+                                            bitstreamImportedList.add(newItemId + "---" + bitstreamFile.getAbsoluteFile());
+                                            logger.debug("A new bitstream file "+bitstreamFileName+" with link "+((String)bitstreamInfo.get("retrieveLink"))+" has been added to the item "+newItemHandle+". \n");
+                                            System.out.println("A new bitstream file "+bitstreamFileName+" with link "+((String)bitstreamInfo.get("retrieveLink"))+" has been added to the item "+newItemHandle+". \n\n");
+                                        }
+                                        else{
+                                            if(null == importResults.get("bitstream-unimported")){
+                                                importResults.put("bitstream-unimported", new ArrayList<String>());
+                                            }
+                                            List bitstreamUnimportedList = (ArrayList)importResults.get("bitstream-unimported");
+                                            bitstreamUnimportedList.add(newItemId + "---" + bitstreamFile.getAbsoluteFile());
+                                            logger.debug("Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n");
+                                            System.out.println("Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n\n");
+                                        }
+                                    }
+                                    catch(Exception ex){
+                                        if(null == importResults.get("bitstream-unimported")){
+                                            importResults.put("bitstream-unimported", new ArrayList<String>());
+                                        }
+                                        List bitstreamUnimportedList = (ArrayList)importResults.get("bitstream-unimported");
+                                        bitstreamUnimportedList.add(newItemId + "---" + bitstreamFile.getAbsoluteFile());
+                                        logger.debug( "Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n"+ex.getMessage());
+                                        System.out.println("Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n"+ex.getMessage()+"\n\n");
+                                    }
+                                }
+                            }                            
+                        }
+                        else{
+                            logger.debug( "This saf package is missing either the contents file or the metadata files.\n");
+                            System.out.println("This saf package is missing either the contents file or the metadata files.\n\n");
+                            throw new SafPackageMissingFileException("Saf package at " + safPath + " either the contents file or the metadata files are missing!");
+                        }
+                    }
+                }
+            }
+            else {
+                throw new SafPackagePathErrorException("Saf package path is not a directory");
+            }
+            
+            // Due to various reasons, some metadata and/or bitstreams cannot be added and are given second chance here:
+            List metadataUnimportedList = (ArrayList)importResults.get("metadata-unimported");
+            if(null != metadataUnimportedList && metadataUnimportedList.size() > 0){
+                for (Iterator<String> iterator = metadataUnimportedList.iterator(); iterator.hasNext();) {
+                    String[] values = ((String) iterator.next()).split("---");
+                    logger.debug("Second try to add metadata into "+values[0]+" with data "+values[1]);
+                    System.out.println("Second try to add metadata into "+values[0]+" with data "+values[1]+"\n\n");
+                    try{
+                        String metadataInfo = addItemMetadata(values[0], values[1]);
+                        if(null != metadataInfo){
+                            iterator.remove();
+                            logger.debug("Second try: sucessfully added metadata into item "+values[0]+" with data "+values[1]);
+                            System.out.println("Second try: sucessfully added metadata into item "+values[0]+" with data "+values[1]+"\n\n");
+                        }
+                        else{
+                            logger.debug("Second try: failed to add metadata into item "+values[0]+" with data "+values[1]);
+                            System.out.println("Second try: failed to add metadata into item "+values[0]+" with data "+values[1]+"\n\n");
+                        }
+                    }
+                    catch(Exception ex){
+                        logger.debug("Second try: failed to add metadata into item "+values[0]+" with data "+values[1]+"\n"+ex.getMessage());
+                        System.out.println("Second try: failed to add metadata into item "+values[0]+" with data "+values[1]+"\n"+ex.getMessage()+"\n\n");
+                    }
+                }
+            }
+            
+            List bitstreamUnimportedList = (ArrayList)importResults.get("bitstream-unimported");
+            if(null != bitstreamUnimportedList && bitstreamUnimportedList.size() > 0){
+//                for (Object bitstreamUnimportedList1 : bitstreamUnimportedList) {
+                for (Iterator<String> iterator = bitstreamUnimportedList.iterator(); iterator.hasNext();) {
+                    String[] values = ((String) iterator.next()).split("---");
+                    String name = new File(values[1]).getName().replace(" ", "_");
+                    logger.debug("Second try to add bitstream into "+values[0]+" with path "+values[1]);
+                    System.out.println("Second try to add bitstream into "+values[0]+" with path "+values[1]+"\n\n");
+                    try{
+                        Map bitstreamInfo = addItemBitstream(values[0], values[1], name, name);
+                        if(null != bitstreamInfo){
+                            iterator.remove();
+                            logger.debug("Second try: sucessfully added bitstream into item "+values[0]+" with path "+values[1]);
+                            System.out.println("Second try: sucessfully added bitstream into item "+values[0]+" with path "+values[1]+"\n\n");
+                        }
+                        else{
+                            logger.debug("Second try: failed to add bitstream into item "+values[0]+" with path "+values[1]);
+                            System.out.println("Second try: failed to add bitstream into item "+values[0]+" with path "+values[1]+"\n\n");
+                        }
+                    }
+                    catch(Exception ex){
+                        logger.debug("Second try: failed to add bitstream into item "+values[0]+" with path "+values[1]+"\n"+ex.getMessage());
+                        System.out.println("Second try: failed to add bitstream into item "+values[0]+" with path "+values[1]+"\n"+ex.getMessage()+"\n\n");
+                    }
+                }
+            }
+            
+        }
+        catch(SafPackagePathErrorException | SafPackageMissingFileException ex){
+            System.out.println("Saf package is not valid!\n"+ex.getMessage()+"\n\n");
+            logger.error("Cannot create new items with saf package path: " + safPath, ex);
+        } 
+        catch(NullPointerException ex){
+            ex.printStackTrace();
+        }
+        System.out.println("output = "+output);
         return importResults;
     }
     

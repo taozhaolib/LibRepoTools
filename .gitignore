@@ -10,3 +10,4 @@ ouaws/*.log
 dspaceManager/src/main/java/org/shareok/data/dspacemanager/DspaceJournalData.java
 ouaws/.metadata/
 commons-imaging/
+!**/src/main/java/org/shareok/data/kernel/api/services/Main.java

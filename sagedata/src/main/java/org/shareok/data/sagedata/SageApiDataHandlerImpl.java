@@ -139,7 +139,7 @@ public class SageApiDataHandlerImpl implements SageApiDataHandler {
             String startYear = DataHandlersUtil.getYearFromSimpleDateString(startDate);
             String endYear = DataHandlersUtil.getYearFromSimpleDateString(endDate);
             
-            return SageDataUtil.API_SEARCH_PREFIX + "field1=Affiliation&text1=\"" + URLEncoder.encode(affiliate, "UTF-8")+ "\"&field2=AllField&text2=&content=articlesChapters&Ppub=&Ppub=&AfterYear=" + startYear + "&BeforeYear=" + endYear + "&access=user&pageSize=20&startPage=" + startPage + "&";
+            return SageDataUtil.API_SEARCH_PREFIX + "field1=Affiliation&text1=\"" + URLEncoder.encode(affiliate, "UTF-8")+ "\"&field2=AllField&text2=&content=articlesChapters&Ppub=&Ppub=&AfterYear=" + startYear + "&BeforeYear=" + endYear + "&access=&pageSize=20&startPage=" + startPage + "&";
         } catch (Exception ex) {
             logger.error("Cannot encode the query parameters!", ex);
         }

@@ -3,7 +3,7 @@ LibRepoTools provides the UI and command line execution approaches to handle dat
 
 ##Installation for development:
 
-1. Install Java 8 (required), Tomcat 7.0.69 or newer, Maven 3.
+1. Install Java 8 (required), Tomcat 7.0.69 or newer, Maven 3.3+.
 2. Install and run Redis 3.0 or newer with default settings.
 3. Git clone this repository and run: mvn install.
 4. At Tomcat home directory: /config/Catalina/localhost, add the file webserv.xml
@@ -16,7 +16,7 @@ LibRepoTools provides the UI and command line execution approaches to handle dat
 
 
 ##Technology stack:
-Java 8(required), Maven 3, Tomcat 7, Spring Core, Spring Data, Spring Session, Spring MVC, Redis, JSch.
+Java 8(required), Maven 3.3+, Tomcat 7, Spring Core, Spring Data, Spring Session, Spring MVC, Redis, JSch.
 
 ##Project web site:
 https://libtools.repository.ou.edu/webserv/home

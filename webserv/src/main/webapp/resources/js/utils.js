@@ -10,7 +10,7 @@ function isEmpty(object){
     return (null == object || object == "" || typeof(object) == "undefined");
 }
 
-function getVueObjectForList(columns, listData, displaySearch){
+function getVueObjectForList(columns, listData, displaySearch, paging, pageIndex){
     var ok = isEmpty(listData);
     return new Vue({
         el: '#listDiv',
@@ -19,7 +19,9 @@ function getVueObjectForList(columns, listData, displaySearch){
           gridColumns: columns,
           gridData: listData,
           emptyData: ok,
-          displaySearch: displaySearch
+          displaySearch: displaySearch,
+          paging: paging,
+          pageIndex: pageIndex,
         }
     })
 }

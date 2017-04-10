@@ -1,4 +1,7 @@
 <script type="text/x-template" id="grid-template">
+    <div >
+        <span v-for="n in 3"><button type="button" class=".btn-info">Page {{n}}</button></span>
+    </div>
     <table class="table-hover table-condensed table-responsive table-striped" style="width: 100%">
         <thead>
             <tr>
@@ -29,7 +32,9 @@
         props: {
           data: Array,
           columns: Array,
-          filterKey: String
+          filterKey: String,
+          paging: String,
+          pageIndex: Number,
         },
         data: function () {
           var sortOrders = {}
@@ -47,6 +52,22 @@
             var filterKey = this.filterKey && this.filterKey.toLowerCase()
             var order = this.sortOrders[sortKey] || 1
             var data = this.data
+            var paging = this.paging
+            
+            if(paging){
+                data = data.filter(function (item, index) {
+                    var page = Number(paging);
+                    var startPage = this.pageIndex * page;
+                    var endPage = (this.pageIndex + 1) * page;
+                    var valid = false;
+                    if(index >= startPage && index < endPage){
+                        valid = true;
+                    }
+//                    return (index >= this.pageIndex * Number(paging) && index < (this.pageIndex + 1) * Number(paging))
+                    return valid;
+                })
+            }
+            
             if (filterKey) {
               data = data.filter(function (row) {
                 return Object.keys(row).some(function (key) {
@@ -54,6 +75,7 @@
                 })
               })
             }
+            
             if (sortKey) {
               data = data.slice().sort(function (a, b) {
                 a = a[sortKey]
@@ -62,8 +84,32 @@
               })
             }
             return data
-          }
+          },
+          
+          pagedData: function () {
+              var data = this.data
+                var paging = this.paging
+                
+                if(paging){
+                    data = data.filter(function (index) {
+                        return (index >= this.pageIndex * Number(paging) && index < (this.pageIndex + 1) * Number(paging))
+                    })
+                }
+                return data;
+          },
+          
+          getPageNum: function () {
+                var data = this.data;
+                var paging = Number(this.paging);
+                var pageTotal = data.length / paging + 1;
+                return pageTotal;
+            },
+            
+            visible: function () {
+                return this.data.length > 0 ? "visible" : "hidden"
+            }
         },
+        
         filters: {
           capitalize: function (str) {
             return str.charAt(0).toUpperCase() + str.slice(1)
@@ -77,7 +123,7 @@
         }
       })
 
-    getVueObjectForList(columns, listData, displaySearch);
+    getVueObjectForList(columns, listData, displaySearch, paging);
 
 </script>
 

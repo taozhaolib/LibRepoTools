@@ -6,6 +6,8 @@
 <script>    
     var listData = ${articles};
     var displaySearch = true;
+    var paging = 20;
+    var pageIndex = 0;
 </script>
 
 <!-- condition: emptyData is used to handle the situation of empty data found -->
@@ -21,6 +23,8 @@
         </template>
         <br><br>
         <data-grid
+            :pageIndex="pageIndex"
+            :paging="paging"
             :data="gridData"
             :columns="gridColumns"
             :filter-key="searchQuery">

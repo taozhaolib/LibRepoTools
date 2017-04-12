@@ -1,7 +1,6 @@
-<script type="text/x-template" id="grid-template">
-    <div >
-        <span v-for="n in 3"><button type="button" class=".btn-info">Page {{n}}</button></span>
-    </div>
+<script type="text/x-template" id="grid-template">            
+    <div>
+    <span v-for="n in getPageNum"><button type="button" class="btn-primary" >Page {{n}}</button>&nbsp;&nbsp;</span>
     <table class="table-hover table-condensed table-responsive table-striped" style="width: 100%">
         <thead>
             <tr>
@@ -24,6 +23,7 @@
             </tr>
         </tbody>
     </table>
+    </div>
 </script>
 
 <script>
@@ -101,7 +101,7 @@
           getPageNum: function () {
                 var data = this.data;
                 var paging = Number(this.paging);
-                var pageTotal = data.length / paging + 1;
+                var pageTotal = Math.ceil(data.length / paging) + 1;
                 return pageTotal;
             },
             

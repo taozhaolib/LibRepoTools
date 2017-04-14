@@ -1,6 +1,6 @@
 <script type="text/x-template" id="grid-template">            
     <div>
-    <span v-for="n in getPageNum"><button type="button" class="btn-primary" >Page {{n}}</button>&nbsp;&nbsp;</span>
+    <span v-for="n in getPageNum"><button v-bind:id="'page-btn-' + n" type="button" class="btn-primary" v-on:click="goToPage" >Page {{n}}</button>&nbsp;&nbsp;</span>
     <table class="table-hover table-condensed table-responsive table-striped" style="width: 100%">
         <thead>
             <tr>
@@ -34,7 +34,7 @@
           columns: Array,
           filterKey: String,
           paging: String,
-          pageIndex: Number,
+          current_page: String
         },
         data: function () {
           var sortOrders = {}
@@ -53,17 +53,18 @@
             var order = this.sortOrders[sortKey] || 1
             var data = this.data
             var paging = this.paging
+            var pIndex = Number(this.current_page);
             
             if(paging){
                 data = data.filter(function (item, index) {
                     var page = Number(paging);
-                    var startPage = this.pageIndex * page;
-                    var endPage = (this.pageIndex + 1) * page;
+                    var startPage = pIndex * page;
+                    var endPage = (pIndex + 1) * page;
                     var valid = false;
                     if(index >= startPage && index < endPage){
                         valid = true;
                     }
-//                    return (index >= this.pageIndex * Number(paging) && index < (this.pageIndex + 1) * Number(paging))
+//                    return (index >= this.index * Number(paging) && index < (this.index + 1) * Number(paging))
                     return valid;
                 })
             }
@@ -86,28 +87,20 @@
             return data
           },
           
-          pagedData: function () {
-              var data = this.data
-                var paging = this.paging
-                
-                if(paging){
-                    data = data.filter(function (index) {
-                        return (index >= this.pageIndex * Number(paging) && index < (this.pageIndex + 1) * Number(paging))
-                    })
-                }
-                return data;
-          },
-          
           getPageNum: function () {
                 var data = this.data;
                 var paging = Number(this.paging);
-                var pageTotal = Math.ceil(data.length / paging) + 1;
+                var pageTotal = Math.ceil(data.length / paging);
                 return pageTotal;
             },
             
             visible: function () {
                 return this.data.length > 0 ? "visible" : "hidden"
-            }
+            },
+            
+           pageIndex: function(){
+             return this.current_page;  
+           },
         },
         
         filters: {
@@ -119,11 +112,20 @@
           sortBy: function (key) {
             this.sortKey = key
             this.sortOrders[key] = this.sortOrders[key] * -1
-          }
+          },
+          
+           goToPage: function(event) {
+               if(event){
+                   var id = event.target.id;
+                   var n = id.split("-")[2]-1;
+                    this.current_page = n.toString();
+                }
+            },
+            
         }
       })
 
-    getVueObjectForList(columns, listData, displaySearch, paging);
+    getVueObjectForList(columns, listData, displaySearch, paging, current_page);
 
 </script>
 

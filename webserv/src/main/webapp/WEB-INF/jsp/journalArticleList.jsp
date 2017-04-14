@@ -7,7 +7,7 @@
     var listData = ${articles};
     var displaySearch = true;
     var paging = 20;
-    var pageIndex = 0;
+    var current_page = 0;
 </script>
 
 <!-- condition: emptyData is used to handle the situation of empty data found -->
@@ -23,7 +23,7 @@
         </template>
         <br><br>
         <data-grid
-            :pageIndex="pageIndex"
+            :current_page="current_page"
             :paging="paging"
             :data="gridData"
             :columns="gridColumns"

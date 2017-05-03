@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import org.shareok.data.config.DataUtil;
 import java.util.HashMap;
@@ -349,12 +350,11 @@ public class ServiceUtil {
         return safDownloadPaths;
     }
     
-    public static String executeCommandLineTask(String taskId, String data) throws InvalidCommandLineArgumentsException, IOException{
+    public static String executeCommandLineTask(String taskId, String taskType, String data) throws InvalidCommandLineArgumentsException, JSONException, IOException{
         
         BufferedWriter userInputFileInfoFileWr = null;
         BufferedWriter onputFileInfoFileWr = null;
         String message;
-        String taskType = "";
         String startDate;
         String endDate;
         String outputFilePath = null;
@@ -362,53 +362,55 @@ public class ServiceUtil {
         JSONObject argumentsObj;
         
         try{
-            userInputFileInfoFileWr = new BufferedWriter(new FileWriter(new File(DataHandlersUtil.getUserInputInfoFilePath(taskId, taskType))));            
-            if(DocumentProcessorUtil.isEmptyString(data)){
-                message = "The data argument is null or empty string: data="+data;                
-                userInputFileInfoFileWr.write(message);
+            userInputFileInfoFileWr = new BufferedWriter(new FileWriter(DataHandlersUtil.getUserInputInfoFilePath(taskId, taskType), true));
+            if(DocumentProcessorUtil.isEmptyString(taskId)){
+                message = "The data argument is null or empty task ID!";                
                 throw new InvalidCommandLineArgumentsException(message);
-            }
-
-            JSONObject dataObj = new JSONObject(data);
-            for(String key : dataObj.keySet()){
-                taskType = key;
-                DataHandlersUtil.CURRENT_TASK_TYPE = taskType;
             }
             if(DocumentProcessorUtil.isEmptyString(taskType)){
                 message = "The data argument does not specify task type!";
-                userInputFileInfoFileWr.write(message);
                 throw new InvalidCommandLineArgumentsException(message);
             }
+            if(DocumentProcessorUtil.isEmptyString(data)){
+                message = "The data provided for execution of the task is empty!\n";                
+                userInputFileInfoFileWr.write(message);
+                throw new InvalidCommandLineArgumentsException(message);
+            }            
             
             onputFileInfoFileWr = DataHandlersUtil.getWriterForTaskOutputFile(taskId, taskType);
+            
+            JSONObject dataObj = new JSONObject(data);
 
             switch(taskType){
                 case "journal-search":                
-                    argumentsObj = dataObj.getJSONObject(taskType);
-                    String publisher = argumentsObj.getString("publisher");
+                    String publisher = dataObj.getString("publisher");
                     DataHandlersUtil.CURRENT_TASK_ID = taskId;
-                    startDate = argumentsObj.getString("startDate");
-                    endDate = argumentsObj.getString("endDate");
-                    String affiliate = argumentsObj.getString("affiliate");
+                    startDate = dataObj.getString("startDate");
+                    endDate = dataObj.getString("endDate");
+                    String affiliate = dataObj.getString("affiliate");
+                    userInputFileInfoFileWr.write("Task information:\n");
+                    userInputFileInfoFileWr.write("Search publications at "+publisher+" between "+startDate+" and "+endDate+" by authors at "+affiliate+".\n");
                     if(DocumentProcessorUtil.isEmptyString(publisher) || DocumentProcessorUtil.isEmptyString(taskId) || DocumentProcessorUtil.isEmptyString(startDate) || 
                         DocumentProcessorUtil.isEmptyString(endDate) || DocumentProcessorUtil.isEmptyString(affiliate)){
-                        message = "Cannot get specific items from command line data argument";
+                        message = "Cannot get specific information such as publisher, start date, end date, and/or author affiliation to execute the task.\n";
+                        userInputFileInfoFileWr.write(message);
                         throw new InvalidCommandLineArgumentsException(message);
                     }
                     compare = DataHandlersUtil.datesCompare(startDate, endDate);
                     if(compare == null){
-                        message = "Cannot parse the start date or the end date!";
+                        message = "Cannot parse the start date or the end date!\n";
                         userInputFileInfoFileWr.write(message);
                         throw new InvalidCommandLineArgumentsException(message);
                     }
                     else if(compare > 0){
-                        message = "The start date is later than the end date!";
+                        message = "The start date is later than the end date!\n";
                         userInputFileInfoFileWr.write(message);
                         throw new InvalidCommandLineArgumentsException(message);
                     }
                     try{                    
                         DspaceJournalDataService serviceObj = ServiceUtil.getDspaceJournalDataServInstanceByPublisher(publisher);
                         if(null == serviceObj){
+                            userInputFileInfoFileWr.write("The program has internal error, please contact relative personnel.\n");
                             onputFileInfoFileWr.write("Cannot get the service bean from task type: "+taskType);
                             return null;
                         }
@@ -422,56 +424,65 @@ public class ServiceUtil {
                             }
                             DocumentProcessorUtil.outputStringToFile(articlesData, outputFilePath);
                             System.out.println("article data = "+articlesData);
+                            userInputFileInfoFileWr.write("The journal search task has been completed sucessfully.\n");
                         }
                         else{
+                            userInputFileInfoFileWr.write("The program has internal error, please contact relative personnel.\n");
                             System.out.println("The "+taskType+" task id="+taskId+" cannot retrieve the article data!");
                         }
                     }
                     catch(Exception ex){
+                        userInputFileInfoFileWr.write("The program has internal error, please contact relative personnel.\n");
                         logger.error("Cannot complete the "+taskType+" with id="+taskId, ex);
                     }                
     //                articlesData = articlesData.replaceAll("'", "\\\\\\'");                
                     break;
                 case "journal-saf":         
                     String[] dois;
-                    try {
-                        argumentsObj = dataObj.getJSONObject(taskType);
-                        taskId = argumentsObj.getString("id");
-                        DataHandlersUtil.CURRENT_TASK_ID = taskId;
-                        startDate = argumentsObj.getString("startDate");
-                        endDate = argumentsObj.getString("endDate");
-                        dois = argumentsObj.getString("dois").split(";");      
-                        if(DocumentProcessorUtil.isEmptyString(startDate) || DocumentProcessorUtil.isEmptyString(endDate) || null == dois || dois.length == 0){
-                            throw new InvalidCommandLineArgumentsException("Cannot get specific items from command line data argument");
-                        }
+                    DataHandlersUtil.CURRENT_TASK_ID = taskId;
+                    startDate = dataObj.getString("startDate");
+                    endDate = dataObj.getString("endDate");
+                    dois = dataObj.getString("dois").split(";");      
+                    userInputFileInfoFileWr.write("Task information:\n");
+                    userInputFileInfoFileWr.write("Generate DSpace SAF packge for publications with DOIs in "+Arrays.toString(dois)+" which are published between "+startDate+" and "+endDate+".\n");
+                    if(DocumentProcessorUtil.isEmptyString(startDate) || DocumentProcessorUtil.isEmptyString(endDate) || null == dois || dois.length == 0){
+                        message = "Cannot get specific information such as publication DOI, start date, and/or end date to execute the task.\n";
+                        userInputFileInfoFileWr.write(message);
+                        throw new InvalidCommandLineArgumentsException(message);
+                    }
 
-                        compare = DataHandlersUtil.datesCompare(startDate, endDate);
-                        if(compare == null){
-                            throw new InvalidCommandLineArgumentsException("Cannot parse the start date or the end date!");
-                        }
-                        else if(compare > 0){
-                            throw new InvalidCommandLineArgumentsException("The start date is later than the end date!");
-                        }
-
-                    } catch (JSONException | InvalidCommandLineArgumentsException ex) {
-                        logger.error(ex);
-                        throw new InvalidCommandLineArgumentsException("Cannot get specific items from command line data argument");
-                    }     
+                    compare = DataHandlersUtil.datesCompare(startDate, endDate);
+                    if(compare == null){
+                        message = "Cannot parse the start date or the end date!\n";
+                        userInputFileInfoFileWr.write(message);
+                        throw new InvalidCommandLineArgumentsException(message);
+                    }
+                    else if(compare > 0){
+                        message = "The start date is later than the end date!\n";
+                        userInputFileInfoFileWr.write(message);
+                        throw new InvalidCommandLineArgumentsException(message);                            
+                    }
+    
                     try{                    
                         outputFilePath = ServiceUtil.generateDspaceSafPackagesByDois(dois, startDate, endDate);
                         if(outputFilePath.startsWith("error")){
-                            System.out.println("error message received: "+outputFilePath);
-                            throw new ErrorDspaceApiResponseException("Cannot get saf path because error message received: "+outputFilePath);
+                            message = "The DOI provided is not valid: "+outputFilePath+"\n";
+                            System.out.println(message);
+                            userInputFileInfoFileWr.write(message);
+                            throw new ErrorDspaceApiResponseException(message);
                         }
                         else if(null == outputFilePath){
+                            userInputFileInfoFileWr.write("The program has internal error, please contact relative personnel.\n");
                             throw new ErrorDspaceApiResponseException("Cannot get null saf path!");
                         }
                         else{
+                            userInputFileInfoFileWr.write("The journal search task has been completed sucessfully.\n");
                             System.out.println("The SAF package has been stored at path="+outputFilePath);
                         }
                     }
                     catch(Exception ex){
                         logger.error(ex);
+                        userInputFileInfoFileWr.write("The program has internal error, please contact relative personnel.\n");
                         ex.printStackTrace();
                     }
                     break;

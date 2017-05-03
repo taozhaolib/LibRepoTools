@@ -33,6 +33,7 @@
                                 <classpath/>
                                 <argument>org.shareok.data.kernel.api.services.Main</argument>
                                 <argument>${taskId}</argument>
+                                <argument>${taskType}</argument>
                                 <argument>${data}</argument>                                
                             </arguments>  
                         </configuration>
@@ -50,6 +51,7 @@
                                 <classpath/>
                                 <argument>org.shareok.data.kernel.api.services.Main</argument>
                                 <argument>${taskId}</argument>
+                                <argument>${taskType}</argument>
                                 <argument>${data}</argument>
                             </arguments>  
                         </configuration>
@@ -67,6 +69,7 @@
                                 <classpath/>
                                 <argument>org.shareok.data.kernel.api.services.Main</argument>
                                 <argument>${taskId}</argument>
+                                <argument>${taskType}</argument>
                                 <argument>${data}</argument>
                             </arguments>  
                         </configuration>

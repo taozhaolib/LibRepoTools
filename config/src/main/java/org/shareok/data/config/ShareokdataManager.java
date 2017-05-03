@@ -332,4 +332,16 @@ public class ShareokdataManager {
         return path;
     }
         
+    public static String getDspaceCommandLineTaskOutputPath() throws IOException{
+        if(null == prop){
+            loadProperties();
+        }
+        String path = prop.getProperty("dspaceCommandLineTaskOutputPath");
+        File commandLineFile = new File(path);
+        if(!commandLineFile.exists()){
+            commandLineFile.mkdirs();
+        }
+        return path;
+    }
+    
 }

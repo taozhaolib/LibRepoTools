@@ -114,10 +114,10 @@ public class SageApiDataHandlerImpl implements SageApiDataHandler {
             logger.error("Cannot get response sage data after http get request wiht query = "+query, ex);
             return null;
         } catch (NoSageSearchTotalRecordsException ex) {
-            logger.error("Cannot get total records!", ex);
+            logger.error("Cannot get total records with query = "+query, ex);
             return null;
         } catch (NoSageSearchCurrentArticleIndexException ex) {
-            logger.error("Cannot get index of current article!", ex);
+            logger.error("Cannot get index of current article with query = "+query, ex);
             return null;
         }
         

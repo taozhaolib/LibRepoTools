@@ -8,6 +8,7 @@ package org.shareok.data.dspacemanager;
 import java.util.List;
 import java.util.Map;
 import org.shareok.data.datahandlers.JobHandler;
+import org.shareok.data.dspacemanager.exceptions.ErrorDspaceApiResponseException;
 import org.shareok.data.redis.job.DspaceApiJob;
 import org.shareok.data.redis.job.RedisJob;
 
@@ -32,7 +33,7 @@ public interface DspaceApiHandler extends JobHandler {
     public String getItemsInfoByCollectionId(String id);
     public String getItemsInfoByCollectionHandler(String handle);
     public String getObjectInfoByHandler(String handle);
-    public String getObjectInfoByHandler(String handle, String dspaceApiUrl);
+    public String getObjectInfoByHandler(String handle, String dspaceApiUrl) throws ErrorDspaceApiResponseException;
     public String getObjectIdByHandler(String handle);    
     public String getObjectIdByHandler(String handle, String dspaceApiUrl);
     public String addItemMetadata(String id, String data);

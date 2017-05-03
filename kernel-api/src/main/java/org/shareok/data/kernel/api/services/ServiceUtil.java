@@ -362,7 +362,7 @@ public class ServiceUtil {
         JSONObject argumentsObj;
         
         try{
-            userInputFileInfoFileWr = new BufferedWriter(new FileWriter(new File(DataHandlersUtil.getUserInputInfoFilePath(taskId, taskId))));            
+            userInputFileInfoFileWr = new BufferedWriter(new FileWriter(new File(DataHandlersUtil.getUserInputInfoFilePath(taskId, taskType))));            
             if(DocumentProcessorUtil.isEmptyString(data)){
                 message = "The data argument is null or empty string: data="+data;                
                 userInputFileInfoFileWr.write(message);

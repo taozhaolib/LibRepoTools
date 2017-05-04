@@ -245,12 +245,18 @@ public class DataHandlersUtil {
         return outputFileContainerPath;
     }
     
-    public static String getUserInputInfoFilePath(String taskId, String taskType) throws IOException {
+    public static String getLoggingForUserFilePath(String taskId, String taskType) throws IOException {
         String outputFileContainerPath = getTaskFileFolderPath(taskId, taskType);
         File outputFile = new File(outputFileContainerPath + File.separator + "userInputInfo.txt");
         if(!outputFile.exists()){
             outputFile.createNewFile();
         }
         return outputFile.getAbsolutePath();
+    }
+    
+    @Cacheable("loggingForUserFileWriter")
+    public static BufferedWriter getWriterLoggingForUserFile(String taskId, String taskType) throws IOException{
+        String filePath = getLoggingForUserFilePath(taskId, taskType);
+        return new BufferedWriter(new FileWriter(filePath, true));
     }
 }

@@ -308,8 +308,25 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     }
 
     @Override
-    public String getItemsInfoByCollectionHandler(String handle) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public List<Map<String, Object>> getItemsListByCollectionHandler(String handle, String dspaceApiUrl) {
+        try{            
+            String collectionId = getObjectIdByHandler(handle, dspaceApiUrl);
+            String itemCount = String.valueOf(getItemCountByCollectionHandler(handle, dspaceApiUrl));
+            String itemsInfo = httpRequestHandler.sendGet(dspaceApiUrl + "/collections/" + collectionId + "/items?limit="+itemCount);
+            String[] itemsInfoArr = itemsInfo.split("\\n");
+            if(null != itemsInfoArr[0] && itemsInfoArr[0].equals("200")){
+                    itemsInfo = itemsInfoArr[1];
+            }
+            else{
+                throw new ErrorDspaceApiResponseException("Got the response code "+itemsInfoArr[0]);
+            }
+            List<Map<String, Object>> itemsList = DataUtil.getListFromJson(itemsInfo);   
+            return itemsList;
+        }
+        catch(ErrorDspaceApiResponseException ex){
+            logger.error("Cannot get object infor by its handle" , ex);
+        }
+        return null;
     }
 
     @Override
@@ -1433,5 +1450,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
             return doi[0];
         }
         return null;
+    }
+
+    @Override
+    public String getItemsInfoByCollectionHandler(String handle) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

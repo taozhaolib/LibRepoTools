@@ -32,6 +32,7 @@ public interface DspaceApiHandler extends JobHandler {
     public String getTokenFromServer();
     public String getItemsInfoByCollectionId(String id);
     public String getItemsInfoByCollectionHandler(String handle);
+    public List<Map<String, Object>> getItemsListByCollectionHandler(String handle, String dspaceApiUrl);
     public String getObjectInfoByHandler(String handle);
     public String getObjectInfoByHandler(String handle, String dspaceApiUrl) throws ErrorDspaceApiResponseException;
     public String getObjectIdByHandler(String handle);    

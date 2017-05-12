@@ -1,4 +1,6 @@
-<script type="text/x-template" id="grid-template">
+<script type="text/x-template" id="grid-template">            
+    <div>
+    <span v-for="n in getPageNum"><button v-bind:id="'page-btn-' + n" type="button" class="btn-primary" v-on:click="goToPage" >Page {{n}}</button>&nbsp;&nbsp;</span>
     <table class="table-hover table-condensed table-responsive table-striped" style="width: 100%">
         <thead>
             <tr>
@@ -21,6 +23,7 @@
             </tr>
         </tbody>
     </table>
+    </div>
 </script>
 
 <script>
@@ -29,7 +32,9 @@
         props: {
           data: Array,
           columns: Array,
-          filterKey: String
+          filterKey: String,
+          paging: String,
+          current_page: String
         },
         data: function () {
           var sortOrders = {}
@@ -47,6 +52,23 @@
             var filterKey = this.filterKey && this.filterKey.toLowerCase()
             var order = this.sortOrders[sortKey] || 1
             var data = this.data
+            var paging = this.paging
+            var pIndex = Number(this.current_page);
+            
+            if(paging){
+                data = data.filter(function (item, index) {
+                    var page = Number(paging);
+                    var startPage = pIndex * page;
+                    var endPage = (pIndex + 1) * page;
+                    var valid = false;
+                    if(index >= startPage && index < endPage){
+                        valid = true;
+                    }
+//                    return (index >= this.index * Number(paging) && index < (this.index + 1) * Number(paging))
+                    return valid;
+                })
+            }
+            
             if (filterKey) {
               data = data.filter(function (row) {
                 return Object.keys(row).some(function (key) {
@@ -54,6 +76,7 @@
                 })
               })
             }
+            
             if (sortKey) {
               data = data.slice().sort(function (a, b) {
                 a = a[sortKey]
@@ -62,8 +85,24 @@
               })
             }
             return data
-          }
+          },
+          
+          getPageNum: function () {
+                var data = this.data;
+                var paging = Number(this.paging);
+                var pageTotal = Math.ceil(data.length / paging);
+                return pageTotal;
+            },
+            
+            visible: function () {
+                return this.data.length > 0 ? "visible" : "hidden"
+            },
+            
+           pageIndex: function(){
+             return this.current_page;  
+           },
         },
+        
         filters: {
           capitalize: function (str) {
             return str.charAt(0).toUpperCase() + str.slice(1)
@@ -73,11 +112,20 @@
           sortBy: function (key) {
             this.sortKey = key
             this.sortOrders[key] = this.sortOrders[key] * -1
-          }
+          },
+          
+           goToPage: function(event) {
+               if(event){
+                   var id = event.target.id;
+                   var n = id.split("-")[2]-1;
+                    this.current_page = n.toString();
+                }
+            },
+            
         }
       })
 
-    getVueObjectForList(columns, listData, displaySearch);
+    getVueObjectForList(columns, listData, displaySearch, paging, current_page);
 
 </script>
 

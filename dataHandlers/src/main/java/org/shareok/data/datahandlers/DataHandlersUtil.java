@@ -6,6 +6,7 @@
 package org.shareok.data.datahandlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -30,6 +31,7 @@ import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.documentProcessor.FileHandlerFactory;
 import org.shareok.data.htmlrequest.HttpRequestHandler;
 import org.shareok.data.redis.job.RedisJob;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -39,9 +41,16 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class DataHandlersUtil {
     
+    public static String CURRENT_TASK_ID = "";
+    public static String CURRENT_TASK_TYPE = "";
+    
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DataHandlersUtil.class);
     
     public static String getJobReportPath(String jobType, long jobId){
+        return getJobReportPath(jobType, String.valueOf(jobId));
+    }
+    
+    public static String getJobReportPath(String jobType, String jobId){
         String shareokdataPath = getShareokdataPath();
         String repoType = jobType.split("-")[2];
         String filePath = shareokdataPath + File.separator + repoType;
@@ -54,7 +63,7 @@ public class DataHandlersUtil {
         if(!file.exists()){
             file.mkdir();
         }
-        filePath += File.separator + String.valueOf(jobId);
+        filePath += File.separator + jobId;
         file = new File(filePath);
         if(!file.exists()){
             file.mkdir();
@@ -215,5 +224,39 @@ public class DataHandlersUtil {
                 logger.error("Cannot close the file write for csv file at "+csvFilePath, ex);
             }
         }
+    }
+        
+    @Cacheable("taskOutputFileWriter")
+    public static BufferedWriter getWriterForTaskOutputFile(String taskId, String taskType) throws IOException{
+        String outputFilePath = ShareokdataManager.getDspaceCommandLineTaskOutputPath() + "_" + DataHandlersUtil.getCurrentTimeString()+"_"+taskType+"_"+taskId+".txt";
+        File outputFile = new File(outputFilePath);
+        if(!outputFile.exists()){
+            outputFile.createNewFile();
+        }
+        return new BufferedWriter(new FileWriter(outputFilePath, true));
+    }
+    
+    public static String getTaskFileFolderPath(String taskId, String taskType) throws IOException {
+        String outputFileContainerPath = ShareokdataManager.getDspaceCommandLineTaskOutputPath() + File.separator + taskType + File.separator + taskId;
+        File containerFile = new File(outputFileContainerPath);
+        if(!containerFile.exists()){
+            containerFile.mkdirs();
+        }
+        return outputFileContainerPath;
+    }
+    
+    public static String getLoggingForUserFilePath(String taskId, String taskType) throws IOException {
+        String outputFileContainerPath = getTaskFileFolderPath(taskId, taskType);
+        File outputFile = new File(outputFileContainerPath + File.separator + "userInputInfo.txt");
+        if(!outputFile.exists()){
+            outputFile.createNewFile();
+        }
+        return outputFile.getAbsolutePath();
+    }
+    
+    @Cacheable("loggingForUserFileWriter")
+    public static BufferedWriter getWriterLoggingForUserFile(String taskId, String taskType) throws IOException{
+        String filePath = getLoggingForUserFilePath(taskId, taskType);
+        return new BufferedWriter(new FileWriter(filePath, true));
     }
 }

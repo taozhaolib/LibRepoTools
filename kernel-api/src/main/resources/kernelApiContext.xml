@@ -5,9 +5,23 @@
         xsi:schemaLocation="http://www.springframework.org/schema/beans
             http://www.springframework.org/schema/beans/spring-beans.xsd
             http://www.springframework.org/schema/context
-            http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+            http://www.springframework.org/schema/context/spring-context-2.5.xsd
+            http://www.springframework.org/schema/cache
+            http://www.springframework.org/schema/cache/spring-cache.xsd" 
+        xmlns:cache="http://www.springframework.org/schema/cache">
     
     <context:annotation-config />
+    
+    <cache:annotation-driven/>
+    <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
+        <property name="caches">
+            <set>
+                <bean
+                  class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean"
+                  name="addresses"/>
+            </set>
+        </property>
+    </bean>
     
     <import resource="classpath*:**/sageDataContext.xml"/>
     <import resource="classpath*:**/plosContext.xml"/>

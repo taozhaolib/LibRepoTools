@@ -140,6 +140,7 @@ public class FileZipper {
         }
         catch(IOException ex){
             logger.error("Error after Zipping file: " + ex.getMessage());
+            return null;
         }
         finally{
             if(null != zipIn){

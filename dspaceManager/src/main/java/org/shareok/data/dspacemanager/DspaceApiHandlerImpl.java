@@ -5,7 +5,9 @@
  */
 package org.shareok.data.dspacemanager;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -14,10 +16,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.shareok.data.config.DataUtil;
 import org.shareok.data.datahandlers.DataHandlersUtil;
+import org.shareok.data.datahandlers.exceptions.ErrorUnzipSafPackageException;
 import org.shareok.data.datahandlers.exceptions.IncompleteServerInfoException;
+import org.shareok.data.datahandlers.exceptions.NoExistingApiTokenException;
 import org.shareok.data.datahandlers.exceptions.SecurityFileDoesNotExistException;
 import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.documentProcessor.FileZipper;
@@ -302,8 +308,25 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     }
 
     @Override
-    public String getItemsInfoByCollectionHandler(String handle) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public List<Map<String, Object>> getItemsListByCollectionHandler(String handle, String dspaceApiUrl) {
+        try{            
+            String collectionId = getObjectIdByHandler(handle, dspaceApiUrl);
+            String itemCount = String.valueOf(getItemCountByCollectionHandler(handle, dspaceApiUrl));
+            String itemsInfo = httpRequestHandler.sendGet(dspaceApiUrl + "/collections/" + collectionId + "/items?limit="+itemCount);
+            String[] itemsInfoArr = itemsInfo.split("\\n");
+            if(null != itemsInfoArr[0] && itemsInfoArr[0].equals("200")){
+                    itemsInfo = itemsInfoArr[1];
+            }
+            else{
+                throw new ErrorDspaceApiResponseException("Got the response code "+itemsInfoArr[0]);
+            }
+            List<Map<String, Object>> itemsList = DataUtil.getListFromJson(itemsInfo);   
+            return itemsList;
+        }
+        catch(ErrorDspaceApiResponseException ex){
+            logger.error("Cannot get object infor by its handle" , ex);
+        }
+        return null;
     }
 
     @Override
@@ -317,9 +340,14 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     
     @Override
     public String getObjectIdByHandler(String handle, String dspaceApiUrl) {
-        Map map = DataUtil.getMapFromJson(getObjectInfoByHandler(handle, dspaceApiUrl));
-        if(null != map.get("id")){
-            return String.valueOf(map.get("id"));
+        try{
+            Map map = DataUtil.getMapFromJson(getObjectInfoByHandler(handle, dspaceApiUrl));
+            if(null != map.get("id")){
+                return String.valueOf(map.get("id"));
+            }
+        }
+        catch(ErrorDspaceApiResponseException ex){
+            logger.error(ex);
         }
         return null;
     }
@@ -337,21 +365,15 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     }
     
     @Override
-    public String getObjectInfoByHandler(String handle, String dspaceApiUrl){
-        try{            
-            String objectInfo = httpRequestHandler.sendGet(dspaceApiUrl + "/handle/" + handle);
-            String[] objectInfoArr = objectInfo.split("\\n");
-            if(null != objectInfoArr[0] && objectInfoArr[0].equals("200")){
-                return objectInfoArr[1];
-            }
-            else{
-                throw new ErrorDspaceApiResponseException("Got the response code "+objectInfoArr[0]);
-            }
+    public String getObjectInfoByHandler(String handle, String dspaceApiUrl) throws ErrorDspaceApiResponseException{
+        String objectInfo = httpRequestHandler.sendGet(dspaceApiUrl + "/handle/" + handle);
+        String[] objectInfoArr = objectInfo.split("\\n");
+        if(null != objectInfoArr[0] && objectInfoArr[0].equals("200")){
+            return objectInfoArr[1];
         }
-        catch(ErrorDspaceApiResponseException ex){
-            logger.error("Cannot get object infor by its handle" , ex);
+        else{
+            throw new ErrorDspaceApiResponseException("Got the response code "+objectInfoArr[0]);
         }
-        return null;
     }
 
     @Override
@@ -786,12 +808,23 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         
         if(DocumentProcessorUtil.isEmptyString(token)){
             getTokenFromServer();
+            if(DocumentProcessorUtil.isEmptyString(token)){
+                try {
+                    throw new NoExistingApiTokenException("Cannot get useful token!");
+                } catch (NoExistingApiTokenException ex) {
+                    logger.error(ex.getMessage());
+                    return null;
+                }
+            }
         }
         
         try{            
             File safFile = new File(safPath);
             if(safPath.endsWith(".zip")){
                 String newPath = FileZipper.unzipToDirectory(safPath);
+                if(null == newPath){
+                    throw new ErrorUnzipSafPackageException("Cannot unzip the saf package at "+safPath);
+                }
                 // Change the path to be the unzipped folder
 //                safPath = DocumentProcessorUtil.getFileNameWithoutExtension(safPath);
                 safFile = new File(newPath);
@@ -999,6 +1032,8 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
         catch(SafPackagePathErrorException | SafPackageMissingFileException ex){
             output += "Saf package is not valid!\n"+ex.getMessage()+"\n\n";
             logger.error("Cannot create new items with saf package path: " + safPath, ex);
+        } catch (ErrorUnzipSafPackageException ex) {
+            Logger.getLogger(DspaceApiHandlerImpl.class.getName()).log(Level.SEVERE, null, ex);
         } 
         finally{
             DocumentProcessorUtil.outputStringToFile(mapping, DocumentProcessorUtil.getFileContainerPath(reportFilePath)+File.separator+"mapfile");
@@ -1012,15 +1047,51 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
     public Map<String, List<String>> loadItemsFromSafPackage(String safPath, String collectionHandle, String dspaceApiUrl){
         Map<String, List<String>> importResults = new HashMap<>();
         this.dspaceApiUrl = dspaceApiUrl;
+        BufferedWriter loggingForUserWriter = null;
+        BufferedWriter mapWriter = null;
+        String message;
         
         if(DocumentProcessorUtil.isEmptyString(token)){
             getTokenFromServer();
+            if(DocumentProcessorUtil.isEmptyString(token)){
+                try {
+                    throw new NoExistingApiTokenException("Cannot get useful token!");
+                } catch (NoExistingApiTokenException ex) {
+                    logger.error(ex.getMessage());
+                    return null;
+                }
+            }
         }
         
         try{            
+            try {
+                loggingForUserWriter = DataHandlersUtil.getWriterLoggingForUserFile(DataHandlersUtil.CURRENT_TASK_ID, DataHandlersUtil.CURRENT_TASK_TYPE);
+            } catch (IOException ex) {
+                logger.error("Cannot get the output file writer", ex);
+                return null;
+            }
+            
+            loggingForUserWriter.write("\n\n==================================================\n\nStart to import the items in the SAF package.\n\n\n");
+            
+            try{
+                File mapFile = new File(DocumentProcessorUtil.getFileContainerPath(reportFilePath)+File.separator+"mapfile");
+                if(!mapFile.exists()){
+                    mapFile.createNewFile();
+                }
+                mapWriter = new BufferedWriter(new FileWriter(mapFile));
+            }
+            catch (IOException ex) {
+                logger.error("Cannot get the output file writer", ex);
+                loggingForUserWriter.write("Cannot generate the map file, task dismissed. Please contact the relative personnel.\n");
+                return null;
+            }
             File safFile = new File(safPath);
             if(safPath.endsWith(".zip")){
                 String newPath = FileZipper.unzipToDirectory(safPath);
+                if(null == newPath){
+                    loggingForUserWriter.write("The SAF package has problem, please contact the relative personnel.\n");
+                    throw new ErrorUnzipSafPackageException("Cannot unzip the saf package at "+safPath);
+                }
                 // Change the path to be the unzipped folder
 //                safPath = DocumentProcessorUtil.getFileNameWithoutExtension(safPath);
                 safFile = new File(newPath);
@@ -1036,6 +1107,7 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                         
                         List<File> metadataFileList = new ArrayList<>();
                         File contentFile = null;
+                        String doi = "";
                         
                         for(File itemFile : fileList){    
                             
@@ -1051,10 +1123,13 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                             else if(METADATA_FILE_NAMES_LIST.contains(fileName.replaceAll(".xml", ""))){
                                 // Check if there are some duplicates based on doi
                                 if(fileName.contains("dublin")){
-                                    String doi = findDoiFromDublin(itemFile.getAbsolutePath());
+                                    doi = findDoiFromDublin(itemFile.getAbsolutePath());
                                     if(null != doi && checkDuplicatesByDoi(doi, collectionHandle, dspaceApiUrl)){
-                                        logger.debug("Duplication detected:in collection "+collectionHandle+" there has already been an item with doi="+doi);
-                                        System.out.println("Duplication detected:in collection \"+collectionHandle+\" there has already been an item with doi="+doi+".\n\n");
+                                        message = "Duplication detected: collection "+collectionHandle+" has already had an item with doi="+doi;
+                                        logger.debug(message);
+                                        System.out.println(message+".\n\n\n");
+                                        loggingForUserWriter.write(message+".\n\n\n");
+                                        loggingForUserWriter.write("Item with doi:"+doi+" has been processed.\n\n==================================================\n\n");
                                         continue mainLoop;
                                     }
                                 }
@@ -1063,13 +1138,30 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                             }
                         }
                         if(containsContentsFile == true && containsMetadataFile == true){
+                            String newItemId;
+                            String newItemHandle;
                             // Create the new item now:
-                            Map newItemInfo = createEmptyItem(getObjectIdByHandler(collectionHandle, dspaceApiUrl));
-                            String newItemId = String.valueOf(newItemInfo.get("id"));
-                            String newItemHandle = (String)newItemInfo.get("handle");
-                            logger.debug("A new item with handle = "+newItemHandle+" has been added to collection "+collectionHandle+".");
-                            System.out.println("A new item with handle = "+newItemHandle+" has been added to collection "+collectionHandle+".\n\n");
-                            mapping += file.getName() + "   " + newItemHandle+"\n";
+                            try{
+                                String collectionId = getObjectIdByHandler(collectionHandle, dspaceApiUrl);
+                                if(DocumentProcessorUtil.isEmptyString(collectionId)){
+                                    throw new Exception("Cannot get collection ID from handler "+collectionHandle+"!");
+                                }
+                                Map newItemInfo = createEmptyItem(getObjectIdByHandler(collectionHandle, dspaceApiUrl));
+                                newItemId = String.valueOf(newItemInfo.get("id"));
+                                newItemHandle = (String)newItemInfo.get("handle");
+                                message = "A new item with handle = "+newItemHandle+" has been added to collection "+collectionHandle+".\n\n";
+                                logger.debug(message);
+                                System.out.println(message);
+                                loggingForUserWriter.write(message);
+                                mapWriter.write(file.getName() + "   " + newItemHandle+"\n");
+                            }
+                            catch(Exception ex){
+                                message = "Cannot create the new item with collection handler "+collectionHandle+".\nItem with doi="+doi+" is not added.";
+                                logger.error(message, ex);
+                                System.out.println(message+"\n\n\n");
+                                loggingForUserWriter.write(message+"\n\n\n");
+                                continue;
+                            }
                             
                             // Add the metadata to the new item:
                             String[] paths = new String[metadataFileList.size()];
@@ -1080,29 +1172,36 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                             }
                             Map<String, String> metadataStrings = getMetadataFromXmlFiles(paths);
                             for(String path : metadataStrings.keySet()){
-                                String metadata = metadataStrings.get(path);                                
-                                logger.debug(" adding metadata file " + metadata +" now with file name : "+file.getName());
-                                System.out.println(" adding metadata file " + metadata +" now with file name : "+file.getName()+"\n\n");
+                                String metadata = metadataStrings.get(path);      
+                                message = "Adding metadata file " + metadata +" now with file name : "+file.getName();
+                                logger.debug(message);
+                                System.out.println(message+"\n\n");
+                                loggingForUserWriter.write("Start to add metadata for item doi:"+doi+"\n");
+                                
                                 try{
-                                String metadataInfo = addItemMetadata(newItemId, metadata);
-                                if(null == metadataInfo || metadataInfo.equals("")){
-                                    if(null == importResults.get("metadata-imported")){
-                                        importResults.put("metadata-imported", new ArrayList<String>());
+                                    String metadataInfo = addItemMetadata(newItemId, metadata);
+                                    if(null == metadataInfo || metadataInfo.equals("")){
+                                        if(null == importResults.get("metadata-imported")){
+                                            importResults.put("metadata-imported", new ArrayList<String>());
+                                        }
+                                        List metadataUnimportedList = (ArrayList)importResults.get("metadata-imported");
+                                        metadataUnimportedList.add(newItemId + "---" + path);
+                                        message = "Failed to add the metadata into item "+newItemHandle+".\n\n";
+                                        logger.debug(message);
+                                        System.out.println(message);
+                                        loggingForUserWriter.write(message);
                                     }
-                                    List metadataUnimportedList = (ArrayList)importResults.get("metadata-imported");
-                                    metadataUnimportedList.add(newItemId + "---" + path);
-                                    logger.debug("Failed to add the metadata into item "+newItemHandle+".\n");
-                                    System.out.println("Failed to add the metadata into item "+newItemHandle+".\n\n");
-                                }
-                                else{
-                                    if(null == importResults.get("metadata-imported")){
-                                        importResults.put("metadata-imported", new ArrayList<String>());
+                                    else{
+                                        if(null == importResults.get("metadata-imported")){
+                                            importResults.put("metadata-imported", new ArrayList<String>());
+                                        }
+                                        List metadataImportedList = (ArrayList)importResults.get("metadata-imported");
+                                        metadataImportedList.add(newItemId + "---" + path);
+                                        message = "A new set of metadata entries have been added to the item "+newItemHandle+". \n\n";
+                                        logger.debug(message);
+                                        System.out.println(message);
+                                        loggingForUserWriter.write(message);
                                     }
-                                    List metadataImportedList = (ArrayList)importResults.get("metadata-imported");
-                                    metadataImportedList.add(newItemId + "---" + path);
-                                    logger.debug("A new set of metadata entries have been added to the item "+newItemHandle+". \n");
-                                    System.out.println("A new set of metadata entries have been added to the item "+newItemHandle+". \n\n");
-                                }
                                 }
                                 catch(Exception ex){
                                     if(null == importResults.get("metadata-imported")){
@@ -1110,8 +1209,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                     }
                                     List metadataUnimportedList = (ArrayList)importResults.get("metadata-imported");
                                     metadataUnimportedList.add(newItemId + "---" + path);
-                                    logger.debug("Failed to add metadata into item "+newItemHandle+"\n"+ex.getMessage());
-                                    System.out.println("Failed to add metadata into item "+newItemHandle+"\n"+ex.getMessage()+"\n\n");
+                                    message = "Failed to add metadata into item "+newItemHandle+"\n"+ex.getMessage();
+                                    logger.debug(message);
+                                    System.out.println(message+"\n\n");
+                                    loggingForUserWriter.write(message+"\n\n");
                                 }
                             }
                             
@@ -1121,8 +1222,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                 String bitstreamFileName = (String)it.next();
                                 File bitstreamFile = new File(file.getAbsoluteFile() + File.separator + bitstreamFileName);
                                 if(!bitstreamFile.exists()){
-                                    logger.debug("The bitstream file "+bitstreamFileName+" does not exist in the saf package "+safPath+"!\n");
-                                    System.out.println("The bitstream file "+bitstreamFileName+" does not exist in the saf package "+safPath+"!\n\n");
+                                    message = "The bitstream file "+bitstreamFileName+" does not exist in the saf package "+safPath+"!\n";
+                                    logger.debug(message);
+                                    System.out.println(message+"!\n\n");
+                                    loggingForUserWriter.write(message+"!\n\n");
                                 }
                                 else{
                                     String newName = bitstreamFile.getName().replace(" ", "_");
@@ -1134,8 +1237,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                             }
                                             List bitstreamImportedList = (ArrayList)importResults.get("bitstream-imported");
                                             bitstreamImportedList.add(newItemId + "---" + bitstreamFile.getAbsoluteFile());
-                                            logger.debug("A new bitstream file "+bitstreamFileName+" with link "+((String)bitstreamInfo.get("retrieveLink"))+" has been added to the item "+newItemHandle+". \n");
-                                            System.out.println("A new bitstream file "+bitstreamFileName+" with link "+((String)bitstreamInfo.get("retrieveLink"))+" has been added to the item "+newItemHandle+". \n\n");
+                                            message = "A new bitstream file "+bitstreamFileName+" has been added to the item "+newItemHandle+".\n\n";
+                                            logger.debug(message);
+                                            System.out.println(message);
+                                            loggingForUserWriter.write(message);
                                         }
                                         else{
                                             if(null == importResults.get("bitstream-unimported")){
@@ -1143,8 +1248,8 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                             }
                                             List bitstreamUnimportedList = (ArrayList)importResults.get("bitstream-unimported");
                                             bitstreamUnimportedList.add(newItemId + "---" + bitstreamFile.getAbsoluteFile());
-                                            logger.debug("Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n");
-                                            System.out.println("Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n\n");
+                                            message = "Cannot add the bitstream!";
+                                            throw new Exception(message);
                                         }
                                     }
                                     catch(Exception ex){
@@ -1153,22 +1258,31 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                                         }
                                         List bitstreamUnimportedList = (ArrayList)importResults.get("bitstream-unimported");
                                         bitstreamUnimportedList.add(newItemId + "---" + bitstreamFile.getAbsoluteFile());
-                                        logger.debug( "Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n"+ex.getMessage());
-                                        System.out.println("Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n"+ex.getMessage()+"\n\n");
+                                        message = "Failed to add the bitstream file "+bitstreamFileName+" into item "+newItemHandle+".\n";
+                                        logger.debug(message, ex);
+                                        ex.printStackTrace();
+                                        loggingForUserWriter.write(message);
                                     }
                                 }
                             }                            
                         }
                         else{
-                            logger.debug( "This saf package is missing either the contents file or the metadata files.\n");
-                            System.out.println("This saf package is missing either the contents file or the metadata files.\n\n");
-                            throw new SafPackageMissingFileException("Saf package at " + safPath + " either the contents file or the metadata files are missing!");
+                            message = "This saf package is missing either the contents file or the metadata files.\n\n";
+                            logger.debug(message);
+                            System.out.println(message);
+                            loggingForUserWriter.write(message);
+                            //throw new SafPackageMissingFileException("Saf package at " + safPath + " either the contents file or the metadata files are missing!");
                         }
+                        loggingForUserWriter.write("Item with doi:"+doi+" has been processed.\n\n==================================================\n\n");
                     }
                 }
             }
             else {
-                throw new SafPackagePathErrorException("Saf package path is not a directory");
+                message = "This SAF package is not a directory.\n\n\n";
+                logger.debug(message);
+                System.out.println(message);
+                loggingForUserWriter.write(message);
+                throw new SafPackagePathErrorException(message);
             }
             
             // Due to various reasons, some metadata and/or bitstreams cannot be added and are given second chance here:
@@ -1176,23 +1290,28 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
             if(null != metadataUnimportedList && metadataUnimportedList.size() > 0){
                 for (Iterator<String> iterator = metadataUnimportedList.iterator(); iterator.hasNext();) {
                     String[] values = ((String) iterator.next()).split("---");
-                    logger.debug("Second try to add metadata into "+values[0]+" with data "+values[1]);
-                    System.out.println("Second try to add metadata into "+values[0]+" with data "+values[1]+"\n\n");
+                    message = "Second try to add metadata into "+values[0]+" with data "+values[1];
+                    logger.debug(message);
+                    System.out.println(message+"\n\n");
+                    loggingForUserWriter.write(message+"\n\n");
                     try{
                         String metadataInfo = addItemMetadata(values[0], values[1]);
                         if(null != metadataInfo){
                             iterator.remove();
-                            logger.debug("Second try: sucessfully added metadata into item "+values[0]+" with data "+values[1]);
-                            System.out.println("Second try: sucessfully added metadata into item "+values[0]+" with data "+values[1]+"\n\n");
+                            message = "Second try: sucessfully added metadata into item "+values[0]+" with data "+values[1];
+                            logger.debug(message);
+                            System.out.println(message+"\n\n");
+                            loggingForUserWriter.write(message+"\n\n");
                         }
                         else{
-                            logger.debug("Second try: failed to add metadata into item "+values[0]+" with data "+values[1]);
-                            System.out.println("Second try: failed to add metadata into item "+values[0]+" with data "+values[1]+"\n\n");
+                            throw new Exception();
                         }
                     }
                     catch(Exception ex){
-                        logger.debug("Second try: failed to add metadata into item "+values[0]+" with data "+values[1]+"\n"+ex.getMessage());
-                        System.out.println("Second try: failed to add metadata into item "+values[0]+" with data "+values[1]+"\n"+ex.getMessage()+"\n\n");
+                        message = "Second try: failed to add metadata into item "+values[0]+" with data "+values[1]+"\n"+ex.getMessage();
+                        logger.debug(message);
+                        System.out.println(message+"\n\n");
+                        loggingForUserWriter.write(message+"\n\n");
                     }
                 }
             }
@@ -1203,36 +1322,61 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
                 for (Iterator<String> iterator = bitstreamUnimportedList.iterator(); iterator.hasNext();) {
                     String[] values = ((String) iterator.next()).split("---");
                     String name = new File(values[1]).getName().replace(" ", "_");
-                    logger.debug("Second try to add bitstream into "+values[0]+" with path "+values[1]);
-                    System.out.println("Second try to add bitstream into "+values[0]+" with path "+values[1]+"\n\n");
+                    message = "Second try to add bitstream into "+values[0]+" with path "+values[1];
+                    logger.debug(message);
+                    System.out.println(message+"\n\n");
+                    loggingForUserWriter.write(message+"\n\n");
                     try{
                         Map bitstreamInfo = addItemBitstream(values[0], values[1], name, name);
                         if(null != bitstreamInfo){
                             iterator.remove();
-                            logger.debug("Second try: sucessfully added bitstream into item "+values[0]+" with path "+values[1]);
-                            System.out.println("Second try: sucessfully added bitstream into item "+values[0]+" with path "+values[1]+"\n\n");
+                            message = "Second try: sucessfully added bitstream into item "+values[0]+" with path "+values[1];
+                            logger.debug(message);
+                            System.out.println(message+"\n\n");
+                            loggingForUserWriter.write(message+"\n\n");
                         }
                         else{
-                            logger.debug("Second try: failed to add bitstream into item "+values[0]+" with path "+values[1]);
-                            System.out.println("Second try: failed to add bitstream into item "+values[0]+" with path "+values[1]+"\n\n");
+                            message = "Second try: failed to add bitstream into item "+values[0]+" with path "+values[1];
+                            logger.debug(message);
+                            System.out.println(message+"\n\n");
+                            loggingForUserWriter.write(message+"\n\n");
+                            throw new Exception(message);
                         }
                     }
                     catch(Exception ex){
-                        logger.debug("Second try: failed to add bitstream into item "+values[0]+" with path "+values[1]+"\n"+ex.getMessage());
-                        System.out.println("Second try: failed to add bitstream into item "+values[0]+" with path "+values[1]+"\n"+ex.getMessage()+"\n\n");
+                        logger.error(ex);
                     }
                 }
             }
             
         }
-        catch(SafPackagePathErrorException | SafPackageMissingFileException ex){
-            System.out.println("Saf package is not valid!\n"+ex.getMessage()+"\n\n");
+        catch(SafPackagePathErrorException ex){
+            message = "Saf package is not valid!\n"+ex.getMessage();
+            System.out.println(message+"\n\n");
             logger.error("Cannot create new items with saf package path: " + safPath, ex);
         } 
-        catch(NullPointerException ex){
-            ex.printStackTrace();
+        catch(NullPointerException | ErrorUnzipSafPackageException | IOException ex){
+            logger.error(ex);
         }
-        System.out.println("output = "+output);
+        finally{
+            if(null != loggingForUserWriter){
+                try{
+                    loggingForUserWriter.flush();
+                }
+                catch(IOException ex){
+                    logger.error("Cannot close the output file writer!");
+                }
+            }
+            if(null != mapWriter){
+                try{
+                    mapWriter.flush();
+                    mapWriter.close();
+                }
+                catch(IOException ex){
+                    logger.error("Cannot close the map file writer!");
+                }
+            }
+        }
         return importResults;
     }
     
@@ -1306,5 +1450,10 @@ public class DspaceApiHandlerImpl implements DspaceApiHandler{
             return doi[0];
         }
         return null;
+    }
+
+    @Override
+    public String getItemsInfoByCollectionHandler(String handle) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

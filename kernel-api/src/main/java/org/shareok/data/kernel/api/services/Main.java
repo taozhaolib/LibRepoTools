@@ -29,7 +29,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * Action type: 
  *       journal-search <journal articles search> : mvn exec:exec@journal-search -DtaskId='123' -DtaskType='journal-search' -Ddata='{"publisher" : "sage", "startDate": "2017-01-02", "endDate" : "2017-04-05", "affiliate" : "University of Oklahoma"}'
  *       journal-saf <journal articles SAF package> : mvn exec:exec@journal-saf -DtaskId='12322' -DtaskType='journal-saf' -Ddata='{"dois": "10.1371/journal.pone.0171910;10.1371/journal.pone.0171683;10.1371/journal.pone.0171193", "startDate" : "2017-03-03", "endDate" : "2017-03-28"}'
- *       journal-saf-import <journal articles SAF import> : mvn exec:exec@journal-import -Ddata='{"journal-import" : {"id" : "102", "safPath" : "/var/local/librepotools/librepotools-data/uploads/2017.04.03.16.10.41/plos/output_plos_2017-03-03_2017-03-28.zip", "collectionHandle" : "11244/37263", "dspaceApiUrl" : "https://test.shareok.org/rest"}}'
+ *       journal-saf-import <journal articles SAF import> : mvn exec:exec@journal-import -DtaskId='12322' -Ddata='{"id" : "102", "safPath" : "/var/local/librepotools/librepotools-data/uploads/2017.04.03.16.10.41/plos/output_plos_2017-03-03_2017-03-28.zip", "collectionHandle" : "11244/37263", "dspaceApiUrl" : "https://test.shareok.org/rest"}'
  * 
  * @author Tao Zhao
  */

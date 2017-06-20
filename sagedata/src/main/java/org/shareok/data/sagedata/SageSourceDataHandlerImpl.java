@@ -518,7 +518,7 @@ public class SageSourceDataHandlerImpl implements SageSourceDataHandler {
             throw new NoHtmlComponentsFoundException("Cannot find the article type!");
         }
         String typeSpan = typeElements.get(0).select("span").get(0).text();
-        if(null != typeSpan){
+        if(null != typeSpan && typeSpan.contains("-")){
             typeSpan = typeSpan.replace("-", " ");
             String[] typeSpanInfo = typeSpan.split(" ");
             typeSpan = "";

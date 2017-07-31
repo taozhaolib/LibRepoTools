@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>oulib.aws</groupId>
     <artifactId>ouaws</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     
     <parent>
         <groupId>org.shareok.data</groupId>
         <artifactId>shareokdata</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
     
     <repositories>

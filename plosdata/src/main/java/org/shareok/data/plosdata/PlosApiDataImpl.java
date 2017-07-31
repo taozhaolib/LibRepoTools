@@ -6,6 +6,7 @@
 package org.shareok.data.plosdata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import org.shareok.data.plosdata.exception.InvalidPlosApiQueryException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -19,6 +20,7 @@ import java.util.logging.Logger;
 import javax.activation.DataHandler;
 import org.shareok.data.config.ShareokdataManager;
 import org.shareok.data.datahandlers.DataHandlersUtil;
+import org.shareok.data.datahandlers.exceptions.SecurityFileDoesNotExistException;
 import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.htmlrequest.HttpRequestHandler;
 import org.shareok.data.plosdata.exception.ErrorPlosApiResponseException;
@@ -64,12 +66,15 @@ public class PlosApiDataImpl implements PlosApiData {
     
     private String getApiQuery(String startDate, String endDate, String affiliate){
         try {
+            String api_key = DataHandlersUtil.getPublisherApiKeyByName("plos");
             return PlosUtil.API_SEARCH_PREFIX + URLEncoder.encode("author_affiliate:\"" + affiliate + "\" AND publication_date:[", "UTF-8") +
                     startDate + "T00:00:00Z" + URLEncoder.encode(" TO ", "UTF-8") +
                     endDate + "T23:59:59Z]&rows=" + PlosUtil.API_SEARCH_ROW + "&fl=" + PlosUtil.API_SEARCH_FACETS + 
-                    "&api_key=" + PlosUtil.API_KEY;
+                    "&api_key=" + api_key;
         } catch (UnsupportedEncodingException ex) {
             logger.error("Cannot encode the query parameters!", ex);
+        } catch (SecurityFileDoesNotExistException | IOException ex) {
+            logger.error("Cannot find the security file or cannot open the security file!", ex);;
         }
         return null;
     }

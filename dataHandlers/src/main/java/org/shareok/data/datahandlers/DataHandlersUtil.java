@@ -98,6 +98,24 @@ public class DataHandlersUtil {
         return credentials;
     }
     
+    public static String getPublisherApiKeyByName(String publisher) throws SecurityFileDoesNotExistException, IOException{
+        String key = "";
+        String securityFilePath = ShareokdataManager.getSecurityFilePath();
+        File securityFile = new File(securityFilePath);
+        if(!securityFile.exists()){
+            throw new SecurityFileDoesNotExistException("The security file does NOT exist!");
+        }
+        String content = new String(Files.readAllBytes(Paths.get(securityFilePath)));
+        ObjectMapper mapper = new ObjectMapper();
+        RepoCredential[] credentialObjects = mapper.readValue(content, RepoCredential[].class);
+        for(RepoCredential credentialObj : credentialObjects){
+            if(publisher.equals(credentialObj.getRepoName())){
+                key = credentialObj.getUserName();
+            }
+        }
+        return key;
+    }
+    
     public static String getDomainNameFromUrl(String url) throws URISyntaxException {
         URI uri = new URI(url);
         String domain = uri.getHost();

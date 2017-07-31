@@ -23,6 +23,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.htmlrequest.HttpRequestHandler;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -49,9 +50,10 @@ public class PlosRequest {
            return "";
        }
        
-       String data = null;
-       String link = PlosUtil.API_SEARCH_PREFIX + doiInfo + "&&api_key=" + PlosUtil.API_KEY;
+       String data = null;              
         try {
+            String api_key = DataHandlersUtil.getPublisherApiKeyByName("plos");
+            String link = PlosUtil.API_SEARCH_PREFIX + doiInfo + "&&api_key=" + api_key;
             StringBuffer temp = getHtmlRequest().sendPost(link);
             data = temp.toString();
         } catch (Exception ex) {

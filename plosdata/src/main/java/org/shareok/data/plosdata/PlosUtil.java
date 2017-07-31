@@ -33,7 +33,7 @@ public class PlosUtil {
      * &fl=affiliate,doi,author,volume,issue,title,journal,publication_date&api_key=mC8TEAzqwfvDWs4eamFh
      * 
     **/
-    public static final String API_KEY = "mC8TEAzqwfvDWs4eamFh";
+
     public static final String API_SEARCH_FACETS = "affiliate,doi,author,volume,issue,title,journal,publication_date";
     public static final String API_SEARCH_PREFIX = "http://api.plos.org/search?q=";
     public static final String API_SEARCH_ROW = "500";

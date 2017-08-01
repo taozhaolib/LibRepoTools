@@ -30,7 +30,7 @@ public class PlosUtil {
     /**
      * api search example: http://api.plos.org/search?q=author_affiliate%3A%22University+of%20Oklahoma%22 
      * AND publication_date:[2016-01-01T00:00:00Z%20TO%202016-12-31T23:59:59Z]&rows=500
-     * &fl=affiliate,doi,author,volume,issue,title,journal,publication_date&api_key=mC8TEAzqwfvDWs4eamFh
+     * &fl=affiliate,doi,author,volume,issue,title,journal,publication_date&api_key=SOME-API-KEY-INFO
      * 
     **/
 

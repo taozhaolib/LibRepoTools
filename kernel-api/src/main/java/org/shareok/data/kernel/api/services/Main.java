@@ -29,7 +29,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  * Action type: 
  *       journal-search <journal articles search> : java -jar target/kernel-api-1.0-SNAPSHOT-jar-with-dependencies.jar id-0 journal-search '{"publisher" : "sage", "startDate": "2017-01-02", "endDate" : "2017-04-05", "affiliate" : "University of Oklahoma"}'
  *       journal-saf <journal articles SAF package> : java -jar target/kernel-api-1.0-SNAPSHOT-jar-with-dependencies.jar id-1 journal-saf '{"dois": "10.1371/journal.pone.0171910;10.1371/journal.pone.0171683;10.1371/journal.pone.0171193", "startDate" : "2017-03-03", "endDate" : "2017-03-28"}'
- *       journal-saf-import <journal articles SAF import> : java -jar target/kernel-api-1.0-SNAPSHOT-jar-with-dependencies.jar sdfx7 journal-import '{"safPath" : "org.shareok.data.kernel.api.services.ServiceUtil.executeCommandLineTask", "collectionHandle" : "11244/37263", "dspaceApiUrl" : "https://test.shareok.org/rest"}'
+                                                      java -jar target/kernel-api-1.0-SNAPSHOT-jar-with-dependencies.jar id-1 journal-saf '{"dois": "10.1177/8755123315593325;10.1177/1461444815606121", "startDate" : "2017-03-03", "endDate" : "2017-03-28"}'
+ *       journal-saf-import <journal articles SAF import> : java -jar target/kernel-api-1.0-SNAPSHOT-jar-with-dependencies.jar sdfx7 journal-import '{"safPath" : "/var/local/librepotools/librepotools-data/uploads/2017.07.21.16.42.16/sage/output_sage_2017-03-03_2017-03-28.zip", "collectionHandle" : "11244/37263", "dspaceApiUrl" : "https://test.shareok.org/rest"}'
  * 
  * @author Tao Zhao
  */

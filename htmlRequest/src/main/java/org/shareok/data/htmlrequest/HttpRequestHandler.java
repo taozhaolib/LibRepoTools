@@ -357,9 +357,9 @@ public class HttpRequestHandler {
             
             int responseCode = con.getResponseCode();
             
-            if(responseCode != 200){
-                throw new ErrorResponseCodeException("The response code = "+responseCode);
-            }
+//            if(responseCode != 200){
+//                throw new ErrorResponseCodeException("The response code = "+responseCode);
+//            }
             
             StringBuffer response = null;
 

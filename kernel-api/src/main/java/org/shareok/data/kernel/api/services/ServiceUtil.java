@@ -479,7 +479,8 @@ public class ServiceUtil {
                             throw new ErrorDspaceApiResponseException("Cannot get null saf path!");
                         }
                         else{
-                            loggingForUserFileInfoFileWr.write("The journal search task has been completed sucessfully.\n");
+                            loggingForUserFileInfoFileWr.write("safPath="+outputFilePath+"\n");
+                            loggingForUserFileInfoFileWr.write("The SAF package has been prepared sucessfully.\n");
                             System.out.println("The SAF package has been stored at path="+outputFilePath);
                         }
                     }

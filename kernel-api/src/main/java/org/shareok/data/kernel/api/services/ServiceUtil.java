@@ -22,6 +22,7 @@ import org.shareok.data.config.DataUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.shareok.data.config.ShareokdataManager;
@@ -36,10 +37,13 @@ import org.shareok.data.kernel.api.services.dspace.DspaceJournalDataService;
 import org.shareok.data.kernel.api.services.dspace.DspaceRestServiceImpl;
 import org.shareok.data.kernel.api.services.job.DspaceApiJobServiceImpl;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
+import org.shareok.data.ouhistory.exceptions.FileAlreadyExistsException;
+import org.shareok.data.ouhistory.exceptions.NonCsvFileException;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.web.multipart.MultipartFile;
+import safbuilder.SAFPackage;
 
 /**
  *
@@ -359,7 +363,6 @@ public class ServiceUtil {
         String endDate;
         String outputFilePath = null;
         Integer compare;
-        JSONObject argumentsObj;
         
         try{
             loggingForUserFileInfoFileWr = new BufferedWriter(new FileWriter(DataHandlersUtil.getLoggingForUserFilePath(taskId, taskType), true));
@@ -377,7 +380,6 @@ public class ServiceUtil {
                 throw new InvalidCommandLineArgumentsException(message);
             }            
             
-            onputFileInfoFileWr = DataHandlersUtil.getWriterForTaskOutputFile(taskId, taskType);
             DataHandlersUtil.CURRENT_TASK_TYPE = taskType;
             JSONObject dataObj = new JSONObject(data);
 
@@ -515,6 +517,50 @@ public class ServiceUtil {
                         ex.printStackTrace();
                     }
                     break;
+                case "saf-build":
+                    try{
+                        loggingForUserFileInfoFileWr.write("Task information:\n");
+                        String csvPath = dataObj.getString("csvPath"); // The full path of the csv file
+                        String extension = DocumentProcessorUtil.getFileExtension(csvPath);
+                        if(null == extension || !extension.contains("csv")){
+                            throw new NonCsvFileException("The uploaded file is not a CSV file!");
+                        }
+                        loggingForUserFileInfoFileWr.write("Generate a SAF package with metadata file at "+csvPath+".\n");
+                        loggingForUserFileInfoFileWr.write("Start generating...\n");
+                        SAFPackage safPackageInstance = new SAFPackage();
+                        safPackageInstance.processMetaPack(csvPath, true);
+                        String csvDirectoryPath = DocumentProcessorUtil.getFileContainerPath(csvPath);
+                        File csv = new File(csvPath);
+                        File safPackage = new File(csvDirectoryPath + File.separator + "SimpleArchiveFormat.zip");
+                        File newPackage = null;
+                        if(safPackage.exists()){
+                            newPackage = new File(csvDirectoryPath + File.separator + DocumentProcessorUtil.getFileNameWithoutExtension(csv.getName()) + ".zip");
+                            if(!newPackage.exists()){
+                                safPackage.renameTo(newPackage);
+                            }
+                            else{
+                                throw new FileAlreadyExistsException("The zip file of the SAF package already exists!");
+                            }
+                        }                        
+                        File safPackageFolder = new File(csvDirectoryPath + File.separator + "SimpleArchiveFormat");
+                        if(safPackageFolder.exists()){
+                            FileUtils.deleteDirectory(safPackageFolder);
+                        }
+                        if(null != newPackage){
+                            outputFilePath = safPackage.getAbsolutePath();
+                            loggingForUserFileInfoFileWr.write("The new SAF package path is: \nsafPath=[\""+outputFilePath+"\"]\n");
+                            return outputFilePath;
+                        }
+                        else{
+                            loggingForUserFileInfoFileWr.write("The new SAF package generation failed.\n");
+                            return null;
+                        }
+
+                    } catch (IOException | FileAlreadyExistsException | NonCsvFileException ex) {
+                        logger.error(ex.getMessage());
+                        loggingForUserFileInfoFileWr.write("Error:"+ex.getMessage()+"\n");
+                        loggingForUserFileInfoFileWr.flush();
+                    }
                 default:
                     throw new InvalidCommandLineArgumentsException("The command line task type is valid!");
             }
@@ -527,16 +573,6 @@ public class ServiceUtil {
                 try{
                     loggingForUserFileInfoFileWr.flush();
                     loggingForUserFileInfoFileWr.close();                    
-                }
-                catch(IOException ex){
-                    ex.printStackTrace();
-                }
-            }
-            
-            if(null != onputFileInfoFileWr){
-                try{
-                    onputFileInfoFileWr.flush();
-                    onputFileInfoFileWr.close();                    
                 }
                 catch(IOException ex){
                     ex.printStackTrace();

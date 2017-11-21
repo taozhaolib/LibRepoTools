@@ -380,7 +380,7 @@ public class ServiceUtil {
                 throw new InvalidCommandLineArgumentsException(message);
             }            
             
-            DataHandlersUtil.CURRENT_TASK_TYPE = taskType;
+            DataHandlersUtil.CURRENT_TASK_TYPE = taskType;            
             JSONObject dataObj = new JSONObject(data);
 
             switch(taskType){
@@ -493,12 +493,13 @@ public class ServiceUtil {
                     }
                     break;
                 case "journal-import":
-                    try{
+                    try{                        
                         DataHandlersUtil.CURRENT_TASK_ID = taskId;
                         outputFilePath = ShareokdataManager.getDspaceCommandLineTaskOutputPath() + "_" + DataHandlersUtil.getCurrentTimeString()+"_"+taskType+"_"+taskId+".txt";
                         String safPath = dataObj.getString("safPath");
                         String collectionHandle = dataObj.getString("collectionHandle");
                         String dspaceApiUrl = dataObj.getString("dspaceApiUrl");
+                        loggingForUserFileInfoFileWr.write("Importing into DSpace repo with safPath="+safPath+" collection ID="+collectionHandle+" and rest end point="+dspaceApiUrl);
                         if(DocumentProcessorUtil.isEmptyString(safPath) || DocumentProcessorUtil.isEmptyString(collectionHandle) || DocumentProcessorUtil.isEmptyString(dspaceApiUrl)){
                             message = "Cannot get specific information such as SAF package path, collection handle, and/or DSpace REST API url to execute the task.\n";
                             loggingForUserFileInfoFileWr.write(message);
@@ -520,7 +521,13 @@ public class ServiceUtil {
                 case "saf-build":
                     try{
                         loggingForUserFileInfoFileWr.write("Task information:\n");
-                        String csvPath = dataObj.getString("csvPath"); // The full path of the csv file
+                        String csvPath = dataObj.getString("csvPath");
+                        String zipped = dataObj.getString("zipped");
+                        if(DocumentProcessorUtil.isEmptyString(csvPath) || DocumentProcessorUtil.isEmptyString(zipped)){
+                            message = "Cannot get specific information such as csv file path and/or zipped value to execute the task.\n";
+                            loggingForUserFileInfoFileWr.write(message);
+                            throw new InvalidCommandLineArgumentsException(message);
+                        }
                         String extension = DocumentProcessorUtil.getFileExtension(csvPath);
                         if(null == extension || !extension.contains("csv")){
                             throw new NonCsvFileException("The uploaded file is not a CSV file!");
@@ -530,33 +537,26 @@ public class ServiceUtil {
                         SAFPackage safPackageInstance = new SAFPackage();
                         safPackageInstance.processMetaPack(csvPath, true);
                         String csvDirectoryPath = DocumentProcessorUtil.getFileContainerPath(csvPath);
-                        File csv = new File(csvPath);
-                        File safPackage = new File(csvDirectoryPath + File.separator + "SimpleArchiveFormat.zip");
-                        File newPackage = null;
-                        if(safPackage.exists()){
-                            newPackage = new File(csvDirectoryPath + File.separator + DocumentProcessorUtil.getFileNameWithoutExtension(csv.getName()) + ".zip");
-                            if(!newPackage.exists()){
-                                safPackage.renameTo(newPackage);
-                            }
-                            else{
-                                throw new FileAlreadyExistsException("The zip file of the SAF package already exists!");
-                            }
-                        }                        
-                        File safPackageFolder = new File(csvDirectoryPath + File.separator + "SimpleArchiveFormat");
-                        if(safPackageFolder.exists()){
-                            FileUtils.deleteDirectory(safPackageFolder);
-                        }
-                        if(null != newPackage){
-                            outputFilePath = safPackage.getAbsolutePath();
-                            loggingForUserFileInfoFileWr.write("The new SAF package path is: \nsafPath=[\""+outputFilePath+"\"]\n");
+                        File safPackage = new File(csvDirectoryPath + File.separator + "SimpleArchiveFormat");
+                        File safPackageZipped = new File(csvDirectoryPath + File.separator + "SimpleArchiveFormat.zip");
+                        if(zipped.equals("true")){
+                            FileUtils.deleteDirectory(safPackage);
+                            outputFilePath = safPackageZipped.getAbsolutePath();
+                            message = "The new SAF package path is: \nsafPath=[\""+outputFilePath+"\"]\n";
+                            System.out.println(message);
+                            loggingForUserFileInfoFileWr.write(message);
                             return outputFilePath;
                         }
                         else{
-                            loggingForUserFileInfoFileWr.write("The new SAF package generation failed.\n");
-                            return null;
-                        }
+                            FileUtils.deleteQuietly(safPackageZipped);
+                            outputFilePath = safPackage.getAbsolutePath();
+                            message = "The new SAF package path is: \nsafPath=[\""+outputFilePath+"\"]\n";
+                            System.out.println(message);
+                            loggingForUserFileInfoFileWr.write(message);
+                            return outputFilePath;
+                        }                        
 
-                    } catch (IOException | FileAlreadyExistsException | NonCsvFileException ex) {
+                    } catch (IOException | NonCsvFileException ex) {
                         logger.error(ex.getMessage());
                         loggingForUserFileInfoFileWr.write("Error:"+ex.getMessage()+"\n");
                         loggingForUserFileInfoFileWr.flush();

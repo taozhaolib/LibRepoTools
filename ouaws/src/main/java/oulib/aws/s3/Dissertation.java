@@ -47,4 +47,16 @@ public class Dissertation {
         this.metadata = metadata;
     }
     
+    @Override
+    public String toString(){
+        String output = "This dissertation has the following information:\n";
+        output += "Dissertation name: " + getName() + ";\n";
+        output += "Dissertation bucket: " + getBucket() + ";\n";
+        output += "Dissertation metadata: " + getMetadata() + ";\n";
+        output += "Dissertation has " + getFiles().length + " files:\n";
+        for(String file : getFiles()){
+            output += "File name: " + file +";\n";
+        }
+        return output;
+    }
 }

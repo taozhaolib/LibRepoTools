@@ -5,6 +5,7 @@
  */
 package oulib.aws.s3;
 
+import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,12 +18,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.dspacemanager.DspaceDataUtil;
+import oulib.aws.AwsUtil;
 import oulib.aws.exceptions.IncompleteFunctionArgumentsException;
 import oulib.aws.exceptions.InvalidDissertationInfoException;
 import oulib.aws.exceptions.InvalidS3ClientException;
@@ -34,10 +35,18 @@ import oulib.aws.exceptions.InvalidS3ObjectKeyException;
  */
 public class DissertationProcessor {
     
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DissertationProcessor.class);
+    
     private AmazonS3Client s3Client;
     private String endPoint;
     private String collection;
     private Dissertation[] dissertations;
+
+    public DissertationProcessor() {
+        AWSCredentials credentials = AwsUtil.getAwsCredentials();
+        AmazonS3Client client = AwsUtil.getS3ClientByCredentialInfo(credentials);
+        setS3Client(client);
+    }
 
     public AmazonS3Client getS3Client() {
         return s3Client;
@@ -55,7 +64,7 @@ public class DissertationProcessor {
         return dissertations;
     }
 
-    public void setS3Client(AmazonS3Client s3Client) {
+    public final void setS3Client(AmazonS3Client s3Client) {
         this.s3Client = s3Client;
     }
 
@@ -69,6 +78,22 @@ public class DissertationProcessor {
 
     public void setDissertations(Dissertation[] dissertations) {
         this.dissertations = dissertations;
+    }
+    
+    @Override
+    public String toString(){
+        String output = "Parsing the recipe file gets the following dissertation information:\n";
+        output += "The DSpace REST API end point: " + getEndPoint() + ";\n";
+        output += "Collection to be imported into: " + getCollection() + ";\n";
+        output += "The recipte contains " + getDissertations().length + " dissertaions;\n";
+        output += "The included dissertations are: \n";
+        int index = 1;
+        for(Dissertation dis : getDissertations()){
+            output += "Dissertation " + index + ":\n";
+            output += dis.toString() + "\n";
+            index++;
+        }
+        return output;
     }
     
     public void parseRecipeFile(String recipeJson){
@@ -136,8 +161,9 @@ public class DissertationProcessor {
             setDissertations(dissertationsLocal);
             
         } catch (InvalidS3ClientException ex) {
-            Logger.getLogger(DissertationProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error(ex);
         } catch (Exception ex){
+            logger.error(ex);
             ex.printStackTrace();
         }
     }
@@ -194,9 +220,10 @@ public class DissertationProcessor {
             }
         }
         catch(IOException | IncompleteFunctionArgumentsException | InvalidS3ClientException ex){
+            logger.error("Something is wrong when generating the saf package: " + ex.getMessage());
             ex.printStackTrace();
         } catch (InvalidS3ObjectKeyException ex) {
-            Logger.getLogger(DissertationProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("S3 object key is wrong: " + ex.getMessage());
         } finally {
             try{
                 if(null != out){
@@ -210,6 +237,7 @@ public class DissertationProcessor {
                 }        
             }
             catch(IOException ioex){
+                logger.error("Cannot close the file streams: "+ioex.getMessage());
                 ioex.printStackTrace();
             }
         }
@@ -228,7 +256,7 @@ public class DissertationProcessor {
             }
             return keyArr[keyArr.length-1];
         }
-        catch(Exception ex){
+        catch(InvalidS3ObjectKeyException ex){
             throw new InvalidS3ObjectKeyException("DissertationProcess cannot process this object key: "+key);
         }
     }

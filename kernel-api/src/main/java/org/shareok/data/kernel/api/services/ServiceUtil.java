@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.shareok.data.config.ShareokdataManager;
@@ -30,6 +31,7 @@ import org.shareok.data.datahandlers.DataHandlersUtil;
 import org.shareok.data.datahandlers.exceptions.InvalidDoiException;
 import org.shareok.data.documentProcessor.DocumentProcessorUtil;
 import org.shareok.data.dspacemanager.exceptions.ErrorDspaceApiResponseException;
+import org.shareok.data.kernel.api.exceptions.AwsDissertationProcessorParseRecipeJsonException;
 import org.shareok.data.kernel.api.exceptions.InvalidCommandLineArgumentsException;
 import org.shareok.data.kernel.api.exceptions.NoServiceProcessDoiException;
 import org.shareok.data.kernel.api.exceptions.NotFoundServiceBeanException;
@@ -37,7 +39,8 @@ import org.shareok.data.kernel.api.services.dspace.DspaceJournalDataService;
 import org.shareok.data.kernel.api.services.dspace.DspaceRestServiceImpl;
 import org.shareok.data.kernel.api.services.job.DspaceApiJobServiceImpl;
 import org.shareok.data.kernel.api.services.job.RedisJobService;
-import org.shareok.data.ouhistory.exceptions.FileAlreadyExistsException;
+import org.shareok.data.kernel.api.services.ouaws.AwsDissertationService;
+import org.shareok.data.kernel.api.services.ouaws.AwsDissertationServiceImpl;
 import org.shareok.data.ouhistory.exceptions.NonCsvFileException;
 import org.shareok.data.redis.job.RedisJob;
 import org.springframework.context.ApplicationContext;
@@ -354,6 +357,12 @@ public class ServiceUtil {
         return safDownloadPaths;
     }
     
+    public static AwsDissertationService getAwsDissertationProcessorServiceInstance(){
+        ApplicationContext context = new ClassPathXmlApplicationContext("kernelApiContext.xml");
+        AwsDissertationService awsServ = (AwsDissertationServiceImpl)context.getBean("awsDissertationServiceImpl");
+        return awsServ;
+    }
+    
     public static String executeCommandLineTask(String taskId, String taskType, String data) throws InvalidCommandLineArgumentsException, JSONException, IOException{
         
         BufferedWriter loggingForUserFileInfoFileWr = null;
@@ -561,6 +570,28 @@ public class ServiceUtil {
                         loggingForUserFileInfoFileWr.write("Error:"+ex.getMessage()+"\n");
                         loggingForUserFileInfoFileWr.flush();
                     }
+                    break;
+                case "aws-dissertation":
+                    try{
+                        String json = dataObj.getString("json");
+                        loggingForUserFileInfoFileWr.write("Starting to create a processor to handle the generation of SAF package...");
+                        AwsDissertationService awsServ = getAwsDissertationProcessorServiceInstance();
+                        String processorInfo = awsServ.parseRecipeFile(json);
+                        if(StringUtils.isBlank(processorInfo)){
+                            throw new AwsDissertationProcessorParseRecipeJsonException("Empty string was returned after dissertation processor parsed recipe JSON!");
+                        }
+                        loggingForUserFileInfoFileWr.write(processorInfo);
+                        String path = awsServ.generateDissertationSafPackage();
+                        message = "The SAF package has been successfully created:\n safPath=[\""+path+"\"]\n";
+                        loggingForUserFileInfoFileWr.write(message);
+                        System.out.println(message);
+                    }
+                    catch(Exception ex){
+                        logger.error(ex.getMessage());
+                        loggingForUserFileInfoFileWr.write("Error:"+ex.getMessage()+"\n");
+                        loggingForUserFileInfoFileWr.flush();
+                    }
+                    break;
                 default:
                     throw new InvalidCommandLineArgumentsException("The command line task type is valid!");
             }

@@ -573,7 +573,8 @@ public class ServiceUtil {
                     break;
                 case "aws-dissertation":
                     try{
-                        String json = dataObj.getString("json");
+                        String jsonPath = dataObj.getString("json");
+                        String json = DocumentProcessorUtil.readFileIntoString(jsonPath);
                         loggingForUserFileInfoFileWr.write("Starting to create a processor to handle the generation of SAF package...");
                         AwsDissertationService awsServ = getAwsDissertationProcessorServiceInstance();
                         String processorInfo = awsServ.parseRecipeFile(json);
